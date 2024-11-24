@@ -255,11 +255,11 @@ io.on('connection', (socket) => {
           isCorrect = true;
           lobby.guesses[username].addedBy = true;
         }
-
-        if (isCorrect) {
-          lobby.scores[username] = (lobby.scores[username] || 0) + points;
-        }
       }
+    }
+
+    if (isCorrect) {
+      lobby.scores[username] = (lobby.scores[username] || 0) + points;
     }
     
     io.to(lobbyId).emit('guess_result', {
