@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import SpotifyPlayer from 'react-spotify-web-playback';
-import { Play, Users } from 'lucide-react';
+import { Play, Users, Settings, X } from 'lucide-react';
 import { socket } from '../socket';
 import useStore from '../store';
 import Cookies from 'js-cookie'; 
@@ -21,6 +21,7 @@ const Home = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(isSpotifyAuthenticated());
   const [accessToken, setAccessToken] = useState<string | null>(null);
   const [randomTrackUri, setRandomTrackUri] = useState<string | null>(null);
+  const [showSettings, setShowSettings] = useState(false);
   const navigate = useNavigate();
   const setCurrentUser = useStore((state) => state.setCurrentUser);
   const setStoreSpotifyDisplayName = useStore((state) => state.setSpotifyDisplayName);
@@ -57,6 +58,13 @@ const Home = () => {
 
   const loginToSpotify = () => {
     window.location.href = getSpotifyLoginUrl();
+  };
+
+  const resetSpotifyAuth = () => {
+    Cookies.remove('spotifyAuthToken');
+    setAccessToken(null);
+    setIsAuthenticated(false);
+    setShowSettings(false);
   };
 
   const fetchPlaylist = async () => {
@@ -109,7 +117,41 @@ const Home = () => {
   };
 
   return (
-    <div className="max-w-md mx-auto mt-20 p-6">
+    <div className="max-w-md mx-auto mt-20 p-6 relative">
+         {/* Settings Button */}
+    <button
+      onClick={() => setShowSettings(!showSettings)}
+      className="fixed top-4 right-4 p-2 text-white/80 hover:text-white transition-colors z-50"
+    >
+      <Settings className="w-6 h-6" />
+    </button>
+
+    {/* Settings Modal */}
+    {showSettings && (
+      <div className="fixed top-16 right-4 w-64 bg-black/80 backdrop-blur-md rounded-lg p-4 shadow-xl border border-white/20 z-50">
+        <div className="flex justify-between items-center mb-4">
+          <h3 className="text-white font-semibold">Settings</h3>
+          <button
+            onClick={() => setShowSettings(false)}
+            className="text-white/80 hover:text-white"
+          >
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+        <div className="space-y-4">
+          <div>
+            <h4 className="text-sm font-medium text-white/80 mb-2">Spotify Authentication</h4>
+            <button
+              onClick={resetSpotifyAuth}
+              className="w-full px-3 py-2 bg-red-500/20 text-red-300 rounded-md hover:bg-red-500/30 transition-colors"
+            >
+              Reset Spotify Cookies
+            </button>
+          </div>
+        </div>
+      </div>
+    )}
+
       <div className="bg-white/10 backdrop-blur-md rounded-lg p-8 shadow-xl border border-white/20">
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-white mb-2">Welcome to Doozy!</h1>
