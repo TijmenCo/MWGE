@@ -237,22 +237,29 @@ io.on('connection', (socket) => {
         }
       }
     } else if (lobby.gameVariant === 'whoAdded') {
-      const adder = lobby.users.find(u => 
-        u.spotifyDisplayName.toLowerCase() === addedBy?.displayName?.toLowerCase()
-      );
-      
-      if (!lobby.guesses[username].addedBy && (
-        normalizedGuess === adder?.username.toLowerCase() ||
-        normalizedGuess === adder?.spotifyDisplayName.toLowerCase()
-      )) {
-        points += 2;
-        isCorrect = true;
-        lobby.guesses[username].addedBy = true;
-      }
-    }
+      if (!lobby.guesses[username].addedBy) {
+        const adder = lobby.users.find(u => 
+          u.spotifyDisplayName.toLowerCase() === addedBy?.displayName?.toLowerCase()
+        );
+        
+        const isCorrectGuess = 
+          // Match against user's username
+          normalizedGuess === adder?.username.toLowerCase() ||
+          // Match against user's Spotify display name
+          normalizedGuess === adder?.spotifyDisplayName.toLowerCase() ||
+          // Direct match against addedBy displayName
+          normalizedGuess === addedBy?.displayName?.toLowerCase();
+  
+        if (isCorrectGuess) {  
+          points += 2;
+          isCorrect = true;
+          lobby.guesses[username].addedBy = true;
+        }
 
-    if (isCorrect) {
-      lobby.scores[username] = (lobby.scores[username] || 0) + points;
+        if (isCorrect) {
+          lobby.scores[username] = (lobby.scores[username] || 0) + points;
+        }
+      }
     }
     
     io.to(lobbyId).emit('guess_result', {
