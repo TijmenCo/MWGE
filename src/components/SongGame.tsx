@@ -239,6 +239,12 @@ const SongGame: React.FC<SongGameProps> = ({
                         height: '300px'
                       }}
                     />
+                      {currentSong.addedBy && (
+          <div className="flex items-center gap-2 text-sm text-gray-400">
+            <User className="w-4 h-4 text-green-400" />
+            <span>Added by: {currentSong.addedBy.displayName}</span>
+          </div>
+        )}
                   </div>
                 ) : (
                   renderSongDetails()
@@ -266,11 +272,6 @@ const SongGame: React.FC<SongGameProps> = ({
               <div className="text-center">
                 <Music className="w-16 h-16 text-white/50 mx-auto animate-bounce" />
                 <div className="text-4xl font-bold text-white mt-4">{timeLeft}s</div>
-                {gameVariant === 'whoAdded' && (
-                  <div className="mt-4 text-xl text-white">
-                    {currentSong.title} - {currentSong.artist}
-                  </div>
-                )}
               </div>
             </div>
           )}

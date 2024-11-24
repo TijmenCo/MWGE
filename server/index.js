@@ -354,7 +354,8 @@ function startNextSong(lobbyId) {
     spotifyId: lobby.currentSong.id,
     songInfo: {
       title: lobby.currentSong.title,
-      artist: lobby.currentSong.artist
+      artist: lobby.currentSong.artist,
+      addedBy: lobby.currentSong.addedBy
     }
   });
 
