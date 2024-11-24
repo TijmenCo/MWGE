@@ -9,7 +9,7 @@ import ColorPicker from '../components/ColorPicker';
 import DrawingCanvas from '../components/DrawingCanvas';
 import JoinLobbyForm from '../components/JoinLobbyForm';
 import { fetchPlaylistVideos } from '../utils/youtube';
-import { fetchSpotifyPlaylist, getCurrentSpotifyToken } from '../utils/spotify';
+import { fetchSpotifyPlaylist } from '../utils/spotify';
 
 interface User {
   username: string;
