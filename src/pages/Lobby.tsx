@@ -93,6 +93,39 @@ const Lobby = () => {
     return <JoinLobbyForm lobbyId={lobbyId!} onJoinSuccess={() => setHasJoined(true)} />;
   }
 
+  const loadPlaylist = async (mode: 'minigames' | 'songguess') => {
+    if (mode === 'songguess' && playlistUrl) {
+      setIsLoadingPlaylist(true);
+      setPlaylistError(null);
+      try {
+        let playlist;
+        if (musicProvider === 'youtube') {
+          playlist = await fetchPlaylistVideos(playlistUrl);
+        } else {
+          playlist = await fetchSpotifyPlaylist(playlistUrl);
+        }
+        socket.emit('select_game_mode', {
+          lobbyId,
+          mode,
+          playlist,
+          musicProvider,
+          gameVariant,
+          config: {
+            totalRounds: roundConfig.totalRounds,
+            roundTime: roundConfig.roundTime
+          }
+        });
+      } catch (error) {
+        setPlaylistError('Failed to load playlist. Please check the URL and try again.');
+        return;
+      } finally {
+        setIsLoadingPlaylist(false);
+      }
+    } else {
+      socket.emit('select_game_mode', { lobbyId, mode, musicProvider, gameVariant });
+    }
+  };
+
   const copyLobbyId = () => {
     navigator.clipboard.writeText(lobbyId || '');
   };
@@ -292,6 +325,15 @@ const Lobby = () => {
                 placeholder={`Enter ${musicProvider === 'youtube' ? 'YouTube' : 'Spotify'} playlist URL`}
                 className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-md text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500"
               />
+            <button
+                    onClick={() => loadPlaylist("songguess")}
+                    className={`flex-1 px-4 py-2 rounded-md transition-all duration-200 ${musicProvider == "spotify" || "youtube"
+                      ? 'bg-purple-600 text-white'
+                      : 'bg-white/5 text-gray-300 hover:bg-white/10'
+                    }`}
+                  >
+                    Load Playlist
+                  </button>
               {playlistError && (
                 <p className="mt-2 text-red-400 text-sm">{playlistError}</p>
               )}
