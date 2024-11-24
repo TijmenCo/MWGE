@@ -8,7 +8,7 @@ interface DrawingCanvasProps {
 
 const DrawingCanvas: React.FC<DrawingCanvasProps> = ({ lobbyId }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const ctxRef = useRef<CanvasRenderingContext2D | null>(null);
+  const ctxRef = useRef<Map<string, Path2D>>(new Map()); // Map of socketId to Path2D
   const isDrawingRef = useRef(false);
   const { userColor } = useStore();
 
@@ -18,14 +18,13 @@ const DrawingCanvas: React.FC<DrawingCanvasProps> = ({ lobbyId }) => {
 
     canvas.width = canvas.offsetWidth;
     canvas.height = canvas.offsetHeight;
-    
+
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
     ctx.lineJoin = 'round';
     ctx.lineCap = 'round';
     ctx.lineWidth = 3;
-    ctxRef.current = ctx;
 
     const handleResize = () => {
       const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
@@ -45,18 +44,25 @@ const DrawingCanvas: React.FC<DrawingCanvasProps> = ({ lobbyId }) => {
   }, []);
 
   useEffect(() => {
-    socket.on('draw', (data: { x: number; y: number; color: string }) => {
-      if (!ctxRef.current) return;
-      ctxRef.current.strokeStyle = data.color;
-      ctxRef.current.lineTo(data.x, data.y);
-      ctxRef.current.stroke();
+    socket.on('start_path', (data: { x: number; y: number; color: string; socketId: string }) => {
+      if (!ctxRef.current || !canvasRef.current) return;
+      const path = new Path2D();
+      path.moveTo(data.x, data.y);
+
+      ctxRef.current.set(data.socketId, path); // Store path for this socketId
     });
 
-    socket.on('start_path', (data: { x: number; y: number; color: string }) => {
-      if (!ctxRef.current) return;
-      ctxRef.current.beginPath();
-      ctxRef.current.strokeStyle = data.color;
-      ctxRef.current.moveTo(data.x, data.y);
+    socket.on('draw', (data: { x: number; y: number; color: string; socketId: string }) => {
+      const canvas = canvasRef.current;
+      const ctx = canvas?.getContext('2d');
+      if (!ctx || !ctxRef.current) return;
+
+      const path = ctxRef.current.get(data.socketId);
+      if (!path) return;
+
+      ctx.strokeStyle = data.color;
+      path.lineTo(data.x, data.y);
+      ctx.stroke(path);
     });
 
     return () => {
@@ -70,7 +76,7 @@ const DrawingCanvas: React.FC<DrawingCanvasProps> = ({ lobbyId }) => {
     if (!canvas) return null;
 
     const rect = canvas.getBoundingClientRect();
-    const x = ('touches' in e) 
+    const x = ('touches' in e)
       ? e.touches[0].clientX - rect.left
       : e.clientX - rect.left;
     const y = ('touches' in e)

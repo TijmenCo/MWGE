@@ -145,12 +145,12 @@ io.on('connection', (socket) => {
   });
 
   socket.on('start_drawing', ({ x, y, color, lobbyId }) => {
-    io.to(lobbyId).emit('start_path', { x, y, color });
+    io.to(lobbyId).emit('start_path', { x, y, color, socketId: socket.id });
   });
-
+  
   socket.on('draw', ({ x, y, color, lobbyId }) => {
-    io.to(lobbyId).emit('draw', { x, y, color });
-  });
+    io.to(lobbyId).emit('draw', { x, y, color, socketId: socket.id });
+  });  
 
   socket.on('update_user_color', ({ lobbyId, username, color }) => {
     const lobby = lobbies.get(lobbyId);

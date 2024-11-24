@@ -33,8 +33,8 @@ interface LobbyState {
 
 const Lobby = () => {
   const { id: lobbyId } = useParams();
-  const [lobbyState, setLobbyState] = useState<LobbyState>({ 
-    users: [], 
+  const [lobbyState, setLobbyState] = useState<LobbyState>({
+    users: [],
     gameState: 'waiting',
     scores: {},
     gameMode: null,
@@ -104,13 +104,13 @@ const Lobby = () => {
       try {
         let playlist;
         if (musicProvider === 'youtube') {
-          playlist = await fetchPlaylistVideos(playlistUrl, 'apiKey');
+          playlist = await fetchPlaylistVideos(playlistUrl);
         } else {
           playlist = await fetchSpotifyPlaylist(playlistUrl);
         }
-        socket.emit('select_game_mode', { 
-          lobbyId, 
-          mode, 
+        socket.emit('select_game_mode', {
+          lobbyId,
+          mode,
           playlist,
           musicProvider,
           gameVariant,
@@ -151,7 +151,7 @@ const Lobby = () => {
               <Copy className="w-4 h-4 text-gray-300" />
             </button>
           </div>
-          
+
           <div className="flex items-center space-x-4">
             <div className="flex items-center space-x-2">
               <Users className="w-5 h-5 text-gray-300" />
@@ -162,11 +162,10 @@ const Lobby = () => {
                 <button
                   onClick={() => selectGameMode('minigames')}
                   disabled={isLoadingPlaylist}
-                  className={`flex items-center space-x-2 px-4 py-2 rounded-md transition-all duration-200 ${
-                    lobbyState.gameMode === 'minigames'
+                  className={`flex items-center space-x-2 px-4 py-2 rounded-md transition-all duration-200 ${lobbyState.gameMode === 'minigames'
                       ? 'bg-purple-600 text-white'
                       : 'bg-white/5 text-gray-300 hover:bg-white/10'
-                  } disabled:opacity-50 disabled:cursor-not-allowed`}
+                    } disabled:opacity-50 disabled:cursor-not-allowed`}
                 >
                   <Gamepad className="w-5 h-5" />
                   <span>Mini Games</span>
@@ -174,11 +173,10 @@ const Lobby = () => {
                 <button
                   onClick={() => selectGameMode('songguess')}
                   disabled={isLoadingPlaylist}
-                  className={`flex items-center space-x-2 px-4 py-2 rounded-md transition-all duration-200 ${
-                    lobbyState.gameMode === 'songguess'
+                  className={`flex items-center space-x-2 px-4 py-2 rounded-md transition-all duration-200 ${lobbyState.gameMode === 'songguess'
                       ? 'bg-purple-600 text-white'
                       : 'bg-white/5 text-gray-300 hover:bg-white/10'
-                  } disabled:opacity-50 disabled:cursor-not-allowed`}
+                    } disabled:opacity-50 disabled:cursor-not-allowed`}
                 >
                   <Music className="w-5 h-5" />
                   <span>Song Guess</span>
@@ -208,21 +206,19 @@ const Lobby = () => {
                 <div className="flex gap-2">
                   <button
                     onClick={() => setGameVariant('classic')}
-                    className={`flex-1 px-4 py-2 rounded-md transition-all duration-200 ${
-                      gameVariant === 'classic'
+                    className={`flex-1 px-4 py-2 rounded-md transition-all duration-200 ${gameVariant === 'classic'
                         ? 'bg-purple-600 text-white'
                         : 'bg-white/5 text-gray-300 hover:bg-white/10'
-                    }`}
+                      }`}
                   >
                     Classic
                   </button>
                   <button
                     onClick={() => setGameVariant('whoAdded')}
-                    className={`flex-1 px-4 py-2 rounded-md transition-all duration-200 ${
-                      gameVariant === 'whoAdded'
+                    className={`flex-1 px-4 py-2 rounded-md transition-all duration-200 ${gameVariant === 'whoAdded'
                         ? 'bg-purple-600 text-white'
                         : 'bg-white/5 text-gray-300 hover:bg-white/10'
-                    }`}
+                      }`}
                   >
                     Who Added It?
                   </button>
@@ -265,22 +261,20 @@ const Lobby = () => {
             <div className="flex gap-4 mb-4">
               <button
                 onClick={() => setMusicProvider('youtube')}
-                className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-md transition-all duration-200 ${
-                  musicProvider === 'youtube'
+                className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-md transition-all duration-200 ${musicProvider === 'youtube'
                     ? 'bg-red-600 text-white'
                     : 'bg-white/5 text-gray-300 hover:bg-white/10'
-                }`}
+                  }`}
               >
                 <Youtube className="w-5 h-5" />
                 <span>YouTube</span>
               </button>
               <button
                 onClick={() => setMusicProvider('spotify')}
-                className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-md transition-all duration-200 ${
-                  musicProvider === 'spotify'
+                className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-md transition-all duration-200 ${musicProvider === 'spotify'
                     ? 'bg-green-600 text-white'
                     : 'bg-white/5 text-gray-300 hover:bg-white/10'
-                }`}
+                  }`}
               >
                 <Music className="w-5 h-5" />
                 <span>Spotify</span>
@@ -318,11 +312,13 @@ const Lobby = () => {
 
         {lobbyState.gameState === 'playing' ? (
           lobbyState.gameMode === 'songguess' ? (
-            spotifyToken ? (
-              <SongGame 
-                lobbyId={lobbyId!} 
-                currentUser={currentUser} 
-                scores={lobbyState.scores} 
+            lobbyState.musicProvider === 'spotify' && !spotifyToken ? (
+              <div>Loading Spotify token...</div>
+            ) : (
+              <SongGame
+                lobbyId={lobbyId!}
+                currentUser={currentUser}
+                scores={lobbyState.scores}
                 isHost={isHost}
                 currentRound={lobbyState.currentRound}
                 totalRounds={lobbyState.totalRounds}
@@ -331,8 +327,6 @@ const Lobby = () => {
                 spotifyToken={spotifyToken}
                 gameVariant={lobbyState.gameVariant}
               />
-            ) : (
-              <div>Loading Spotify token...</div>
             )
           ) : (
             <Game lobbyId={lobbyId!} currentUser={currentUser} scores={lobbyState.scores} />
@@ -343,18 +337,17 @@ const Lobby = () => {
               <DrawingCanvas lobbyId={lobbyId!} />
               <ColorPicker />
             </div>
-            
+
             <div className="bg-black/20 rounded-lg p-4 border border-white/10">
               <h3 className="text-white font-semibold mb-4">Players</h3>
               <div className="space-y-2">
                 {lobbyState.users.map((user, index) => (
                   <div
                     key={index}
-                    className={`p-2 rounded-md ${
-                      user.username === currentUser
+                    className={`p-2 rounded-md ${user.username === currentUser
                         ? 'bg-purple-500/20 text-purple-300'
                         : 'bg-white/5 text-gray-300'
-                    } flex justify-between items-center`}
+                      } flex justify-between items-center`}
                   >
                     <div className="flex items-center space-x-2">
                       <div
