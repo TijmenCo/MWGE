@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import YouTube from 'react-youtube';
 import SpotifyPlayer from 'react-spotify-web-playback';
 import { socket } from '../socket';
@@ -48,105 +48,95 @@ const SongGame: React.FC<SongGameProps> = ({
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentRoundDisplay, setCurrentRoundDisplay] = useState(currentRound);
   const [gameOver, setGameOver] = useState(false);
+  const [playerKey, setPlayerKey] = useState(0);
+  const playerRef = useRef<any>(null);
+  const songStartTimeRef = useRef<number>(Date.now());
 
   useEffect(() => {
-    const setupSocketListeners = () => {
-      console.log('Setting up socket listeners');
-      
-      socket.on('song_start', (data) => {
-        const { videoId, spotifyId, songInfo } = data;
-        console.log('Song start received:', { videoId, spotifyId, songInfo });
-        
-        if (songInfo) {
-          const newSong: Track = {
-            id: spotifyId || videoId,
-            videoId,
-            title: songInfo.title,
-            artist: songInfo.artist,
-            addedBy: songInfo.addedBy
-          };
-          console.log('Setting current song:', newSong);
-          setCurrentSong(newSong);
-          setTimeLeft(roundTime);
-          setShowVideo(false);
-          setHasGuessedAll(false);
-          setGuesses([]);
-          setIsPlaying(true);
-          setGameOver(false);
-        } else {
-          console.error('Received incomplete song data:', data);
-        }
-      });
+    socket.connect();
+    return () => {
+      socket.disconnect();
+    };
+  }, []);
 
-      socket.on('time_update', ({ timeLeft }) => {
-        setTimeLeft(timeLeft);
-      });
-
-      socket.on('show_answer', () => {
-        console.log('Showing answer');
-        setShowVideo(true);
-        setIsPlaying(true);
-      });
-
-      socket.on('lobby_update', (state) => {
-        console.log('Received lobby update:', state);
-        if (state.currentRound) {
-          setCurrentRoundDisplay(state.currentRound);
-        }
-        if (state.gameState === 'waiting') {
-          setGameOver(true);
-        }
-        // If there's a current song in the state, make sure we have it
-        if (state.currentSong && !currentSong) {
-          setCurrentSong(state.currentSong);
-        }
-      });
-
-      socket.on('game_over', ({ finalScores }) => {
-        console.log('Game over, final scores:', finalScores);
-        setGameScores(finalScores);
-        setGameOver(true);
+  useEffect(() => {
+    const handleSongStart = (data: any) => {
+      const { videoId, spotifyId, songInfo } = data;
+      if (songInfo) {
+        const newSong: Track = {
+          id: spotifyId || videoId,
+          videoId,
+          title: songInfo.title,
+          artist: songInfo.artist,
+          addedBy: songInfo.addedBy
+        };
+        setCurrentSong(newSong);
+        setTimeLeft(roundTime);
         setShowVideo(false);
-        setIsPlaying(false);
-      });
-
-      socket.on('guess_result', (result: GuessResult) => {
-        console.log('Guess result received:', result);
-        setGuesses(prev => [...prev, {
-          ...result,
-          guess: result.correct && result.username !== currentUser 
-            ? '✓ [Correct Answer]' 
-            : result.guess
-        }]);
-        if (result.username === currentUser) {
-          setHasGuessedAll(result.hasGuessedAll);
-        }
-      });
-
-      socket.on('scores_update', (newScores) => {
-        console.log('Scores updated:', newScores);
-        setGameScores(newScores);
-      });
+        setHasGuessedAll(false);
+        setGuesses([]);
+        setIsPlaying(true);
+        setGameOver(false);
+        setPlayerKey(prev => prev + 1);
+        songStartTimeRef.current = Date.now();
+      }
     };
 
-    setupSocketListeners();
+    socket.on('song_start', handleSongStart);
+    socket.on('time_update', ({ timeLeft }) => setTimeLeft(timeLeft));
+    socket.on('show_answer', () => {
+      setShowVideo(true);
+      // Don't reset isPlaying here to maintain playback position
+    });
+
+    socket.on('lobby_update', (state) => {
+      if (state.currentRound) {
+        setCurrentRoundDisplay(state.currentRound);
+      }
+      if (state.gameState === 'waiting') {
+        setGameOver(true);
+      }
+      if (state.currentSong && !currentSong) {
+        setCurrentSong(state.currentSong);
+      }
+    });
+
+    socket.on('game_over', ({ finalScores }) => {
+      setGameScores(finalScores);
+      setGameOver(true);
+      setShowVideo(false);
+      setIsPlaying(false);
+    });
+
+    socket.on('guess_result', (result: GuessResult) => {
+      setGuesses(prev => [...prev, {
+        ...result,
+        guess: result.correct && result.username !== currentUser 
+          ? '✓ [Correct Answer]' 
+          : result.guess
+      }]);
+      if (result.username === currentUser) {
+        setHasGuessedAll(result.hasGuessedAll);
+      }
+    });
+
+    socket.on('scores_update', setGameScores);
 
     return () => {
-      socket.off('song_start');
+      socket.off('song_start', handleSongStart);
       socket.off('time_update');
       socket.off('show_answer');
       socket.off('lobby_update');
+      socket.off('game_over');
       socket.off('guess_result');
       socket.off('scores_update');
-      socket.off('game_over');
     };
-  }, [currentUser, roundTime]);
+  }, [currentUser, roundTime, currentSong]);
 
   const handleGuess = (e: React.FormEvent) => {
     e.preventDefault();
     if (!guess.trim() || hasGuessedAll || showVideo) return;
 
-    console.log('Submitting guess:', guess);
     socket.emit('make_guess', {
       lobbyId,
       username: currentUser,
@@ -156,7 +146,6 @@ const SongGame: React.FC<SongGameProps> = ({
   };
 
   const nextSong = () => {
-    console.log('Requesting next song');
     socket.emit('next_song', { lobbyId });
   };
 
@@ -215,10 +204,16 @@ const SongGame: React.FC<SongGameProps> = ({
     );
   };
 
+  const handlePlayerCallback = (state: any) => {
+    if (playerRef.current !== state) {
+      playerRef.current = state;
+    }
+  };
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
       <div className="md:col-span-3 space-y-6">
-        <div className="bg-black/40 rounded-lg p-4 relative overflow-hidden">
+        <div className="bg-black/40 rounded-lg p-4 relative overflow-hidden min-h-[300px]">
           <div className="absolute top-4 left-4 z-10 bg-black/60 px-3 py-1 rounded-full text-white text-sm">
             Round {currentRoundDisplay} / {totalRounds}
           </div>
@@ -227,18 +222,21 @@ const SongGame: React.FC<SongGameProps> = ({
             <div className={`transition-opacity duration-500 ${showVideo ? 'opacity-100' : 'opacity-0'}`}>
               {musicProvider === 'spotify' ? (
                 isHost && spotifyToken ? (
-                  <div className={showVideo ? 'visible' : 'invisible'}>
+                  <div className={`${showVideo ? 'visible' : 'invisible'} min-h-[300px]`}>
                     <SpotifyPlayer
+                      key={`${playerKey}-${currentSong.id}`}
                       token={spotifyToken}
                       uris={[`spotify:track:${currentSong.id}`]}
                       play={isPlaying}
                       magnifySliderOnHover={true}
+                      callback={handlePlayerCallback}
                       styles={{
                         bgColor: 'transparent',
                         color: '#fff',
                         trackNameColor: '#fff',
                         trackArtistColor: '#ccc',
-                        sliderColor: '#1cb954'
+                        sliderColor: '#1cb954',
+                        height: '300px'
                       }}
                     />
                   </div>

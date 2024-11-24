@@ -11,7 +11,7 @@ interface SpotifyConfig {
 export const spotifyConfig: SpotifyConfig = {
   clientId: import.meta.env.VITE_SPOTIFY_CLIENT_ID,
   clientSecret: import.meta.env.VITE_SPOTIFY_CLIENT_SECRET,
-  redirectUri: `http://localhost:5173/`
+  redirectUri: `http://localhost:3000/`
 };
 
 let accessToken: string | null = null;
