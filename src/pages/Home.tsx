@@ -231,6 +231,7 @@ const Home = () => {
               <span>Fetch Playlist</span>
             </button>
           )}
+           <span className="text-red-300 text-sm">NOTE: you NEED a Premium account and NEED to be whitelisted by the owner</span>
         </div>
 
         {playlist && (
