@@ -12,8 +12,8 @@ function App() {
             <div className="flex items-center justify-between h-16">
               <div className="flex items-center">
                 <Users className="w-8 h-8 text-white" />
-                <span className="ml-2 text-xl font-bold text-white">Doozy</span>
-                <span className="text-gray-300 text-sm">v0.5</span>
+                <span className="ml-2 text-xl font-bold text-white">Doozy (beta)</span>
+                <span className="text-gray-300 text-sm">v0.6</span>
               </div>
             </div>
           </div>
