@@ -211,7 +211,7 @@ io.on('connection', (socket) => {
     }
 
     if (!lobby.correctGuessOrder) {
-      lobby.correctGuessOrder = { title: [], artist: [] };
+      lobby.correctGuessOrder = { title: [], artist: [], addedBy: [] };
     }
 
     if (lobby.gameVariant === 'classic') {
@@ -250,10 +250,16 @@ io.on('connection', (socket) => {
           // Direct match against addedBy displayName
           normalizedGuess === addedBy?.displayName?.toLowerCase();
   
-        if (isCorrectGuess) {  
-          points += 2;
+        if (isCorrectGuess) {
           isCorrect = true;
           lobby.guesses[username].addedBy = true;
+
+          // Award points based on order of correct guesses
+          const addedByGuessOrder = lobby.correctGuessOrder.addedBy.length;
+          if (addedByGuessOrder < Math.min(3, totalPlayers)) {
+            points = 3 - addedByGuessOrder; // First: 3 points, Second: 2 points, Third: 1 point
+            lobby.correctGuessOrder.addedBy.push(username);
+          }
         }
       }
     }
@@ -324,7 +330,7 @@ function startNextSong(lobbyId) {
   const lobby = lobbies.get(lobbyId);
   if (!lobby) return;
 
-  lobby.correctGuessOrder = { title: [], artist: [] };
+  lobby.correctGuessOrder = { title: [], artist: [], addedBy: [] };
 
   if (lobby.timer) {
     clearInterval(lobby.timer);
