@@ -16,6 +16,7 @@ interface SongGameProps {
   musicProvider: 'youtube' | 'spotify';
   spotifyToken: string;
   gameVariant?: 'classic' | 'whoAdded';
+  maxGuesses?: number; // Added maxGuesses prop
 }
 
 interface GuessResult {
@@ -36,8 +37,10 @@ const SongGame: React.FC<SongGameProps> = ({
   roundTime = 20,
   musicProvider,
   spotifyToken,
-  gameVariant = 'classic'
+  gameVariant = 'classic',
+  maxGuesses = 3 // Default value
 }) => {
+  const [remainingGuesses, setRemainingGuesses] = useState(maxGuesses);
   const [currentSong, setCurrentSong] = useState<Track | null>(null);
   const [timeLeft, setTimeLeft] = useState<number>(roundTime);
   const [showVideo, setShowVideo] = useState(false);
@@ -70,6 +73,7 @@ const SongGame: React.FC<SongGameProps> = ({
           artist: songInfo.artist,
           addedBy: songInfo.addedBy
         };
+        setRemainingGuesses(maxGuesses); // Reset guesses for new song
         setCurrentSong(newSong);
         setTimeLeft(roundTime);
         setShowVideo(false);
@@ -142,6 +146,7 @@ const SongGame: React.FC<SongGameProps> = ({
       guess: guess.trim()
     });
     setGuess('');
+    setRemainingGuesses(prev => prev - 1);
   };
 
   const nextSong = () => {
@@ -277,26 +282,28 @@ const SongGame: React.FC<SongGameProps> = ({
         </div>
 
         <form onSubmit={handleGuess} className="flex gap-2">
-          <input
-            type="text"
-            value={guess}
-            onChange={(e) => setGuess(e.target.value)}
-            disabled={hasGuessedAll || showVideo}
-            placeholder={
-              gameVariant === 'classic'
-                ? "Enter your guess (Song - Artist)"
-                : "Who added this song?"
-            }
-            className="flex-1 px-4 py-2 bg-white/5 border border-white/10 rounded-md text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500"
-          />
-          <button
-            type="submit"
-            disabled={hasGuessedAll || showVideo}
-            className="px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            Guess
-          </button>
-        </form>
+    <input
+      type="text"
+      value={guess}
+      onChange={(e) => setGuess(e.target.value)}
+      disabled={hasGuessedAll || showVideo || remainingGuesses <= 0}
+      placeholder={
+        remainingGuesses <= 0 
+          ? "No more guesses remaining" 
+          : gameVariant === 'classic'
+            ? `Enter your guess (${remainingGuesses} left)`
+            : `Who added this song? (${remainingGuesses} guesses left)`
+      }
+      className="flex-1 px-4 py-2 bg-white/5 border border-white/10 rounded-md text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 disabled:opacity-50"
+    />
+    <button
+      type="submit"
+      disabled={hasGuessedAll || showVideo || remainingGuesses <= 0}
+      className="px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed"
+    >
+      Guess ({remainingGuesses})
+    </button>
+  </form>
 
         <div className="space-y-2">
           {guesses.map((guess, index) => (

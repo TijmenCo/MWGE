@@ -27,6 +27,7 @@ interface LobbyState {
   currentRound?: number;
   totalRounds?: number;
   roundTime?: number;
+  maxGuesses?: number;
   spotifyToken?: string;
   gameVariant?: 'classic' | 'whoAdded';
 }
@@ -48,7 +49,8 @@ const Lobby = () => {
   const [gameVariant, setGameVariant] = useState<'classic' | 'whoAdded'>('classic');
   const [roundConfig, setRoundConfig] = useState({
     totalRounds: 5,
-    roundTime: 20
+    roundTime: 20,
+    maxGuesses: 3 // Added maxGuesses config
   });
   const [spotifyToken, setSpotifyToken] = useState<string>('');
   const [hasJoined, setHasJoined] = useState(false);
@@ -112,7 +114,8 @@ const Lobby = () => {
           gameVariant,
           config: {
             totalRounds: roundConfig.totalRounds,
-            roundTime: roundConfig.roundTime
+            roundTime: roundConfig.roundTime,
+            maxGuesses: roundConfig.maxGuesses
           }
         });
       } catch (error) {
@@ -279,7 +282,7 @@ const Lobby = () => {
                 </label>
                 <input
                   type="number"
-                  min="5"
+                  min="1"
                   max="60"
                   value={roundConfig.roundTime}
                   onChange={(e) => setRoundConfig(prev => ({
@@ -289,6 +292,22 @@ const Lobby = () => {
                   className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-md text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500"
                 />
               </div>
+              <div>
+          <label className="block text-sm font-medium text-gray-200 mb-2">
+            Max Guesses per Round
+          </label>
+          <input
+            type="number"
+            min="1"
+            max="99999"
+            value={roundConfig.maxGuesses}
+            onChange={(e) => setRoundConfig(prev => ({
+              ...prev,
+              maxGuesses: Math.max(1, Math.min(10, parseInt(e.target.value) || 1))
+            }))}
+            className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-md text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500"
+          />
+        </div>
             </div>
 
             <div className="flex gap-4 mb-4">
@@ -365,6 +384,7 @@ const Lobby = () => {
                 currentRound={lobbyState.currentRound}
                 totalRounds={lobbyState.totalRounds}
                 roundTime={lobbyState.roundTime}
+                maxGuesses={lobbyState.maxGuesses}
                 musicProvider={lobbyState.musicProvider || 'youtube'}
                 spotifyToken={spotifyToken}
                 gameVariant={lobbyState.gameVariant}

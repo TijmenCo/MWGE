@@ -77,6 +77,7 @@ io.on('connection', (socket) => {
       currentRound: 1,
       totalRounds: 5,
       roundTime: 20,
+      maxGuesses: 3,
       guesses: {},
       timer: null,
       playlist: [...DEFAULT_PLAYLIST],
@@ -128,6 +129,7 @@ io.on('connection', (socket) => {
         if (config) {
           lobby.totalRounds = config.totalRounds;
           lobby.roundTime = config.roundTime;
+          lobby.maxGuesses = config.maxGuesses;
         }
         
         if (playlist) {
@@ -192,6 +194,18 @@ io.on('connection', (socket) => {
   socket.on('make_guess', ({ lobbyId, username, guess }) => {
     const lobby = lobbies.get(lobbyId);
     if (!lobby || !lobby.currentSong) return;
+
+      // Check if user has remaining guesses
+      if (!lobby.remainingGuesses) {
+        lobby.remainingGuesses = {};
+      }
+      
+      if (lobby.remainingGuesses[username] <= 0) {
+        return;
+      }
+  
+      // Decrease remaining guesses
+      lobby.remainingGuesses[username]--;
 
     const { title, artist, addedBy } = lobby.currentSong;
     const normalizedGuess = guess.toLowerCase();
@@ -331,6 +345,13 @@ function startNextSong(lobbyId) {
   if (!lobby) return;
 
   lobby.correctGuessOrder = { title: [], artist: [], addedBy: [] };
+
+  lobby.remainingGuesses = {}; // Reset remaining guesses for all users
+
+  // Initialize remaining guesses for each user
+  lobby.users.forEach(user => {
+    lobby.remainingGuesses[user.username] = lobby.config?.maxGuesses || 3;
+  });
 
   if (lobby.timer) {
     clearInterval(lobby.timer);
