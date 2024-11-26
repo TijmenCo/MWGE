@@ -2,7 +2,7 @@ import React, { useEffect, useState, useRef } from 'react';
 import YouTube from 'react-youtube';
 import SpotifyPlayer from 'react-spotify-web-playback';
 import { socket } from '../socket';
-import { Trophy, Music, FastForward, User, Disc } from 'lucide-react';
+import { Trophy, Music, FastForward, User, Disc, RotateCcw } from 'lucide-react';
 import { Track } from '../types';
 
 interface SongGameProps {
@@ -16,7 +16,7 @@ interface SongGameProps {
   musicProvider: 'youtube' | 'spotify';
   spotifyToken: string;
   gameVariant?: 'classic' | 'whoAdded';
-  maxGuesses?: number; // Added maxGuesses prop
+  maxGuesses?: number; 
 }
 
 interface GuessResult {
@@ -179,6 +179,15 @@ const SongGame: React.FC<SongGameProps> = ({
                 <span className="font-mono text-lg">{score}</span>
               </div>
             ))}
+             {isHost && (
+            <button
+              onClick={returnToLobby}
+              className="mt-6 w-full flex items-center justify-center space-x-2 px-4 py-2 bg-gradient-to-r from-purple-500 to-indigo-600 text-white rounded-md hover:from-purple-600 hover:to-indigo-700 transition-colors"
+            >
+              <RotateCcw className="w-5 h-5" />
+              <span>Return to Lobby</span>
+            </button>
+          )}
           </div>
         </div>
       </div>
@@ -213,6 +222,10 @@ const SongGame: React.FC<SongGameProps> = ({
       playerRef.current = state;
     }
   };
+
+  function returnToLobby(): void {
+    socket.emit('return_to_lobby', { lobbyId });
+  }
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
@@ -351,6 +364,7 @@ const SongGame: React.FC<SongGameProps> = ({
               <span className="font-mono">{score}</span>
             </div>
           ))}
+
         </div>
       </div>
     </div>

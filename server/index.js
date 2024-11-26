@@ -53,6 +53,24 @@ io.on('connection', (socket) => {
     }
   });
 
+  socket.on('return_to_lobby', ({ lobbyId }) => {
+    const lobby = lobbies.get(lobbyId);
+    if (lobby) {
+      if (lobby.timer) {
+        clearInterval(lobby.timer);
+      }
+      lobby.gameState = 'waiting';
+      lobby.gameMode = null;
+      lobby.currentSong = null;
+      lobby.scores = {};
+      lobby.guesses = {};
+      lobby.playlist = [];
+      lobby.currentRound = 1;
+      lobby.currentSongIndex = 1;
+      io.to(lobbyId).emit('lobby_update', lobby);
+    }
+  });
+
   socket.on('create_lobby', ({ username, accessToken, spotifyDisplayName }, callback) => {
     const lobbyId = randomUUID().slice(0, 8);
     const userColor = COLORS[0];
