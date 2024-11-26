@@ -291,7 +291,7 @@ const SongGame: React.FC<SongGameProps> = ({
         remainingGuesses <= 0 
           ? "No more guesses remaining" 
           : gameVariant === 'classic'
-            ? `Enter your guess (${remainingGuesses} left)`
+            ? `What is this song called and their artist? (${remainingGuesses} left)`
             : `Who added this song? (${remainingGuesses} guesses left)`
       }
       className="flex-1 px-4 py-2 bg-white/5 border border-white/10 rounded-md text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 disabled:opacity-50"
