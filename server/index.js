@@ -5,6 +5,8 @@ import { randomUUID } from 'crypto';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 import fetch from 'node-fetch';
+import { MINIGAMES, startMinigameSequence } from './games.js';
+
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -52,6 +54,26 @@ io.on('connection', (socket) => {
       socket.emit('lobby_update', lobby);
     }
   });
+
+  socket.on('minigame_action', ({ lobbyId, username, action, data }) => {
+    const lobby = lobbies.get(lobbyId);
+    if (!lobby) return;
+
+    switch (action) {
+      case 'whackamole':
+      case 'buttonmash':
+      case 'colorclick':
+      case 'quickmath':
+      case 'typespeed':
+      case 'memorymatch':
+        if (data.score > lobby.scores[username]) {
+          lobby.scores[username] = data.score;
+          io.to(lobbyId).emit('scores_update', lobby.scores);
+        }
+        break;
+    }
+  });
+
 
   socket.on('return_to_lobby', ({ lobbyId }) => {
     const lobby = lobbies.get(lobbyId);
@@ -188,8 +210,7 @@ io.on('connection', (socket) => {
     if (lobby) {
       lobby.gameState = 'countdown';
       lobby.scores = {};
-      lobby.currentSongIndex = 1;
-      lobby.currentRound = 1;
+      lobby.currentGameIndex = 0;
       lobby.users.forEach(user => {
         lobby.scores[user.username] = 0;
       });
@@ -200,10 +221,10 @@ io.on('connection', (socket) => {
         lobby.gameState = 'playing';
         io.to(lobbyId).emit('lobby_update', lobby);
         
-        if (lobby.gameMode === 'songguess') {
+        if (lobby.gameMode === 'minigames') {
+          startMinigameSequence(io, lobby, lobbyId);
+        } else if (lobby.gameMode === 'songguess') {
           startNextSong(lobbyId);
-        } else {
-          startMoleSpawning(lobbyId);
         }
       }, 3000);
     }
