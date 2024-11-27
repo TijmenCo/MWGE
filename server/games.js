@@ -50,72 +50,77 @@ export const MINIGAMES = [
 ];
 
 export function startMinigameSequence(io, lobby, lobbyId) {
-  // Initialize minigame state if not exists
   if (!lobby.minigameState) {
     lobby.minigameState = {
       currentGameIndex: 0,
       scores: {},
-      isActive: false
+      isActive: false,
+      showingSplash: false
     };
   }
 
-  // Reset minigame state for new sequence
   lobby.minigameState.currentGameIndex = 0;
   lobby.minigameState.isActive = true;
 
-  // Function to start a single minigame
   const startMinigame = () => {
     if (!lobby.minigameState.isActive) return;
 
     const game = MINIGAMES[lobby.minigameState.currentGameIndex];
     
-    // Clear any existing timer
     if (lobby.timer) {
       clearInterval(lobby.timer);
     }
 
-    // Broadcast game start to all players
-    io.to(lobbyId).emit('minigame_start', {
+    // Set splash screen state
+    lobby.minigameState.showingSplash = true;
+    io.to(lobbyId).emit('minigame_splash_start', {
       ...game,
       currentGameIndex: lobby.minigameState.currentGameIndex,
       totalGames: MINIGAMES.length
     });
 
-    let timeLeft = game.duration;
-    
-    // Start the game timer
-    lobby.timer = setInterval(() => {
-      if (timeLeft <= 0) {
-        clearInterval(lobby.timer);
-        
-        // Move to next game
-        lobby.minigameState.currentGameIndex = (lobby.minigameState.currentGameIndex + 1) % MINIGAMES.length;
-        
-        // Broadcast round end
-        io.to(lobbyId).emit('minigame_end', {
-          nextGameIndex: lobby.minigameState.currentGameIndex,
-          scores: lobby.scores
-        });
+    // Wait for splash screen duration
+    setTimeout(() => {
+      lobby.minigameState.showingSplash = false;
+      io.to(lobbyId).emit('minigame_splash_end');
 
-        // Short delay before starting next game
-        setTimeout(() => {
-          if (lobby.minigameState.isActive) {
-            startMinigame();
-          }
-        }, 3000);
-      } else {
-        // Broadcast time update to all players
-        io.to(lobbyId).emit('minigame_tick', { 
-          timeLeft,
-          currentGame: game.type,
-          scores: lobby.scores
-        });
-        timeLeft--;
-      }
-    }, 1000);
+      // Start the actual game
+      io.to(lobbyId).emit('minigame_start', {
+        ...game,
+        currentGameIndex: lobby.minigameState.currentGameIndex,
+        totalGames: MINIGAMES.length
+      });
+
+      let timeLeft = game.duration;
+      
+      lobby.timer = setInterval(() => {
+        if (timeLeft <= 0) {
+          clearInterval(lobby.timer);
+          
+          lobby.minigameState.currentGameIndex = (lobby.minigameState.currentGameIndex + 1) % MINIGAMES.length;
+          
+          io.to(lobbyId).emit('minigame_end', {
+            nextGameIndex: lobby.minigameState.currentGameIndex,
+            scores: lobby.scores
+          });
+
+          setTimeout(() => {
+            if (lobby.minigameState.isActive) {
+              startMinigame();
+            }
+          }, 3000);
+        } else {
+          io.to(lobbyId).emit('minigame_tick', { 
+            timeLeft,
+            currentGame: game.type,
+            scores: lobby.scores
+          });
+          timeLeft--;
+        }
+      }, 1000);
+    }, 3000); // Splash screen duration
   };
 
-  // Start the first minigame
   startMinigame();
 }
 
@@ -125,6 +130,7 @@ export function stopMinigameSequence(lobby) {
   }
   if (lobby.minigameState) {
     lobby.minigameState.isActive = false;
+    lobby.minigameState.showingSplash = false;
   }
 }
 

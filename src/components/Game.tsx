@@ -10,57 +10,6 @@ import QuickMath from './minigames/QuickMath';
 import TypeSpeed from './minigames/TypeSpeed';
 import MemoryMatch from './minigames/MemoryMatch';
 
-const MINIGAMES: MinigameConfig[] = [
-  {
-    type: 'whackamole',
-    name: 'Whack-a-Mole',
-    description: 'Whack the moles as they appear!',
-    duration: 20,
-    maxScore: 30,
-    instruction: 'Click the moles when they pop up!'
-  },
-  {
-    type: 'buttonmash',
-    name: 'Button Masher',
-    description: 'Mash the button as fast as you can!',
-    duration: 10,
-    maxScore: 100,
-    instruction: 'Click the button as many times as possible!'
-  },
-  {
-    type: 'colorclick',
-    name: 'Color Match',
-    description: 'Click the correct color as fast as you can!',
-    duration: 15,
-    maxScore: 20,
-    instruction: 'Click the color that matches the text!'
-  },
-  {
-    type: 'quickmath',
-    name: 'Quick Math',
-    description: 'Solve math problems quickly!',
-    duration: 20,
-    maxScore: 15,
-    instruction: 'Solve the math problems as fast as you can!'
-  },
-  {
-    type: 'typespeed',
-    name: 'Speed Typer',
-    description: 'Type the words as fast as you can!',
-    duration: 15,
-    maxScore: 20,
-    instruction: 'Type the words exactly as shown!'
-  },
-  {
-    type: 'memorymatch',
-    name: 'Memory Match',
-    description: 'Match the pairs of cards!',
-    duration: 30,
-    maxScore: 6,
-    instruction: 'Find all matching pairs before time runs out!'
-  }
-];
-
 interface GameProps {
   lobbyId: string;
   currentUser: string;
@@ -75,9 +24,13 @@ const Game: React.FC<GameProps> = ({ lobbyId, currentUser, scores, isHost }) => 
   const [gameScores, setGameScores] = useState<Record<string, number>>(scores);
 
   useEffect(() => {
-    socket.on('minigame_start', (game: MinigameConfig) => {
+    socket.on('minigame_splash_start', (game: MinigameConfig) => {
       setCurrentGame(game);
       setShowSplash(true);
+    });
+
+    socket.on('minigame_start', (game: MinigameConfig) => {
+      setCurrentGame(game);
       setTimeLeft(game.duration);
     });
 
@@ -90,6 +43,7 @@ const Game: React.FC<GameProps> = ({ lobbyId, currentUser, scores, isHost }) => 
     });
 
     return () => {
+      socket.off('minigame_splash_start');
       socket.off('minigame_start');
       socket.off('minigame_tick');
       socket.off('scores_update');

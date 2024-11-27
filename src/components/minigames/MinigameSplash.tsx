@@ -1,5 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { MinigameConfig } from '../../types/games';
+import { socket } from '../../socket';
 
 interface MinigameSplashProps {
   game: MinigameConfig;
@@ -7,21 +8,16 @@ interface MinigameSplashProps {
 }
 
 const MinigameSplash: React.FC<MinigameSplashProps> = ({ game, onComplete }) => {
-  const [timeLeft, setTimeLeft] = useState(3);
-
   useEffect(() => {
-    const timer = setInterval(() => {
-      setTimeLeft((prev) => {
-        if (prev <= 1) {
-          clearInterval(timer);
-          onComplete();
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
+    const handleSplashEnd = () => {
+      onComplete();
+    };
 
-    return () => clearInterval(timer);
+    socket.on('minigame_splash_end', handleSplashEnd);
+
+    return () => {
+      socket.off('minigame_splash_end', handleSplashEnd);
+    };
   }, [onComplete]);
 
   return (
@@ -29,7 +25,7 @@ const MinigameSplash: React.FC<MinigameSplashProps> = ({ game, onComplete }) => 
       <div className="text-center">
         <h2 className="text-4xl font-bold text-white mb-4">{game.name}</h2>
         <p className="text-2xl text-gray-300 mb-8">{game.instruction}</p>
-        <div className="text-6xl font-bold text-white animate-pulse">{timeLeft}</div>
+        <div className="text-6xl font-bold text-white animate-pulse">Get Ready!</div>
       </div>
     </div>
   );
