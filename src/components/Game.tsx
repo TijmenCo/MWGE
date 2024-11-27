@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { socket } from '../socket';
-import { Trophy } from 'lucide-react';
+import { Trophy, RotateCcw } from 'lucide-react';
 import { MinigameConfig, MinigameType } from '../types/games';
 import MinigameSplash from './minigames/MinigameSplash';
 import WhackAMole from './minigames/WhackAMole';
@@ -65,9 +65,10 @@ interface GameProps {
   lobbyId: string;
   currentUser: string;
   scores: Record<string, number>;
+  isHost?: boolean;
 }
 
-const Game: React.FC<GameProps> = ({ lobbyId, currentUser, scores }) => {
+const Game: React.FC<GameProps> = ({ lobbyId, currentUser, scores, isHost }) => {
   const [currentGame, setCurrentGame] = useState<MinigameConfig | null>(null);
   const [showSplash, setShowSplash] = useState(false);
   const [timeLeft, setTimeLeft] = useState(0);
@@ -96,7 +97,12 @@ const Game: React.FC<GameProps> = ({ lobbyId, currentUser, scores }) => {
   }, []);
 
   const handleScore = (score: number) => {
-    socket.emit('update_score', { lobbyId, username: currentUser, score });
+    socket.emit('minigame_action', {
+      lobbyId,
+      username: currentUser,
+      action: currentGame?.type,
+      data: { score }
+    });
   };
 
   const renderGame = () => {
