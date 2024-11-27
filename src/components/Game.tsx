@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { socket } from '../socket';
-import { Trophy, RotateCcw } from 'lucide-react';
-import { MinigameConfig, MinigameType } from '../types/games';
+import { Trophy } from 'lucide-react';
+import { MinigameConfig } from '../types/games';
 import MinigameSplash from './minigames/MinigameSplash';
 import WhackAMole from './minigames/WhackAMole';
 import ButtonMash from './minigames/ButtonMash';
