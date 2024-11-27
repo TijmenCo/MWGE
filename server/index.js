@@ -5,7 +5,7 @@ import { randomUUID } from 'crypto';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 import fetch from 'node-fetch';
-import { MINIGAMES, startMinigameSequence } from './games.js';
+import { MINIGAMES, startMinigameSequence, stopMinigameSequence, updateMinigameScore } from './games.js';
 
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -59,36 +59,22 @@ io.on('connection', (socket) => {
     const lobby = lobbies.get(lobbyId);
     if (!lobby) return;
 
-    switch (action) {
-      case 'whackamole':
-      case 'buttonmash':
-      case 'colorclick':
-      case 'quickmath':
-      case 'typespeed':
-      case 'memorymatch':
-        if (data.score > lobby.scores[username]) {
-          lobby.scores[username] = data.score;
-          io.to(lobbyId).emit('scores_update', lobby.scores);
-        }
-        break;
-    }
+    updateMinigameScore(io, lobby, lobbyId, username, data.score, action);
   });
-
 
   socket.on('return_to_lobby', ({ lobbyId }) => {
     const lobby = lobbies.get(lobbyId);
     if (lobby) {
-      if (lobby.timer) {
-        clearInterval(lobby.timer);
-      }
+      stopMinigameSequence(lobby);
       lobby.gameState = 'waiting';
-      lobby.gameMode = minigames;
+      lobby.gameMode = null;
       lobby.currentSong = null;
       lobby.scores = {};
       lobby.guesses = {};
       lobby.playlist = [];
       lobby.currentRound = 0;
       lobby.currentSongIndex = 0;
+      lobby.minigameState = null;
       io.to(lobbyId).emit('lobby_update', lobby);
     }
   });
@@ -110,7 +96,6 @@ io.on('connection', (socket) => {
       }],
       gameState: 'waiting',
       gameMode: null,
-      activeMole: null,
       scores: {},
       currentSong: null,
       currentSongIndex: 1,
@@ -122,7 +107,8 @@ io.on('connection', (socket) => {
       timer: null,
       playlist: [...DEFAULT_PLAYLIST],
       spotifyToken: accessToken,
-      musicProvider: 'youtube'
+      musicProvider: 'youtube',
+      minigameState: null
     });
     
     socket.join(lobbyId);
@@ -210,7 +196,8 @@ io.on('connection', (socket) => {
     if (lobby) {
       lobby.gameState = 'countdown';
       lobby.scores = {};
-      lobby.currentGameIndex = 0;
+      
+      // Initialize scores for all users
       lobby.users.forEach(user => {
         lobby.scores[user.username] = 0;
       });

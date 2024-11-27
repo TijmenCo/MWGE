@@ -50,26 +50,91 @@ export const MINIGAMES = [
 ];
 
 export function startMinigameSequence(io, lobby, lobbyId) {
-  if (!lobby.currentGameIndex) {
-    lobby.currentGameIndex = 0;
+  // Initialize minigame state if not exists
+  if (!lobby.minigameState) {
+    lobby.minigameState = {
+      currentGameIndex: 0,
+      scores: {},
+      isActive: false
+    };
   }
 
-  const game = MINIGAMES[lobby.currentGameIndex];
-  io.to(lobbyId).emit('minigame_start', game);
+  // Reset minigame state for new sequence
+  lobby.minigameState.currentGameIndex = 0;
+  lobby.minigameState.isActive = true;
 
-  let timeLeft = game.duration;
-  lobby.timer = setInterval(() => {
-    timeLeft--;
-    io.to(lobbyId).emit('minigame_tick', { timeLeft });
+  // Function to start a single minigame
+  const startMinigame = () => {
+    if (!lobby.minigameState.isActive) return;
 
-    if (timeLeft <= 0) {
+    const game = MINIGAMES[lobby.minigameState.currentGameIndex];
+    
+    // Clear any existing timer
+    if (lobby.timer) {
       clearInterval(lobby.timer);
-      lobby.currentGameIndex = (lobby.currentGameIndex + 1) % MINIGAMES.length;
-      
-      // Short delay before starting next game
-      setTimeout(() => {
-        startMinigameSequence(io, lobby, lobbyId);
-      }, 3000);
     }
-  }, 1000);
+
+    // Broadcast game start to all players
+    io.to(lobbyId).emit('minigame_start', {
+      ...game,
+      currentGameIndex: lobby.minigameState.currentGameIndex,
+      totalGames: MINIGAMES.length
+    });
+
+    let timeLeft = game.duration;
+    
+    // Start the game timer
+    lobby.timer = setInterval(() => {
+      if (timeLeft <= 0) {
+        clearInterval(lobby.timer);
+        
+        // Move to next game
+        lobby.minigameState.currentGameIndex = (lobby.minigameState.currentGameIndex + 1) % MINIGAMES.length;
+        
+        // Broadcast round end
+        io.to(lobbyId).emit('minigame_end', {
+          nextGameIndex: lobby.minigameState.currentGameIndex,
+          scores: lobby.scores
+        });
+
+        // Short delay before starting next game
+        setTimeout(() => {
+          if (lobby.minigameState.isActive) {
+            startMinigame();
+          }
+        }, 3000);
+      } else {
+        // Broadcast time update to all players
+        io.to(lobbyId).emit('minigame_tick', { 
+          timeLeft,
+          currentGame: game.type,
+          scores: lobby.scores
+        });
+        timeLeft--;
+      }
+    }, 1000);
+  };
+
+  // Start the first minigame
+  startMinigame();
+}
+
+export function stopMinigameSequence(lobby) {
+  if (lobby.timer) {
+    clearInterval(lobby.timer);
+  }
+  if (lobby.minigameState) {
+    lobby.minigameState.isActive = false;
+  }
+}
+
+export function updateMinigameScore(io, lobby, lobbyId, username, score, gameType) {
+  if (!lobby.scores) {
+    lobby.scores = {};
+  }
+  
+  if (!lobby.scores[username] || score > lobby.scores[username]) {
+    lobby.scores[username] = score;
+    io.to(lobbyId).emit('scores_update', lobby.scores);
+  }
 }
