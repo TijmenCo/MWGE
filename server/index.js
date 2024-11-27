@@ -60,13 +60,13 @@ io.on('connection', (socket) => {
         clearInterval(lobby.timer);
       }
       lobby.gameState = 'waiting';
-      lobby.gameMode = null;
+      lobby.gameMode = minigames;
       lobby.currentSong = null;
       lobby.scores = {};
       lobby.guesses = {};
       lobby.playlist = [];
-      lobby.currentRound = 1;
-      lobby.currentSongIndex = 1;
+      lobby.currentRound = 0;
+      lobby.currentSongIndex = 0;
       io.to(lobbyId).emit('lobby_update', lobby);
     }
   });

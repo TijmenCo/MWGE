@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { Copy, Users, Play, Music, Gamepad, Youtube } from 'lucide-react';
+import { Copy, Users, Play, Music, Gamepad, Youtube, RotateCcw } from 'lucide-react';
 import { socket } from '../socket';
 import useStore from '../store';
 import Game from '../components/Game';
@@ -43,6 +43,7 @@ const Lobby = () => {
   const [countdown, setCountdown] = useState<number | null>(null);
   const { currentUser } = useStore();
   const [playlistUrl, setPlaylistUrl] = useState('');
+  const [gameOver, setGameOver] = useState(false);
   const [playlistError, setPlaylistError] = useState<string | null>(null);
   const [isLoadingPlaylist, setIsLoadingPlaylist] = useState(false);
   const [musicProvider, setMusicProvider] = useState<'youtube' | 'spotify'>('youtube');
@@ -56,6 +57,8 @@ const Lobby = () => {
   const [hasJoined, setHasJoined] = useState(false);
 
   React.useEffect(() => {
+    setGameOver(false);
+    
     if (lobbyId) {
       socket.emit('request_lobby_state', { lobbyId });
     }
@@ -133,6 +136,11 @@ const Lobby = () => {
     navigator.clipboard.writeText(lobbyId || '');
   };
 
+  function returnToLobby(): void {
+    socket.emit('return_to_lobby', { lobbyId });
+    setGameOver(true);
+  }
+
   const selectGameMode = async (mode: 'minigames' | 'songguess') => {
     if (mode === 'songguess' && playlistUrl) {
       setIsLoadingPlaylist(true);
@@ -167,6 +175,7 @@ const Lobby = () => {
   };
 
   const startGame = () => {
+    setGameOver(false);
     socket.emit('start_game', { lobbyId });
   };
 
@@ -195,6 +204,17 @@ const Lobby = () => {
             </div>
             {isHost && (
               <>
+               <button
+                  onClick={returnToLobby}
+                  disabled={isLoadingPlaylist}
+                  className={`flex items-center space-x-2 px-4 py-2 rounded-md transition-all duration-200 ${lobbyState.gameMode === 'minigames'
+                      ? 'bg-purple-600 text-white'
+                      : 'bg-white/5 text-gray-300 hover:bg-white/10'
+                    } disabled:opacity-50 disabled:cursor-not-allowed`}
+                >
+                   <RotateCcw className="w-5 h-5" />
+                   <span>Return to Lobby</span>
+                </button>
                 <button
                   onClick={() => selectGameMode('minigames')}
                   disabled={isLoadingPlaylist}
@@ -371,7 +391,7 @@ const Lobby = () => {
           </div>
         )}
 
-        {lobbyState.gameState === 'playing' ? (
+        {lobbyState.gameState === 'playing' && !gameOver ? (
           lobbyState.gameMode === 'songguess' ? (
             lobbyState.musicProvider === 'spotify' && !spotifyToken ? (
               <div>Loading Spotify token...</div>
