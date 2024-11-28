@@ -24,6 +24,8 @@ export function getSpotifyLoginUrl(): string {
     'user-read-private',
     'user-modify-playback-state',
     'user-library-read',
+    'playlist-read-private',
+    'playlist-read-collaborative'
   ];
   
   const params = new URLSearchParams({
