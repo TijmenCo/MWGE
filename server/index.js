@@ -6,7 +6,7 @@ import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 import fetch from 'node-fetch';
 import { MINIGAMES, startMinigameSequence, stopMinigameSequence, updateMinigameScore, startNextMinigame } from './games.js';
-import { handlePowerUpPurchase } from './powerUps.js'
+import { handlePowerUpPurchase } from './PowerUps.js';
 
 
 const __dirname = dirname(fileURLToPath(import.meta.url));

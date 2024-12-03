@@ -1,5 +1,7 @@
 export function handlePowerUpPurchase(socket, io, lobbies) {
     socket.on('purchase_power_up', ({ lobbyId, username, powerUpId }) => {
+        console.log("purchasing powerup");
+        console.log(powerUpId, username)
       const lobby = lobbies.get(lobbyId);
       if (!lobby) return;
   
