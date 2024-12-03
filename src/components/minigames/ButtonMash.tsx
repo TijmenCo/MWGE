@@ -12,7 +12,7 @@ const ButtonMash: React.FC<ButtonMashProps> = ({ lobbyId, currentUser, onScore, 
   const [clicks, setClicks] = useState(0);
 
   const handleClick = () => {
-    const newClicks = clicks + 1;
+    const newClicks = clicks + 5;
     setClicks(newClicks);
     socket.emit('minigame_action', {
       lobbyId,

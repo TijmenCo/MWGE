@@ -1,5 +1,5 @@
 import React from 'react';
-import { X } from 'lucide-react';
+import { X, Play } from 'lucide-react';
 import { PowerUp, PlayerInventory } from '../../types/shop';
 import { POWER_UPS, canAffordPowerUp } from '../../utils/PowerUps';
 import { socket } from '../../socket';
@@ -10,6 +10,7 @@ interface ShopModalProps {
   lobbyId: string;
   currentUser: string;
   inventory: PlayerInventory;
+  isHost?: boolean;
 }
 
 const ShopModal: React.FC<ShopModalProps> = ({
@@ -17,7 +18,8 @@ const ShopModal: React.FC<ShopModalProps> = ({
   onClose,
   lobbyId,
   currentUser,
-  inventory
+  inventory,
+  isHost
 }) => {
   if (!isOpen) return null;
 
@@ -31,17 +33,24 @@ const ShopModal: React.FC<ShopModalProps> = ({
     }
   };
 
+  const startNextMinigame = () => {
+    socket.emit('start_next_minigame', { lobbyId });
+    onClose();
+  };
+
   return (
     <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50">
       <div className="bg-gray-900 rounded-lg p-6 max-w-2xl w-full mx-4 border border-white/10">
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-2xl font-bold text-white">Power-Up Shop</h2>
-          <button
-            onClick={onClose}
-            className="text-gray-400 hover:text-white transition-colors"
-          >
-            <X className="w-6 h-6" />
-          </button>
+          {!isHost && (
+            <button
+              onClick={onClose}
+              className="text-gray-400 hover:text-white transition-colors"
+            >
+              <X className="w-6 h-6" />
+            </button>
+          )}
         </div>
 
         <div className="mb-4">
@@ -87,6 +96,18 @@ const ShopModal: React.FC<ShopModalProps> = ({
             </div>
           ))}
         </div>
+
+        {isHost && (
+          <div className="mt-6 flex justify-end">
+            <button
+              onClick={startNextMinigame}
+              className="flex items-center gap-2 px-6 py-3 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors"
+            >
+              <Play className="w-5 h-5" />
+              <span>Start Next Minigame</span>
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );

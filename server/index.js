@@ -5,7 +5,7 @@ import { randomUUID } from 'crypto';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 import fetch from 'node-fetch';
-import { MINIGAMES, startMinigameSequence, stopMinigameSequence, updateMinigameScore } from './games.js';
+import { MINIGAMES, startMinigameSequence, stopMinigameSequence, updateMinigameScore, startNextMinigame } from './games.js';
 import { handlePowerUpPurchase } from './powerUps.js'
 
 
@@ -53,6 +53,16 @@ io.on('connection', (socket) => {
     const lobby = lobbies.get(lobbyId);
     if (lobby) {
       socket.emit('lobby_update', lobby);
+    }
+  });
+
+  socket.on('start_next_minigame', ({ lobbyId }) => {
+    const lobby = lobbies.get(lobbyId);
+    if (lobby) {
+      const user = lobby.users.find(u => u.username === socket.username);
+      if (user?.isHost) {
+        startNextMinigame(io, lobby, lobbyId);
+      }
     }
   });
 

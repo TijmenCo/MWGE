@@ -17,7 +17,7 @@ interface GameProps {
   lobbyId: string;
   currentUser: string;
   scores: Record<string, number>;
-  isHost?: boolean;
+  isHost: boolean;
 }
 
 const Game: React.FC<GameProps> = ({ lobbyId, currentUser, scores, isHost }) => {
@@ -45,6 +45,7 @@ const Game: React.FC<GameProps> = ({ lobbyId, currentUser, scores, isHost }) => 
 
     socket.on('minigame_end', () => {
       setShowShop(true);
+      setCurrentGame(null);
     });
 
     socket.on('minigame_tick', ({ timeLeft }) => {
@@ -129,6 +130,13 @@ const Game: React.FC<GameProps> = ({ lobbyId, currentUser, scores, isHost }) => 
             />
           )}
           {!showSplash && renderGame()}
+          {!currentGame && !showShop && (
+            <div className="absolute inset-0 flex items-center justify-center">
+              <p className="text-white text-xl">
+                {isHost ? "Start the next minigame when ready!" : "Waiting for host to start next minigame..."}
+              </p>
+            </div>
+          )}
         </div>
       </div>
 
@@ -172,13 +180,16 @@ const Game: React.FC<GameProps> = ({ lobbyId, currentUser, scores, isHost }) => 
         />
       </div>
 
-      <ShopModal
-        isOpen={showShop}
-        onClose={() => setShowShop(false)}
-        lobbyId={lobbyId}
-        currentUser={currentUser}
-        inventory={inventory}
-      />
+      {showShop && (
+        <ShopModal
+          isOpen={true}
+          onClose={() => setShowShop(false)}
+          lobbyId={lobbyId}
+          currentUser={currentUser}
+          inventory={inventory}
+          isHost={isHost}
+        />
+      )}
     </div>
   );
 };

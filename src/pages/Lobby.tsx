@@ -411,7 +411,12 @@ const Lobby = () => {
               />
             )
           ) : (
-            <Game lobbyId={lobbyId!} currentUser={currentUser} scores={lobbyState.scores} />
+            <Game 
+              lobbyId={lobbyId!} 
+              currentUser={currentUser} 
+              scores={lobbyState.scores}
+              isHost={isHost} 
+            />
           )
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
