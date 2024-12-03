@@ -4,7 +4,10 @@ export type MinigameType =
   | 'colorclick'
   | 'quickmath'
   | 'typespeed'
-  | 'memorymatch';
+  | 'memorymatch'
+  | 'reactiontime'
+  | 'patternmemory'
+  | 'wordscramble';
 
 export interface MinigameConfig {
   type: MinigameType;

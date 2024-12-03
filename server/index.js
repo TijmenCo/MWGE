@@ -5,8 +5,9 @@ import { randomUUID } from 'crypto';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 import fetch from 'node-fetch';
-import { MINIGAMES, startMinigameSequence, stopMinigameSequence, updateMinigameScore, startNextMinigame } from './games.js';
+import { startMinigameSequence, stopMinigameSequence, updateMinigameScore, startNextMinigame } from './games.js';
 import { handlePowerUpPurchase } from './PowerUps.js';
+import { MINIGAMES } from './constants/minigames.js';
 
 
 const __dirname = dirname(fileURLToPath(import.meta.url));

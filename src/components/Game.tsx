@@ -12,6 +12,9 @@ import TypeSpeed from './minigames/TypeSpeed';
 import MemoryMatch from './minigames/MemoryMatch';
 import ShopModal from './shop/ShopModal';
 import PowerUpInventory from './PowerUpInventory';
+import ReactionTime from './minigames/ReactionTime';
+import PatternMemory from './minigames/PaternMemory';
+import WordScramble from './minigames/WordScramble';
 
 interface GameProps {
   lobbyId: string;
@@ -111,6 +114,12 @@ const Game: React.FC<GameProps> = ({ lobbyId, currentUser, scores, isHost }) => 
         return <TypeSpeed {...props} />;
       case 'memorymatch':
         return <MemoryMatch {...props} />;
+      case 'reactiontime':
+        return <ReactionTime {...props} />;
+      case 'patternmemory':
+        return <PatternMemory {...props} />;
+      case 'wordscramble':
+        return <WordScramble {...props} />;
       default:
         return null;
     }
