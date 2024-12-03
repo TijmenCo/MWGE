@@ -6,6 +6,7 @@ import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 import fetch from 'node-fetch';
 import { MINIGAMES, startMinigameSequence, stopMinigameSequence, updateMinigameScore } from './games.js';
+import { handlePowerUpPurchase } from './powerUps.js'
 
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -54,6 +55,8 @@ io.on('connection', (socket) => {
       socket.emit('lobby_update', lobby);
     }
   });
+
+  handlePowerUpPurchase(socket, io, lobbies);
 
   socket.on('minigame_action', ({ lobbyId, username, action, data }) => {
     const lobby = lobbies.get(lobbyId);
