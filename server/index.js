@@ -66,6 +66,16 @@ io.on('connection', (socket) => {
     }
   });
 
+  socket.on('start_next_minigame', ({ lobbyId }) => {
+    const lobby = lobbies.get(lobbyId);
+    if (lobby) {
+      const user = lobby.users.find(u => u.username === socket.username);
+      if (user?.isHost) {
+        startNextMinigame(io, lobby, lobbyId);
+      }
+    }
+  });
+
   handlePowerUpPurchase(socket, io, lobbies);
 
   socket.on('minigame_action', ({ lobbyId, username, action, data }) => {
