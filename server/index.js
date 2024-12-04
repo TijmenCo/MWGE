@@ -71,17 +71,17 @@ io.on('connection', (socket) => {
     }
   });
 
-  socket.on('create_lobby', ({ username, accessToken, spotifyDisplayName }, callback) => {
+  socket.on('create_lobby', ({ username, accessToken, spotifyProfileUrl }, callback) => {
     const lobbyId = randomUUID().slice(0, 8);
     const userColor = COLORS[0];
     socket.username = username;
-    socket.spotifyDisplayName = spotifyDisplayName;
+    socket.spotifyProfileUrl = spotifyProfileUrl;
     socket.lobbyId = lobbyId;
     
     lobbies.set(lobbyId, { 
       users: [{
         username,
-        spotifyDisplayName,
+        spotifyProfileUrl,
         isHost: true,
         score: 0,
         color: userColor
@@ -109,17 +109,17 @@ io.on('connection', (socket) => {
     io.to(lobbyId).emit('lobby_update', lobbies.get(lobbyId));
   });
 
-  socket.on('join_lobby', ({ lobbyId, username, spotifyDisplayName }, callback) => {
+  socket.on('join_lobby', ({ lobbyId, username, spotifyProfileUrl }, callback) => {
     const lobby = lobbies.get(lobbyId);
     if (lobby) {
       const userColor = COLORS[lobby.users.length % COLORS.length];
       socket.username = username;
-      socket.spotifyDisplayName = spotifyDisplayName;
+      socket.spotifyProfileUrl = spotifyProfileUrl;
       socket.lobbyId = lobbyId;
       
       lobby.users.push({
         username,
-        spotifyDisplayName,
+        spotifyProfileUrl,
         isHost: false,
         score: 0,
         color: userColor
@@ -132,6 +132,7 @@ io.on('connection', (socket) => {
       callback(false);
     }
   });
+
 
   socket.on('select_game_mode', ({ lobbyId, mode, playlist, config, musicProvider, gameVariant }) => {
     const lobby = lobbies.get(lobbyId);

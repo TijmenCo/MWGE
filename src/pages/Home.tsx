@@ -16,7 +16,7 @@ import {
 
 const Home = () => {
   const [username, setUsername] = useState('');
-  const [spotifyDisplayName, setSpotifyDisplayName] = useState('');
+  const [spotifyProfileUrl, setSpotifyProfileUrl] = useState('');
   const [playlist, setPlaylist] = useState<Track[] | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(isSpotifyAuthenticated());
   const [accessToken, setAccessToken] = useState<string | null>(null);
@@ -24,7 +24,7 @@ const Home = () => {
   const [showSettings, setShowSettings] = useState(false);
   const navigate = useNavigate();
   const setCurrentUser = useStore((state) => state.setCurrentUser);
-  const setStoreSpotifyDisplayName = useStore((state) => state.setSpotifyDisplayName);
+  const setStoreSpotifyProfile = useStore((state) => state.setSpotifyProfile);
 
   interface Track {
     id: string;
@@ -88,12 +88,12 @@ const Home = () => {
     if (!username.trim()) return;
 
     setCurrentUser(username);
-    setStoreSpotifyDisplayName(spotifyDisplayName.trim() || username);
+    setStoreSpotifyProfile(spotifyProfileUrl.trim());
     
     socket.emit('create_lobby', { 
       username, 
       accessToken,
-      spotifyDisplayName: spotifyDisplayName.trim() || username 
+      spotifyProfileUrl: spotifyProfileUrl.trim()
     }, (lobbyId: string) => {
       navigate(`/lobby/${lobbyId}`);
     });
@@ -103,12 +103,12 @@ const Home = () => {
     if (!username.trim()) return;
     
     setCurrentUser(username);
-    setStoreSpotifyDisplayName(spotifyDisplayName.trim() || username);
+    setStoreSpotifyProfile(spotifyProfileUrl.trim());
     
     socket.emit('join_lobby', { 
       lobbyId, 
       username,
-      spotifyDisplayName: spotifyDisplayName.trim() || username 
+      spotifyProfileUrl: spotifyProfileUrl.trim()
     }, (success: boolean) => {
       if (success) {
         navigate(`/lobby/${lobbyId}`);
@@ -159,34 +159,34 @@ const Home = () => {
         </div>
 
         <div className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-200 mb-2">
-              Choose your username
-            </label>
-            <input
-              type="text"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-md text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500"
-              placeholder="Enter username"
-            />
-          </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-200 mb-2">
+            Choose your username
+          </label>
+          <input
+            type="text"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+            className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-md text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500"
+            placeholder="Enter username"
+          />
+        </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-200 mb-2">
-              Spotify Display Name (optional)
-            </label>
-            <input
-              type="text"
-              value={spotifyDisplayName}
-              onChange={(e) => setSpotifyDisplayName(e.target.value)}
-              className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-md text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500"
-              placeholder="Your Spotify account name"
-            />
-            <p className="mt-1 text-sm text-gray-400">
-              Enter your Spotify display name if it's different from your username
-            </p>
-          </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-200 mb-2">
+            Spotify Profile URL
+          </label>
+          <input
+            type="text"
+            value={spotifyProfileUrl}
+            onChange={(e) => setSpotifyProfileUrl(e.target.value)}
+            className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-md text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500"
+            placeholder="https://open.spotify.com/user/your-profile-id"
+          />
+          <p className="mt-1 text-sm text-gray-400">
+            Enter your Spotify profile URL to enable the "Who Added" game mode
+          </p>
+        </div>
 
           <button
             onClick={createLobby}

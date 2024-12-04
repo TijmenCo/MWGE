@@ -9,13 +9,14 @@ import ColorPicker from '../components/ColorPicker';
 import DrawingCanvas from '../components/DrawingCanvas';
 import JoinLobbyForm from '../components/JoinLobbyForm';
 import { fetchPlaylistVideos } from '../utils/youtube';
-import { fetchSpotifyPlaylist } from '../utils/spotify';
+import { fetchSpotifyPlaylist, fetchUserTopTracks } from '../utils/spotify';
 
 interface User {
   username: string;
   isHost: boolean;
   score: number;
   color: string;
+  spotifyProfileUrl: string;
 }
 
 interface LobbyState {
@@ -55,6 +56,7 @@ const Lobby = () => {
   });
   const [spotifyToken, setSpotifyToken] = useState<string>('');
   const [hasJoined, setHasJoined] = useState(false);
+  const [sourceType, setSourceType] = useState<'playlist' | 'profiles'>('playlist');
 
   React.useEffect(() => {
     setGameOver(false);
@@ -131,6 +133,68 @@ const Lobby = () => {
       socket.emit('select_game_mode', { lobbyId, mode, musicProvider, gameVariant });
     }
   };
+
+  const loadSongs = async (mode: 'minigames' | 'songguess') => {
+    if (mode === 'songguess' && (playlistUrl || sourceType === 'profiles')) {
+      setIsLoadingPlaylist(true);
+      setPlaylistError(null);
+      try {
+        let playlist;
+        if (sourceType === 'profiles') {
+          // Get all users' profile URLs and fetch their top tracks
+          console.log(lobbyState.users)
+          const userProfiles = lobbyState.users.map(user => ({
+            username: user.username,
+            profileUrl: user.spotifyProfileUrl
+          })).filter(user => user.profileUrl);
+
+          console.log(userProfiles);
+
+          console.log("got in profiles")
+
+          const allTracks = await Promise.all(
+            userProfiles.map(async user => {
+              const tracks = await fetchUserTopTracks(user.profileUrl);
+              return tracks.map(track => ({
+                ...track,
+                addedBy: {
+                  ...track.addedBy,
+                  displayName: user.username
+                }
+              }));
+            })
+          );
+
+          playlist = allTracks.flat();
+        } else if (musicProvider === 'youtube') {
+          playlist = await fetchPlaylistVideos(playlistUrl);
+        } else {
+          playlist = await fetchSpotifyPlaylist(playlistUrl);
+        }
+
+        socket.emit('select_game_mode', {
+          lobbyId,
+          mode,
+          playlist,
+          musicProvider,
+          gameVariant,
+          config: {
+            totalRounds: roundConfig.totalRounds,
+            roundTime: roundConfig.roundTime,
+            maxGuesses: roundConfig.maxGuesses
+          }
+        });
+      } catch (error) {
+        setPlaylistError('Failed to load songs. Please check the URLs and try again.');
+        return;
+      } finally {
+        setIsLoadingPlaylist(false);
+      }
+    } else {
+      socket.emit('select_game_mode', { lobbyId, mode, musicProvider, gameVariant });
+    }
+  };
+
 
   const copyLobbyId = () => {
     navigator.clipboard.writeText(lobbyId || '');
@@ -280,6 +344,36 @@ const Lobby = () => {
                   </button>
                 </div>
               </div>
+              {gameVariant === 'whoAdded' && (
+            <div>
+              <label className="block text-sm font-medium text-gray-200 mb-2">
+                Source Type
+              </label>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setSourceType('playlist')}
+                  className={`flex-1 px-4 py-2 rounded-md transition-all duration-200 ${
+                    sourceType === 'playlist'
+                      ? 'bg-purple-600 text-white'
+                      : 'bg-white/5 text-gray-300 hover:bg-white/10'
+                  }`}
+                >
+                  From Playlist
+                </button>
+                <button
+                  onClick={() => setSourceType('profiles')}
+                  className={`flex-1 px-4 py-2 rounded-md transition-all duration-200 ${
+                    sourceType === 'profiles'
+                      ? 'bg-purple-600 text-white'
+                      : 'bg-white/5 text-gray-300 hover:bg-white/10'
+                  }`}
+                >
+                  From User Profiles
+                </button>
+              </div>
+            </div>
+          )}
+
               <div>
                 <label className="block text-sm font-medium text-gray-200 mb-2">
                   Number of Rounds
@@ -352,7 +446,7 @@ const Lobby = () => {
                 <span>Spotify</span>
               </button>
             </div>
-
+            {(sourceType === 'playlist' || gameVariant !== 'whoAdded') && (
             <div>
               <label className="block text-sm font-medium text-gray-200 mb-2">
                 {musicProvider === 'youtube' ? 'YouTube Playlist URL' : 'Spotify Playlist URL'}
@@ -380,7 +474,22 @@ const Lobby = () => {
                 <p className="mt-2 text-gray-400 text-sm">Loading playlist...</p>
               )}
             </div>
-          </div>
+            )}
+
+<button
+            onClick={() => loadSongs('songguess')}
+            className="w-full flex items-center justify-center px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 transition-all duration-200"
+          >
+            Load Songs
+          </button>
+          {playlistError && (
+                <p className="mt-2 text-red-400 text-sm">{playlistError}</p>
+              )}
+              {isLoadingPlaylist && (
+                <p className="mt-2 text-gray-400 text-sm">Loading playlist...</p>
+              )}
+            
+            </div>
         )}
 
         {countdown && (

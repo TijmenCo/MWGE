@@ -17,6 +17,39 @@ export const spotifyConfig: SpotifyConfig = {
 let accessToken: string | null = null;
 let tokenExpirationTime: number | null = null;
 
+export async function fetchUserTopTracks(userProfileUrl: string): Promise<Track[]> {
+  try {
+
+    console.log("got in fetchusertop ")
+    const userId = userProfileUrl.match(/user\/([a-zA-Z0-9]+)/)?.[1];
+    if (!userId) throw new Error('Invalid Spotify profile URL');
+
+    // Fetch user's top tracks
+    const response = await spotifyFetch('/me/top/tracks?limit=50&time_range=long_term');
+    const tracks = response.items;
+
+    // Randomly select 10 tracks
+    const shuffledTracks = tracks.sort(() => Math.random() - 0.5);
+    const selectedTracks = shuffledTracks.slice(0, 10);
+
+    console.log(selectedTracks);
+
+    return selectedTracks.map((track: any) => ({
+      id: track.id,
+      title: track.name,
+      artist: track.artists.map((artist: any) => artist.name).join(', '),
+      addedBy: {
+        id: userId,
+        displayName: userId // We'll match this with the username later
+      }
+    }));
+  } catch (error) {
+    console.error('Error fetching user top tracks:', error);
+    throw error;
+  }
+}
+
+
 export function getSpotifyLoginUrl(): string {
   const scopes = [
     'streaming',
@@ -25,7 +58,8 @@ export function getSpotifyLoginUrl(): string {
     'user-modify-playback-state',
     'user-library-read',
     'playlist-read-private',
-    'playlist-read-collaborative'
+    'playlist-read-collaborative',
+    'user-top-read'
   ];
   
   const params = new URLSearchParams({
@@ -69,6 +103,10 @@ export async function handleSpotifyCallback(code: string): Promise<string> {
 }
 
 async function spotifyFetch(endpoint: string, options: RequestInit = {}): Promise<any> {
+  if (!accessToken) {
+    throw new Error('No access token available');
+  }
+
   const response = await fetch(`${SPOTIFY_API_BASE}${endpoint}`, {
     ...options,
     headers: {
@@ -84,7 +122,8 @@ async function spotifyFetch(endpoint: string, options: RequestInit = {}): Promis
       window.location.href = getSpotifyLoginUrl();
       throw new Error('Authentication required');
     }
-    throw new Error('Spotify API request failed');
+    const errorData = await response.json();
+    throw new Error(`Spotify API request failed: ${errorData.error?.message || 'Unknown error'}`);
   }
 
   return response.json();
