@@ -1,4 +1,12 @@
 import { Track } from '../types';
+import {
+  SpotifyArtist,
+  SpotifyPlaylist,
+  SpotifyPlaylistTrack,
+  SpotifyTracksResponse,
+  SpotifyUserProfile,
+  SpotifyPlaylistResponse
+} from '../types/spotify';
 
 const SPOTIFY_API_BASE = 'https://api.spotify.com/v1';
 
@@ -21,7 +29,6 @@ let tokenExpirationTime: number | null = null;
 const userDisplayNameCache = new Map<string, string>();
 
 export async function getSpotifyUserProfile(userId: string): Promise<{ id: string; displayName: string }> {
-  // Check cache first
   if (userDisplayNameCache.has(userId)) {
     return {
       id: userId,
@@ -30,10 +37,8 @@ export async function getSpotifyUserProfile(userId: string): Promise<{ id: strin
   }
 
   try {
-    const userData = await spotifyFetch(`/users/${userId}`);
+    const userData = await spotifyFetch<SpotifyUserProfile>(`/users/${userId}`);
     const displayName = userData.display_name || userId;
-    
-    // Cache the result
     userDisplayNameCache.set(userId, displayName);
     
     return {
@@ -44,20 +49,18 @@ export async function getSpotifyUserProfile(userId: string): Promise<{ id: strin
     console.error('Error fetching user profile:', error);
     return {
       id: userId,
-      displayName: userId // Fallback to userId if we can't fetch the display name
+      displayName: userId
     };
   }
 }
 
-async function fetchUserPlaylists(userId: string): Promise<any[]> {
+async function fetchUserPlaylists(userId: string): Promise<SpotifyPlaylist[]> {
   try {
-    const response = await spotifyFetch(`/users/${userId}/playlists?limit=50`);
-    // Filter out any null or invalid playlists
-    return (response.items || []).filter(playlist => 
-      playlist && 
-      playlist.id && 
-      playlist.tracks && 
-      playlist.tracks.total > 0
+    const response = await spotifyFetch<SpotifyPlaylistResponse>(`/users/${userId}/playlists?limit=50`);
+    return (response.items || []).filter((playlist): playlist is SpotifyPlaylist => 
+      playlist !== null &&
+      typeof playlist.id === 'string' &&
+      playlist.tracks?.total > 0
     );
   } catch (error) {
     console.error(`Error fetching playlists for user ${userId}:`, error);
@@ -65,16 +68,14 @@ async function fetchUserPlaylists(userId: string): Promise<any[]> {
   }
 }
 
-async function fetchPlaylistTracks(playlistId: string): Promise<any[]> {
+async function fetchPlaylistTracks(playlistId: string): Promise<SpotifyPlaylistTrack[]> {
   try {
-    const response = await spotifyFetch(`/playlists/${playlistId}/tracks?limit=50`);
-    // Filter out any null or invalid tracks
-    return (response.items || []).filter(item => 
-      item && 
-      item.track && 
-      item.track.id && 
-      item.track.name && 
-      item.track.artists
+    const response = await spotifyFetch<SpotifyTracksResponse>(`/playlists/${playlistId}/tracks?limit=50`);
+    return (response.items || []).filter((item): item is SpotifyPlaylistTrack => 
+      item !== null &&
+      item.track?.id !== undefined &&
+      item.track?.name !== undefined &&
+      Array.isArray(item.track?.artists)
     );
   } catch (error) {
     console.error(`Error fetching tracks for playlist ${playlistId}:`, error);
@@ -90,10 +91,7 @@ export async function fetchUserTopTracks(userProfileUrl: string): Promise<Track[
       return [];
     }
 
-    // First, fetch the user's profile to get their display name
     const userProfile = await getSpotifyUserProfile(userId);
-
-    // Fetch user's public playlists
     const playlists = await fetchUserPlaylists(userId);
     
     if (playlists.length === 0) {
@@ -101,33 +99,28 @@ export async function fetchUserTopTracks(userProfileUrl: string): Promise<Track[
       return [];
     }
 
-    // Get tracks from each playlist
     const playlistTracksPromises = playlists
       .slice(0, 3)
-      .map(playlist => {
-        if (!playlist || !playlist.id) {
-          console.error('Invalid playlist object:', playlist);
-          return Promise.resolve([]);
-        }
-        return fetchPlaylistTracks(playlist.id);
-      });
+      .map(playlist => fetchPlaylistTracks(playlist.id));
 
     const playlistTracks = await Promise.all(playlistTracksPromises);
 
-    // Flatten and transform tracks
     const allTracks = playlistTracks
       .flat()
-      .filter(item => 
-        item?.track?.id && 
-        item?.track?.name && 
-        item?.track?.artists?.length > 0
+      .filter((item): item is SpotifyPlaylistTrack => 
+        item?.track?.id !== undefined &&
+        item?.track?.name !== undefined &&
+        Array.isArray(item?.track?.artists) &&
+        item.track.artists.length > 0
       )
       .map(item => ({
         id: item.track.id,
         title: item.track.name,
         artist: item.track.artists
-          .filter((artist: any) => artist && artist.name)
-          .map((artist: any) => artist.name)
+          .filter((artist): artist is SpotifyArtist => 
+            artist !== null && typeof artist.name === 'string'
+          )
+          .map(artist => artist.name)
           .join(', '),
         addedBy: {
           id: userId,
@@ -140,12 +133,10 @@ export async function fetchUserTopTracks(userProfileUrl: string): Promise<Track[
       return [];
     }
 
-    // Shuffle and select random tracks
-    const shuffledTracks = allTracks
+    return allTracks
       .sort(() => Math.random() - 0.5)
       .slice(0, Math.min(10, allTracks.length));
 
-    return shuffledTracks;
   } catch (error) {
     console.error('Error fetching user tracks:', error);
     return [];
@@ -202,7 +193,7 @@ export async function handleSpotifyCallback(code: string): Promise<string> {
   return accessToken;
 }
 
-async function spotifyFetch(endpoint: string, options: RequestInit = {}): Promise<any> {
+async function spotifyFetch<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
   if (!accessToken) {
     throw new Error('No access token available');
   }
@@ -229,27 +220,25 @@ async function spotifyFetch(endpoint: string, options: RequestInit = {}): Promis
   return response.json();
 }
 
-async function fetchPlaylistTracksPage(playlistId: string, offset: number = 0): Promise<any> {
-  return spotifyFetch(
-    `/playlists/${playlistId}/tracks?fields=items(track(id,name,artists),added_by.id)&offset=${offset}&limit=50`
-  );
-}
-
 export async function fetchSpotifyPlaylist(playlistUrl: string): Promise<Track[]> {
   try {
     const playlistId = playlistUrl.match(/playlist\/([a-zA-Z0-9]+)/)?.[1];
     if (!playlistId) throw new Error('Invalid Spotify playlist URL');
 
-    // Get initial tracks and total count
-    const initialData = await fetchPlaylistTracksPage(playlistId);
+    const initialData = await spotifyFetch<SpotifyTracksResponse>(
+      `/playlists/${playlistId}/tracks?fields=items(track(id,name,artists),added_by.id)&limit=50`
+    );
+    
     const totalTracks = initialData.total;
     let allTracks = initialData.items;
 
-    // Calculate number of additional requests needed
     const remainingTracks = totalTracks - 50;
     if (remainingTracks > 0) {
-      const additionalRequests = Array.from({ length: Math.ceil(remainingTracks / 50) }, (_, i) =>
-        fetchPlaylistTracksPage(playlistId, (i + 1) * 50)
+      const additionalRequests = Array.from(
+        { length: Math.ceil(remainingTracks / 50) },
+        (_, i) => spotifyFetch<SpotifyTracksResponse>(
+          `/playlists/${playlistId}/tracks?fields=items(track(id,name,artists),added_by.id)&offset=${(i + 1) * 50}&limit=50`
+        )
       );
 
       const additionalData = await Promise.all(additionalRequests);
@@ -259,36 +248,37 @@ export async function fetchSpotifyPlaylist(playlistUrl: string): Promise<Track[]
       ];
     }
 
-    // Get unique user IDs who added tracks
     const uniqueUserIds = [...new Set(allTracks
-      .filter(item => item?.added_by?.id)
+      .filter((item): item is SpotifyPlaylistTrack => 
+        item?.added_by?.id !== undefined
+      )
       .map(item => item.added_by.id)
     )];
 
-    // Fetch display names for all users in parallel
     const userProfiles = await Promise.all(
       uniqueUserIds.map(userId => getSpotifyUserProfile(userId))
     );
 
-    // Create a map of user IDs to display names
     const userDisplayNames = Object.fromEntries(
       userProfiles.map(profile => [profile.id, profile.displayName])
     );
 
-    // Map tracks with user display names
     return allTracks
-      .filter(item => 
-        item?.track?.id && 
-        item?.track?.name && 
-        item?.track?.artists?.length > 0 && 
-        item?.added_by?.id
+      .filter((item): item is SpotifyPlaylistTrack => 
+        item?.track?.id !== undefined &&
+        item?.track?.name !== undefined &&
+        Array.isArray(item?.track?.artists) &&
+        item?.track?.artists.length > 0 &&
+        item?.added_by?.id !== undefined
       )
       .map(item => ({
         id: item.track.id,
         title: item.track.name,
         artist: item.track.artists
-          .filter((artist: any) => artist && artist.name)
-          .map((artist: any) => artist.name)
+          .filter((artist): artist is SpotifyArtist => 
+            artist !== null && typeof artist.name === 'string'
+          )
+          .map(artist => artist.name)
           .join(', '),
         addedBy: {
           id: item.added_by.id,
@@ -306,7 +296,7 @@ export async function getCurrentSpotifyToken(): Promise<string | null> {
   return accessToken;
 }
 
-export async function setCookieSpotifyToken(cookie: string) {
+export async function setCookieSpotifyToken(cookie: string): Promise<void> {
   accessToken = cookie;
 }
 
