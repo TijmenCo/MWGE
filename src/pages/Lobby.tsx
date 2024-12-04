@@ -100,40 +100,6 @@ const Lobby = () => {
     return <JoinLobbyForm lobbyId={lobbyId!} onJoinSuccess={() => setHasJoined(true)} />;
   }
 
-  const loadPlaylist = async (mode: 'minigames' | 'songguess') => {
-    if (mode === 'songguess' && playlistUrl) {
-      setIsLoadingPlaylist(true);
-      setPlaylistError(null);
-      try {
-        let playlist;
-        if (musicProvider === 'youtube') {
-          playlist = await fetchPlaylistVideos(playlistUrl);
-        } else {
-          playlist = await fetchSpotifyPlaylist(playlistUrl);
-        }
-        socket.emit('select_game_mode', {
-          lobbyId,
-          mode,
-          playlist,
-          musicProvider,
-          gameVariant,
-          config: {
-            totalRounds: roundConfig.totalRounds,
-            roundTime: roundConfig.roundTime,
-            maxGuesses: roundConfig.maxGuesses
-          }
-        });
-      } catch (error) {
-        setPlaylistError('Failed to load playlist. Please check the URL and try again.');
-        return;
-      } finally {
-        setIsLoadingPlaylist(false);
-      }
-    } else {
-      socket.emit('select_game_mode', { lobbyId, mode, musicProvider, gameVariant });
-    }
-  };
-
   const loadSongs = async (mode: 'minigames' | 'songguess') => {
     if (mode === 'songguess' && (playlistUrl || sourceType === 'profiles')) {
       setIsLoadingPlaylist(true);
