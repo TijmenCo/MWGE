@@ -49,36 +49,106 @@ export async function getSpotifyUserProfile(userId: string): Promise<{ id: strin
   }
 }
 
+async function fetchUserPlaylists(userId: string): Promise<any[]> {
+  try {
+    const response = await spotifyFetch(`/users/${userId}/playlists?limit=50`);
+    // Filter out any null or invalid playlists
+    return (response.items || []).filter(playlist => 
+      playlist && 
+      playlist.id && 
+      playlist.tracks && 
+      playlist.tracks.total > 0
+    );
+  } catch (error) {
+    console.error(`Error fetching playlists for user ${userId}:`, error);
+    return [];
+  }
+}
+
+async function fetchPlaylistTracks(playlistId: string): Promise<any[]> {
+  try {
+    const response = await spotifyFetch(`/playlists/${playlistId}/tracks?limit=50`);
+    // Filter out any null or invalid tracks
+    return (response.items || []).filter(item => 
+      item && 
+      item.track && 
+      item.track.id && 
+      item.track.name && 
+      item.track.artists
+    );
+  } catch (error) {
+    console.error(`Error fetching tracks for playlist ${playlistId}:`, error);
+    return [];
+  }
+}
+
 export async function fetchUserTopTracks(userProfileUrl: string): Promise<Track[]> {
   try {
     const userId = userProfileUrl.match(/user\/([a-zA-Z0-9]+)/)?.[1];
-    if (!userId) throw new Error('Invalid Spotify profile URL');
+    if (!userId) {
+      console.error('Invalid Spotify profile URL:', userProfileUrl);
+      return [];
+    }
 
     // First, fetch the user's profile to get their display name
     const userProfile = await getSpotifyUserProfile(userId);
 
-    // Fetch user's top tracks
-    const response = await spotifyFetch('/me/top/tracks?limit=50&time_range=long_term');
-    const tracks = response.items;
+    // Fetch user's public playlists
+    const playlists = await fetchUserPlaylists(userId);
+    
+    if (playlists.length === 0) {
+      console.log(`No valid playlists found for user ${userId}`);
+      return [];
+    }
 
-    // Randomly select 10 tracks
-    const shuffledTracks = tracks.sort(() => Math.random() - 0.5);
-    const selectedTracks = shuffledTracks.slice(0, 10);
+    // Get tracks from each playlist
+    const playlistTracksPromises = playlists
+      .slice(0, 3)
+      .map(playlist => {
+        if (!playlist || !playlist.id) {
+          console.error('Invalid playlist object:', playlist);
+          return Promise.resolve([]);
+        }
+        return fetchPlaylistTracks(playlist.id);
+      });
 
-    console.log(selectedTracks);
+    const playlistTracks = await Promise.all(playlistTracksPromises);
 
-    return selectedTracks.map((track: any) => ({
-      id: track.id,
-      title: track.name,
-      artist: track.artists.map((artist: any) => artist.name).join(', '),
-      addedBy: {
-        id: userId,
-        displayName: userProfile.displayName
-      }
-    }));
+    // Flatten and transform tracks
+    const allTracks = playlistTracks
+      .flat()
+      .filter(item => 
+        item?.track?.id && 
+        item?.track?.name && 
+        item?.track?.artists?.length > 0
+      )
+      .map(item => ({
+        id: item.track.id,
+        title: item.track.name,
+        artist: item.track.artists
+          .filter((artist: any) => artist && artist.name)
+          .map((artist: any) => artist.name)
+          .join(', '),
+        addedBy: {
+          id: userId,
+          displayName: userProfile.displayName
+        }
+      }));
+
+    if (allTracks.length === 0) {
+      console.log(`No valid tracks found in playlists for user ${userId}`);
+      return [];
+    }
+
+    // Shuffle and select random tracks
+    const shuffledTracks = allTracks
+      .sort(() => Math.random() - 0.5)
+      .slice(0, Math.min(10, allTracks.length));
+
+    return shuffledTracks;
   } catch (error) {
-    console.error('Error fetching user top tracks:', error);
-    throw error;
+    console.error('Error fetching user tracks:', error);
+    return [];
   }
 }
 
@@ -101,8 +171,6 @@ export function getSpotifyLoginUrl(): string {
     scope: scopes.join(' '),
     show_dialog: 'true'
   });
-
-  accessToken = `https://accounts.spotify.com/authorize?${params.toString()}`;
 
   return `https://accounts.spotify.com/authorize?${params.toString()}`;
 }
@@ -161,7 +229,7 @@ async function spotifyFetch(endpoint: string, options: RequestInit = {}): Promis
   return response.json();
 }
 
-async function fetchPlaylistTracks(playlistId: string, offset: number = 0): Promise<any> {
+async function fetchPlaylistTracksPage(playlistId: string, offset: number = 0): Promise<any> {
   return spotifyFetch(
     `/playlists/${playlistId}/tracks?fields=items(track(id,name,artists),added_by.id)&offset=${offset}&limit=50`
   );
@@ -173,7 +241,7 @@ export async function fetchSpotifyPlaylist(playlistUrl: string): Promise<Track[]
     if (!playlistId) throw new Error('Invalid Spotify playlist URL');
 
     // Get initial tracks and total count
-    const initialData = await fetchPlaylistTracks(playlistId);
+    const initialData = await fetchPlaylistTracksPage(playlistId);
     const totalTracks = initialData.total;
     let allTracks = initialData.items;
 
@@ -181,7 +249,7 @@ export async function fetchSpotifyPlaylist(playlistUrl: string): Promise<Track[]
     const remainingTracks = totalTracks - 50;
     if (remainingTracks > 0) {
       const additionalRequests = Array.from({ length: Math.ceil(remainingTracks / 50) }, (_, i) =>
-        fetchPlaylistTracks(playlistId, (i + 1) * 50)
+        fetchPlaylistTracksPage(playlistId, (i + 1) * 50)
       );
 
       const additionalData = await Promise.all(additionalRequests);
@@ -192,7 +260,10 @@ export async function fetchSpotifyPlaylist(playlistUrl: string): Promise<Track[]
     }
 
     // Get unique user IDs who added tracks
-    const uniqueUserIds = [...new Set(allTracks.map((item: any) => item.added_by.id))];
+    const uniqueUserIds = [...new Set(allTracks
+      .filter(item => item?.added_by?.id)
+      .map(item => item.added_by.id)
+    )];
 
     // Fetch display names for all users in parallel
     const userProfiles = await Promise.all(
@@ -205,15 +276,25 @@ export async function fetchSpotifyPlaylist(playlistUrl: string): Promise<Track[]
     );
 
     // Map tracks with user display names
-    return allTracks.map((item: any) => ({
-      id: item.track.id,
-      title: item.track.name,
-      artist: item.track.artists.map((artist: any) => artist.name).join(', '),
-      addedBy: {
-        id: item.added_by.id,
-        displayName: userDisplayNames[item.added_by.id]
-      }
-    }));
+    return allTracks
+      .filter(item => 
+        item?.track?.id && 
+        item?.track?.name && 
+        item?.track?.artists?.length > 0 && 
+        item?.added_by?.id
+      )
+      .map(item => ({
+        id: item.track.id,
+        title: item.track.name,
+        artist: item.track.artists
+          .filter((artist: any) => artist && artist.name)
+          .map((artist: any) => artist.name)
+          .join(', '),
+        addedBy: {
+          id: item.added_by.id,
+          displayName: userDisplayNames[item.added_by.id] || 'Unknown User'
+        }
+      }));
 
   } catch (error) {
     console.error('Error fetching Spotify playlist:', error);

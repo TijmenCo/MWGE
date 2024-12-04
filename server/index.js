@@ -60,7 +60,7 @@ io.on('connection', (socket) => {
         clearInterval(lobby.timer);
       }
       lobby.gameState = 'waiting';
-      lobby.gameMode = minigames;
+      lobby.gameMode = null;
       lobby.currentSong = null;
       lobby.scores = {};
       lobby.guesses = {};
