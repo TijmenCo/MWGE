@@ -47,7 +47,7 @@ const Lobby = () => {
   const [gameOver, setGameOver] = useState(false);
   const [playlistError, setPlaylistError] = useState<string | null>(null);
   const [isLoadingPlaylist, setIsLoadingPlaylist] = useState(false);
-  const [musicProvider, setMusicProvider] = useState<'youtube' | 'spotify'>('youtube');
+  const [musicProvider, setMusicProvider] = useState<'youtube' | 'spotify'>('spotify');
   const [gameVariant, setGameVariant] = useState<'classic' | 'whoAdded'>('classic');
   const [roundConfig, setRoundConfig] = useState({
     totalRounds: 5,
@@ -427,7 +427,7 @@ const Lobby = () => {
             </div>
 
             <div className="flex gap-4 mb-4">
-              <button
+              {/* <button
                 onClick={() => setMusicProvider('youtube')}
                 className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-md transition-all duration-200 ${musicProvider === 'youtube'
                     ? 'bg-red-600 text-white'
@@ -436,7 +436,7 @@ const Lobby = () => {
               >
                 <Youtube className="w-5 h-5" />
                 <span>YouTube</span>
-              </button>
+              </button> */}
               <button
                 onClick={() => setMusicProvider('spotify')}
                 className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-md transition-all duration-200 ${musicProvider === 'spotify'
@@ -460,15 +460,6 @@ const Lobby = () => {
                 placeholder={`Enter ${musicProvider === 'youtube' ? 'YouTube' : 'Spotify'} playlist URL`}
                 className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-md text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500"
               />
-            <button
-                    onClick={() => loadPlaylist("songguess")}
-                    className={`flex-1 px-4 py-2 rounded-md transition-all duration-200 ${musicProvider == "spotify" || "youtube"
-                      ? 'bg-purple-600 text-white'
-                      : 'bg-white/5 text-gray-300 hover:bg-white/10'
-                    }`}
-                  >
-                    Load Playlist
-                  </button>
               {playlistError && (
                 <p className="mt-2 text-red-400 text-sm">{playlistError}</p>
               )}
