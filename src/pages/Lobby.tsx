@@ -312,7 +312,6 @@ const Lobby = () => {
                   </button>
                 </div>
               </div>
-              {gameVariant === 'whoAdded' && (
             <div>
               <label className="block text-sm font-medium text-gray-200 mb-2">
                 Source Type
@@ -340,8 +339,6 @@ const Lobby = () => {
                 </button>
               </div>
             </div>
-          )}
-
               <div>
                 <label className="block text-sm font-medium text-gray-200 mb-2">
                   Number of Rounds
@@ -414,7 +411,7 @@ const Lobby = () => {
                 <span>Spotify</span>
               </button>
             </div>
-            {(sourceType === 'playlist' || gameVariant !== 'whoAdded') && (
+            {(sourceType === 'playlist') && (
             <div>
               <label className="block text-sm font-medium text-gray-200 mb-2">
                 {musicProvider === 'youtube' ? 'YouTube Playlist URL' : 'Spotify Playlist URL'}
