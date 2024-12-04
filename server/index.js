@@ -78,10 +78,16 @@ io.on('connection', (socket) => {
     socket.spotifyProfileUrl = spotifyProfileUrl;
     socket.lobbyId = lobbyId;
     
+    // Extract Spotify display name from URL if available
+    const spotifyDisplayName = spotifyProfileUrl 
+      ? spotifyProfileUrl.split('/').pop() 
+      : username;
+    
     lobbies.set(lobbyId, { 
       users: [{
         username,
         spotifyProfileUrl,
+        spotifyDisplayName, // Add Spotify display name
         isHost: true,
         score: 0,
         color: userColor
@@ -117,9 +123,15 @@ io.on('connection', (socket) => {
       socket.spotifyProfileUrl = spotifyProfileUrl;
       socket.lobbyId = lobbyId;
       
+      // Extract Spotify display name from URL if available
+      const spotifyDisplayName = spotifyProfileUrl 
+        ? spotifyProfileUrl.split('/').pop() 
+        : username;
+      
       lobby.users.push({
         username,
         spotifyProfileUrl,
+        spotifyDisplayName, // Add Spotify display name
         isHost: false,
         score: 0,
         color: userColor
@@ -132,7 +144,6 @@ io.on('connection', (socket) => {
       callback(false);
     }
   });
-
 
   socket.on('select_game_mode', ({ lobbyId, mode, playlist, config, musicProvider, gameVariant }) => {
     const lobby = lobbies.get(lobbyId);
@@ -214,20 +225,20 @@ io.on('connection', (socket) => {
     const lobby = lobbies.get(lobbyId);
     if (!lobby || !lobby.currentSong) return;
 
-      // Check if user has remaining guesses
-      if (!lobby.remainingGuesses) {
-        lobby.remainingGuesses = {};
-      }
-      
-      if (lobby.remainingGuesses[username] <= 0) {
-        return;
-      }
-  
-      // Decrease remaining guesses
-      lobby.remainingGuesses[username]--;
+    // Check if user has remaining guesses
+    if (!lobby.remainingGuesses) {
+      lobby.remainingGuesses = {};
+    }
+    
+    if (lobby.remainingGuesses[username] <= 0) {
+      return;
+    }
+
+    // Decrease remaining guesses
+    lobby.remainingGuesses[username]--;
 
     const { title, artist, addedBy } = lobby.currentSong;
-    const normalizedGuess = guess.toLowerCase();
+    const normalizedGuess = guess.toLowerCase().trim();
     const normalizedTitle = title.toLowerCase().replace(/\(feat\..*?\)/g, '').trim();
     const normalizedArtists = artist.toLowerCase().split(',').map(a => a.trim());
 
@@ -270,27 +281,26 @@ io.on('connection', (socket) => {
         }
       }
     } else if (lobby.gameVariant === 'whoAdded') {
-      if (!lobby.guesses[username].addedBy) {
-        const adder = lobby.users.find(u => 
-          u.spotifyDisplayName.toLowerCase() === addedBy?.displayName?.toLowerCase()
-        );
-        
-        const isCorrectGuess = 
-          // Match against user's username
-          normalizedGuess === adder?.username.toLowerCase() ||
-          // Match against user's Spotify display name
-          normalizedGuess === adder?.spotifyDisplayName.toLowerCase() ||
-          // Direct match against addedBy displayName
-          normalizedGuess === addedBy?.displayName?.toLowerCase();
-  
-        if (isCorrectGuess) {
+      if (!lobby.guesses[username].addedBy && addedBy) {
+        // Find the user who added the song
+        const adder = lobby.users.find(u => {
+          // Check both username and Spotify display name
+          const usernameLower = u.username.toLowerCase();
+          const spotifyDisplayNameLower = u.spotifyDisplayName?.toLowerCase();
+          const addedByDisplayNameLower = addedBy.displayName?.toLowerCase();
+          
+          return usernameLower === normalizedGuess || 
+                 (spotifyDisplayNameLower && spotifyDisplayNameLower === normalizedGuess) ||
+                 (addedByDisplayNameLower && addedByDisplayNameLower === normalizedGuess);
+        });
+
+        if (adder) {
           isCorrect = true;
           lobby.guesses[username].addedBy = true;
 
-          // Award points based on order of correct guesses
           const addedByGuessOrder = lobby.correctGuessOrder.addedBy.length;
           if (addedByGuessOrder < Math.min(3, totalPlayers)) {
-            points = 3 - addedByGuessOrder; // First: 3 points, Second: 2 points, Third: 1 point
+            points = 3 - addedByGuessOrder;
             lobby.correctGuessOrder.addedBy.push(username);
           }
         }
@@ -313,7 +323,6 @@ io.on('connection', (socket) => {
 
     io.to(lobbyId).emit('scores_update', lobby.scores);
   });
-
   socket.on('next_song', ({ lobbyId }) => {
     const lobby = lobbies.get(lobbyId);
     lobby.currentRound++;

@@ -17,12 +17,45 @@ export const spotifyConfig: SpotifyConfig = {
 let accessToken: string | null = null;
 let tokenExpirationTime: number | null = null;
 
+// Cache for Spotify user display names
+const userDisplayNameCache = new Map<string, string>();
+
+export async function getSpotifyUserProfile(userId: string): Promise<{ id: string; displayName: string }> {
+  // Check cache first
+  if (userDisplayNameCache.has(userId)) {
+    return {
+      id: userId,
+      displayName: userDisplayNameCache.get(userId)!
+    };
+  }
+
+  try {
+    const userData = await spotifyFetch(`/users/${userId}`);
+    const displayName = userData.display_name || userId;
+    
+    // Cache the result
+    userDisplayNameCache.set(userId, displayName);
+    
+    return {
+      id: userId,
+      displayName
+    };
+  } catch (error) {
+    console.error('Error fetching user profile:', error);
+    return {
+      id: userId,
+      displayName: userId // Fallback to userId if we can't fetch the display name
+    };
+  }
+}
+
 export async function fetchUserTopTracks(userProfileUrl: string): Promise<Track[]> {
   try {
-
-    console.log("got in fetchusertop ")
     const userId = userProfileUrl.match(/user\/([a-zA-Z0-9]+)/)?.[1];
     if (!userId) throw new Error('Invalid Spotify profile URL');
+
+    // First, fetch the user's profile to get their display name
+    const userProfile = await getSpotifyUserProfile(userId);
 
     // Fetch user's top tracks
     const response = await spotifyFetch('/me/top/tracks?limit=50&time_range=long_term');
@@ -40,7 +73,7 @@ export async function fetchUserTopTracks(userProfileUrl: string): Promise<Track[
       artist: track.artists.map((artist: any) => artist.name).join(', '),
       addedBy: {
         id: userId,
-        displayName: userId // We'll match this with the username later
+        displayName: userProfile.displayName
       }
     }));
   } catch (error) {
@@ -48,7 +81,6 @@ export async function fetchUserTopTracks(userProfileUrl: string): Promise<Track[
     throw error;
   }
 }
-
 
 export function getSpotifyLoginUrl(): string {
   const scopes = [
@@ -131,7 +163,7 @@ async function spotifyFetch(endpoint: string, options: RequestInit = {}): Promis
 
 async function fetchPlaylistTracks(playlistId: string, offset: number = 0): Promise<any> {
   return spotifyFetch(
-    `/playlists/${playlistId}/tracks?fields=items(track(id,name,artists),added_by.id,added_by.display_name),total&offset=${offset}&limit=50`
+    `/playlists/${playlistId}/tracks?fields=items(track(id,name,artists),added_by.id)&offset=${offset}&limit=50`
   );
 }
 
@@ -148,50 +180,38 @@ export async function fetchSpotifyPlaylist(playlistUrl: string): Promise<Track[]
     // Calculate number of additional requests needed
     const remainingTracks = totalTracks - 50;
     if (remainingTracks > 0) {
-      const additionalRequests = Math.ceil(remainingTracks / 50);
-      const requests = Array.from({ length: additionalRequests }, (_, i) =>
+      const additionalRequests = Array.from({ length: Math.ceil(remainingTracks / 50) }, (_, i) =>
         fetchPlaylistTracks(playlistId, (i + 1) * 50)
       );
 
-      const additionalData = await Promise.all(requests);
+      const additionalData = await Promise.all(additionalRequests);
       allTracks = [
         ...allTracks,
         ...additionalData.flatMap(data => data.items)
       ];
-
-      console.log(allTracks)
     }
 
-    // Map tracks and identify users without display names
-    const tracks = allTracks.map((item: any) => ({
+    // Get unique user IDs who added tracks
+    const uniqueUserIds = [...new Set(allTracks.map((item: any) => item.added_by.id))];
+
+    // Fetch display names for all users in parallel
+    const userProfiles = await Promise.all(
+      uniqueUserIds.map(userId => getSpotifyUserProfile(userId))
+    );
+
+    // Create a map of user IDs to display names
+    const userDisplayNames = Object.fromEntries(
+      userProfiles.map(profile => [profile.id, profile.displayName])
+    );
+
+    // Map tracks with user display names
+    return allTracks.map((item: any) => ({
       id: item.track.id,
       title: item.track.name,
       artist: item.track.artists.map((artist: any) => artist.name).join(', '),
       addedBy: {
         id: item.added_by.id,
-        displayName: item.added_by.display_name || null
-      }
-    }));
-
-    // Find unique user IDs without display names
-    const missingDisplayNames = tracks
-      .filter((track: { addedBy: { displayName: any; }; }) => !track.addedBy.displayName)
-      .map((track: { addedBy: { id: any; }; }) => track.addedBy.id);
-
-    const uniqueUserIds = [...new Set(missingDisplayNames)];
-    const displayNamePromises = uniqueUserIds.map(async (userId) => {
-      const userData = await spotifyFetch(`/users/${userId}`);
-      return { id: userId, displayName: userData.display_name || userId };
-    });
-
-    const displayNames = await Promise.all(displayNamePromises);
-    const displayNameMap = Object.fromEntries(displayNames.map(user => [user.id, user.displayName]));
-    
-    return tracks.map((track: { addedBy: { id: string | number; displayName: any; }; }) => ({
-      ...track,
-      addedBy: {
-        id: track.addedBy.id,
-        displayName: track.addedBy.displayName || displayNameMap[track.addedBy.id]
+        displayName: userDisplayNames[item.added_by.id]
       }
     }));
 

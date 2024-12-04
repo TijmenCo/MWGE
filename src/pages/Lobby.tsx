@@ -165,6 +165,8 @@ const Lobby = () => {
             })
           );
 
+          console.log(allTracks);
+
           playlist = allTracks.flat();
         } else if (musicProvider === 'youtube') {
           playlist = await fetchPlaylistVideos(playlistUrl);
