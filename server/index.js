@@ -56,21 +56,43 @@ io.on('connection', (socket) => {
   socket.on('return_to_lobby', ({ lobbyId }) => {
     const lobby = lobbies.get(lobbyId);
     if (lobby) {
+      // Store final scores before resetting
+      const finalScores = { ...lobby.scores };
+  
+      // Clear any existing timers
       if (lobby.timer) {
         clearInterval(lobby.timer);
+        lobby.timer = null;
       }
-      lobby.gameState = 'waiting';
-      lobby.gameMode = null;
-      lobby.currentSong = null;
-      lobby.scores = {};
-      lobby.guesses = {};
-      lobby.playlist = [];
-      lobby.currentRound = 0;
-      lobby.currentSongIndex = 0;
-      io.to(lobbyId).emit('lobby_update', lobby);
+  
+      // First emit game over with final scores
+      io.to(lobbyId).emit('game_over', { finalScores });
+  
+      // Wait a bit before resetting the lobby state
+      setTimeout(() => {
+        // Reset all game-related state
+        lobby.gameState = 'waiting';
+        lobby.gameMode = null;
+        lobby.currentSong = null;
+        lobby.scores = {};
+        lobby.guesses = {};
+        lobby.playlist = [];
+        lobby.currentRound = 0;
+        lobby.currentSongIndex = 0;
+        lobby.remainingGuesses = {};
+        lobby.correctGuessOrder = { title: [], artist: [], addedBy: [] };
+  
+        // Reset user scores
+        lobby.users.forEach(user => {
+          user.score = 0;
+        });
+  
+        // Notify all clients about the lobby reset
+        io.to(lobbyId).emit('lobby_update', lobby);
+      }, 1000); // Wait 1 second before resetting
     }
   });
-
+  
   socket.on('create_lobby', ({ username, accessToken, spotifyProfileUrl }, callback) => {
     const lobbyId = randomUUID().slice(0, 8);
     const userColor = COLORS[0];

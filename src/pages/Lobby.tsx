@@ -65,7 +65,7 @@ const Lobby = () => {
       socket.emit('request_lobby_state', { lobbyId });
     }
 
-    socket.on('lobby_update', (state: LobbyState) => {
+    const handleLobbyUpdate = (state: LobbyState) => {
       setLobbyState(state);
       if (state.spotifyToken) {
         setSpotifyToken(state.spotifyToken);
@@ -74,7 +74,18 @@ const Lobby = () => {
       if (state.users.some(user => user.username === currentUser)) {
         setHasJoined(true);
       }
-    });
+      
+      // Reset states when returning to lobby
+      if (state.gameState === 'waiting') {
+        setPlaylistUrl('');
+        setGameOver(false);
+        setIsLoadingPlaylist(false);
+        setPlaylistError(null);
+        setCountdown(null);
+      }
+    };
+
+    socket.on('lobby_update', handleLobbyUpdate);
 
     socket.on('game_countdown', () => {
       setCountdown(3);
@@ -90,10 +101,13 @@ const Lobby = () => {
     });
 
     return () => {
-      socket.off('lobby_update');
+      socket.off('lobby_update', handleLobbyUpdate);
       socket.off('game_countdown');
     };
   }, [lobbyId, currentUser]);
+
+  
+
 
   // If the user hasn't joined and there's no current user, show the join form
   if (!hasJoined && !currentUser) {
@@ -168,10 +182,23 @@ const Lobby = () => {
     navigator.clipboard.writeText(lobbyId || '');
   };
 
-  function returnToLobby(): void {
+  const returnToLobby = () => {
     socket.emit('return_to_lobby', { lobbyId });
-    setGameOver(true);
-  }
+    // Reset local states
+    setGameOver(false);
+    setPlaylistUrl('');
+    setIsLoadingPlaylist(false);
+    setPlaylistError(null);
+    setCountdown(null);
+    // Reset game-specific states
+    setLobbyState(prev => ({
+      ...prev,
+      gameState: 'waiting',
+      gameMode: null,
+      scores: {},
+    }));
+  };
+
 
   const selectGameMode = async (mode: 'minigames' | 'songguess') => {
     if (mode === 'songguess' && playlistUrl) {

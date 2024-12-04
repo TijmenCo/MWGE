@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef, useCallback } from 'react';
 import YouTube from 'react-youtube';
 import SpotifyPlayer from 'react-spotify-web-playback';
 import { socket } from '../socket';
@@ -16,7 +16,7 @@ interface SongGameProps {
   musicProvider: 'youtube' | 'spotify';
   spotifyToken: string;
   gameVariant?: 'classic' | 'whoAdded';
-  maxGuesses?: number; 
+  maxGuesses?: number;
 }
 
 interface GuessResult {
@@ -27,10 +27,10 @@ interface GuessResult {
   hasGuessedAll: boolean;
 }
 
-const SongGame: React.FC<SongGameProps> = ({ 
-  lobbyId, 
-  currentUser, 
-  scores, 
+const SongGame: React.FC<SongGameProps> = ({
+  lobbyId,
+  currentUser,
+  scores,
   isHost,
   currentRound = 1,
   totalRounds = 5,
@@ -38,7 +38,7 @@ const SongGame: React.FC<SongGameProps> = ({
   musicProvider,
   spotifyToken,
   gameVariant = 'classic',
-  maxGuesses = 3 // Default value
+  maxGuesses = 3
 }) => {
   const [remainingGuesses, setRemainingGuesses] = useState(maxGuesses);
   const [currentSong, setCurrentSong] = useState<Track | null>(null);
@@ -55,90 +55,90 @@ const SongGame: React.FC<SongGameProps> = ({
   const playerRef = useRef<any>(null);
   const songStartTimeRef = useRef<number>(Date.now());
 
-  useEffect(() => {
-    socket.connect();
-    return () => {
-      socket.disconnect();
-    };
-  }, []);
+  const handleGuessResult = useCallback((result: GuessResult) => {
+    setGuesses(prev => [...prev, {
+      ...result,
+      guess: result.correct && result.username !== currentUser
+        ? '✓ [Correct Answer]'
+        : result.guess
+    }]);
+    if (result.username === currentUser) {
+      setHasGuessedAll(result.hasGuessedAll);
+    }
+  }, [currentUser]);
+
+  const handleSongStart = useCallback((data: { videoId: string; spotifyId: string; songInfo: any }) => {
+    const { videoId, spotifyId, songInfo } = data;
+    if (songInfo) {
+      const newSong: Track = {
+        id: spotifyId || videoId,
+        videoId,
+        title: songInfo.title,
+        artist: songInfo.artist,
+        addedBy: songInfo.addedBy
+      };
+      setRemainingGuesses(maxGuesses);
+      setCurrentSong(newSong);
+      setTimeLeft(roundTime);
+      setShowVideo(false);
+      setHasGuessedAll(false);
+      setGuesses([]);
+      setIsPlaying(true);
+      setGameOver(false);
+      setPlayerKey(prev => prev + 1);
+      songStartTimeRef.current = Date.now();
+    }
+  }, [maxGuesses, roundTime]);
+
+  const handleLobbyUpdate = useCallback((state: any) => {
+    if (state.currentRound) {
+      setCurrentRoundDisplay(state.currentRound);
+    }
+    if (state.gameState === 'waiting' && !gameOver) {
+      // Only update these states if we're not already in game over
+      setIsPlaying(false);
+      setShowVideo(false);
+      setCurrentSong(null);
+      setGuesses([]);
+      setRemainingGuesses(maxGuesses);
+      setHasGuessedAll(false);
+    }
+    if (state.currentSong && !currentSong) {
+      setCurrentSong(state.currentSong);
+    }
+  }, [currentSong, maxGuesses, gameOver]);
+
 
   useEffect(() => {
-    const handleSongStart = (data: any) => {
-      const { videoId, spotifyId, songInfo } = data;
-      if (songInfo) {
-        const newSong: Track = {
-          id: spotifyId || videoId,
-          videoId,
-          title: songInfo.title,
-          artist: songInfo.artist,
-          addedBy: songInfo.addedBy
-        };
-        setRemainingGuesses(maxGuesses); // Reset guesses for new song
-        setCurrentSong(newSong);
-        setTimeLeft(roundTime);
-        setShowVideo(false);
-        setHasGuessedAll(false);
-        setGuesses([]);
-        setIsPlaying(true);
-        setGameOver(false);
-        setPlayerKey(prev => prev + 1);
-        songStartTimeRef.current = Date.now();
-      }
-    };
-
-    socket.on('song_start', handleSongStart);
-    socket.on('time_update', ({ timeLeft }) => setTimeLeft(timeLeft));
-    socket.on('show_answer', () => {
-      setShowVideo(true);
-    });
-
-    socket.on('lobby_update', (state) => {
-      if (state.currentRound) {
-        setCurrentRoundDisplay(state.currentRound);
-      }
-      if (state.gameState === 'waiting') {
-        setGameOver(true);
-      }
-      if (state.currentSong && !currentSong) {
-        setCurrentSong(state.currentSong);
-      }
-    });
-
-    socket.on('game_over', ({ finalScores }) => {
+    const handleGameOver = ({ finalScores }: { finalScores: Record<string, number> }) => {
       setGameScores(finalScores);
       setGameOver(true);
       setShowVideo(false);
       setIsPlaying(false);
-    });
+    };
 
-    socket.on('guess_result', (result: GuessResult) => {
-      setGuesses(prev => [...prev, {
-        ...result,
-        guess: result.correct && result.username !== currentUser 
-          ? '✓ [Correct Answer]' 
-          : result.guess
-      }]);
-      if (result.username === currentUser) {
-        setHasGuessedAll(result.hasGuessedAll);
-      }
-    });
-
+    socket.on('song_start', handleSongStart);
+    socket.on('time_update', ({ timeLeft }) => setTimeLeft(timeLeft));
+    socket.on('show_answer', () => setShowVideo(true));
+    socket.on('lobby_update', handleLobbyUpdate);
+    socket.on('game_over', handleGameOver);
+    socket.on('guess_result', handleGuessResult);
     socket.on('scores_update', setGameScores);
 
     return () => {
       socket.off('song_start', handleSongStart);
       socket.off('time_update');
       socket.off('show_answer');
-      socket.off('lobby_update');
-      socket.off('game_over');
-      socket.off('guess_result');
+      socket.off('lobby_update', handleLobbyUpdate);
+      socket.off('game_over', handleGameOver);
+      socket.off('guess_result', handleGuessResult);
       socket.off('scores_update');
     };
-  }, [currentUser, roundTime, currentSong]);
+  }, [handleSongStart, handleLobbyUpdate, handleGuessResult]);
 
   const handleGuess = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!guess.trim() || hasGuessedAll || showVideo) return;
+    if (!guess.trim() || hasGuessedAll || showVideo || remainingGuesses <= 0) return;
 
     socket.emit('make_guess', {
       lobbyId,
@@ -151,6 +151,10 @@ const SongGame: React.FC<SongGameProps> = ({
 
   const nextSong = () => {
     socket.emit('next_song', { lobbyId });
+  };
+
+  const returnToLobby = () => {
+    socket.emit('return_to_lobby', { lobbyId });
   };
 
   const sortedScores = Object.entries(gameScores)
@@ -179,52 +183,19 @@ const SongGame: React.FC<SongGameProps> = ({
                 <span className="font-mono text-lg">{score}</span>
               </div>
             ))}
-             {isHost && (
-            <button
-              onClick={returnToLobby}
-              className="mt-6 w-full flex items-center justify-center space-x-2 px-4 py-2 bg-gradient-to-r from-purple-500 to-indigo-600 text-white rounded-md hover:from-purple-600 hover:to-indigo-700 transition-colors"
-            >
-              <RotateCcw className="w-5 h-5" />
-              <span>Return to Lobby</span>
-            </button>
-          )}
+            {isHost && (
+              <button
+                onClick={returnToLobby}
+                className="mt-6 w-full flex items-center justify-center space-x-2 px-4 py-2 bg-gradient-to-r from-purple-500 to-indigo-600 text-white rounded-md hover:from-purple-600 hover:to-indigo-700 transition-colors"
+              >
+                <RotateCcw className="w-5 h-5" />
+                <span>Return to Lobby</span>
+              </button>
+            )}
           </div>
         </div>
       </div>
     );
-  }
-
-  const renderSongDetails = () => {
-    if (!currentSong || !showVideo) return null;
-
-    return (
-      <div className="bg-black/40 p-4 rounded-lg space-y-3">
-        <div className="flex items-center gap-2">
-          <Disc className="w-5 h-5 text-purple-400" />
-          <span className="text-lg font-semibold text-white">{currentSong.title}</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <User className="w-5 h-5 text-blue-400" />
-          <span className="text-gray-300">{currentSong.artist}</span>
-        </div>
-        {currentSong.addedBy && (
-          <div className="flex items-center gap-2 text-sm text-gray-400">
-            <User className="w-4 h-4 text-green-400" />
-            <span>Added by: {currentSong.addedBy.displayName}</span>
-          </div>
-        )}
-      </div>
-    );
-  };
-
-  const handlePlayerCallback = (state: any) => {
-    if (playerRef.current !== state) {
-      playerRef.current = state;
-    }
-  };
-
-  function returnToLobby(): void {
-    socket.emit('return_to_lobby', { lobbyId });
   }
 
   return (
@@ -246,7 +217,11 @@ const SongGame: React.FC<SongGameProps> = ({
                       uris={[`spotify:track:${currentSong.id}`]}
                       play={isPlaying}
                       magnifySliderOnHover={true}
-                      callback={handlePlayerCallback}
+                      callback={state => {
+                        if (playerRef.current !== state) {
+                          playerRef.current = state;
+                        }
+                      }}
                       styles={{
                         bgColor: 'transparent',
                         color: '#fff',
@@ -256,15 +231,18 @@ const SongGame: React.FC<SongGameProps> = ({
                         height: '300px'
                       }}
                     />
-                    {currentSong.addedBy && (
-          <div className="flex items-center gap-2 text-sm text-gray-400">
-            <User className="w-4 h-4 text-green-400" />
-            <span>Added by: {currentSong.addedBy.displayName}</span>
-          </div>
-        )}
                   </div>
                 ) : (
-                  renderSongDetails()
+                  <div className="bg-black/40 p-4 rounded-lg space-y-3">
+                    <div className="flex items-center gap-2">
+                      <Disc className="w-5 h-5 text-purple-400" />
+                      <span className="text-lg font-semibold text-white">{currentSong.title}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <User className="w-5 h-5 text-blue-400" />
+                      <span className="text-gray-300">{currentSong.artist}</span>
+                    </div>
+                  </div>
                 )
               ) : (
                 <YouTube
@@ -295,28 +273,28 @@ const SongGame: React.FC<SongGameProps> = ({
         </div>
 
         <form onSubmit={handleGuess} className="flex gap-2">
-    <input
-      type="text"
-      value={guess}
-      onChange={(e) => setGuess(e.target.value)}
-      disabled={hasGuessedAll || showVideo || remainingGuesses <= 0}
-      placeholder={
-        remainingGuesses <= 0 
-          ? "No more guesses remaining" 
-          : gameVariant === 'classic'
-            ? `What is this song called and their artist? (${remainingGuesses} left)`
-            : `Who added this song? (${remainingGuesses} guesses left)`
-      }
-      className="flex-1 px-4 py-2 bg-white/5 border border-white/10 rounded-md text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 disabled:opacity-50"
-    />
-    <button
-      type="submit"
-      disabled={hasGuessedAll || showVideo || remainingGuesses <= 0}
-      className="px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed"
-    >
-      Guess ({remainingGuesses})
-    </button>
-  </form>
+          <input
+            type="text"
+            value={guess}
+            onChange={(e) => setGuess(e.target.value)}
+            disabled={hasGuessedAll || showVideo || remainingGuesses <= 0}
+            placeholder={
+              remainingGuesses <= 0 
+                ? "No more guesses remaining" 
+                : gameVariant === 'classic'
+                  ? `What is this song called and their artist? (${remainingGuesses} left)`
+                  : `Who added this song? (${remainingGuesses} guesses left)`
+            }
+            className="flex-1 px-4 py-2 bg-white/5 border border-white/10 rounded-md text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 disabled:opacity-50"
+          />
+          <button
+            type="submit"
+            disabled={hasGuessedAll || showVideo || remainingGuesses <= 0}
+            className="px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            Guess ({remainingGuesses})
+          </button>
+        </form>
 
         <div className="space-y-2">
           {guesses.map((guess, index) => (
@@ -364,7 +342,6 @@ const SongGame: React.FC<SongGameProps> = ({
               <span className="font-mono">{score}</span>
             </div>
           ))}
-
         </div>
       </div>
     </div>
