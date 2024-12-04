@@ -165,8 +165,33 @@ const Lobby = () => {
 
 
   const copyLobbyId = () => {
-    navigator.clipboard.writeText(lobbyId || '');
+    const fullLobbyUrl = `${window.location.origin}/lobby/${lobbyId || ''}`;
+    navigator.clipboard.writeText(fullLobbyUrl)
+      .then(() => {
+        // Notify the user that the URL was copied
+        const notification = document.createElement('div');
+        notification.textContent = 'Lobby URL copied to clipboard!';
+        notification.style.position = 'fixed';
+        notification.style.top = '20px';
+        notification.style.right = '20px';
+        notification.style.padding = '10px';
+        notification.style.backgroundColor = '#4CAF50';
+        notification.style.color = 'white';
+        notification.style.borderRadius = '5px';
+        notification.style.zIndex = '1000';
+        document.body.appendChild(notification);
+  
+        // Automatically remove the notification after 2 seconds
+        setTimeout(() => {
+          document.body.removeChild(notification);
+        }, 2000);
+      })
+      .catch(() => {
+        // Handle any potential errors in writing to the clipboard
+        alert('Failed to copy lobby URL.');
+      });
   };
+  
 
   function returnToLobby(): void {
     socket.emit('return_to_lobby', { lobbyId });

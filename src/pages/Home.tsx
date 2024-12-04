@@ -174,7 +174,7 @@ const Home = () => {
 
         <div>
           <label className="block text-sm font-medium text-gray-200 mb-2">
-            Spotify Profile URL
+            Spotify Profile URL - Optional but Recommended
           </label>
           <input
             type="text"
@@ -184,7 +184,7 @@ const Home = () => {
             placeholder="https://open.spotify.com/user/your-profile-id"
           />
           <p className="mt-1 text-sm text-gray-400">
-            Enter your Spotify profile URL to enable the "Who Added" game mode
+            If you want to easily/automatically play songs, enter your Spotify profile URL.
           </p>
         </div>
 
@@ -228,7 +228,7 @@ const Home = () => {
               onClick={fetchPlaylist}
               className="w-full flex items-center justify-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-all duration-200"
             >
-              <span>Fetch Playlist</span>
+              <span>Debug</span>
             </button>
           )}
            <span className="text-red-300 text-sm">NOTE: you NEED a Premium account and NEED to be whitelisted by the owner</span>
