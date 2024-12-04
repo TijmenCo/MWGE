@@ -19,7 +19,7 @@ interface SpotifyConfig {
 export const spotifyConfig: SpotifyConfig = {
   clientId: import.meta.env.VITE_SPOTIFY_CLIENT_ID,
   clientSecret: import.meta.env.VITE_SPOTIFY_CLIENT_SECRET,
-  redirectUri: `http://localhost:3000/`
+  redirectUri: `${window.location.origin}/`
 };
 
 let accessToken: string | null = null;
@@ -57,11 +57,21 @@ export async function getSpotifyUserProfile(userId: string): Promise<{ id: strin
 async function fetchUserPlaylists(userId: string): Promise<SpotifyPlaylist[]> {
   try {
     const response = await spotifyFetch<SpotifyPlaylistResponse>(`/users/${userId}/playlists?limit=50`);
-    return (response.items || []).filter((playlist): playlist is SpotifyPlaylist => 
+    console.log("PLAYLISTS FETCHED");
+    console.log(response);
+
+    const playlists = (response.items || []).filter((playlist): playlist is SpotifyPlaylist => 
       playlist !== null &&
       typeof playlist.id === 'string' &&
-      playlist.tracks?.total > 0
+      playlist.tracks?.total > 0 &&
+      typeof playlist.snapshot_id === 'string' &&
+      playlist.owner?.id === userId // Filter playlists owned by the target user
     );
+
+    // Sort playlists by snapshot_id (string comparison approximates recent updates)
+    playlists.sort((a, b) => b.snapshot_id.localeCompare(a.snapshot_id));
+
+    return playlists;
   } catch (error) {
     console.error(`Error fetching playlists for user ${userId}:`, error);
     return [];
@@ -70,13 +80,37 @@ async function fetchUserPlaylists(userId: string): Promise<SpotifyPlaylist[]> {
 
 async function fetchPlaylistTracks(playlistId: string): Promise<SpotifyPlaylistTrack[]> {
   try {
-    const response = await spotifyFetch<SpotifyTracksResponse>(`/playlists/${playlistId}/tracks?limit=50`);
-    return (response.items || []).filter((item): item is SpotifyPlaylistTrack => 
-      item !== null &&
-      item.track?.id !== undefined &&
-      item.track?.name !== undefined &&
-      Array.isArray(item.track?.artists)
+    // Fetch the first batch of playlist data
+    const initialData = await spotifyFetch<SpotifyTracksResponse>(
+      `/playlists/${playlistId}/tracks?fields=total,items(track(id,name,artists),added_by.id)&limit=50`
     );
+
+    const totalTracks = initialData.total;
+    let allTracks = [...initialData.items];
+
+    // Fetch the remaining tracks in chunks of 50
+    const remainingTracks = totalTracks - 50;
+    if (remainingTracks > 0) {
+      const additionalRequests = Array.from(
+        { length: Math.ceil(remainingTracks / 50) },
+        (_, i) => spotifyFetch<SpotifyTracksResponse>(
+          `/playlists/${playlistId}/tracks?fields=items(track(id,name,artists),added_by.id)&offset=${(i + 1) * 50}&limit=50`
+        )
+      );
+
+      const additionalData = await Promise.all(additionalRequests);
+      allTracks = allTracks.concat(...additionalData.flatMap(data => data.items));
+    }
+
+    // Filter valid tracks
+    const validTracks = allTracks.filter((item): item is SpotifyPlaylistTrack => 
+      item?.track?.id !== undefined &&
+      item?.track?.name !== undefined &&
+      Array.isArray(item?.track?.artists) &&
+      item.track.artists.length > 0
+    );
+
+    return validTracks;
   } catch (error) {
     console.error(`Error fetching tracks for playlist ${playlistId}:`, error);
     return [];
@@ -93,26 +127,24 @@ export async function fetchUserTopTracks(userProfileUrl: string): Promise<Track[
 
     const userProfile = await getSpotifyUserProfile(userId);
     const playlists = await fetchUserPlaylists(userId);
-    
+
+    console.log(playlists);
+
     if (playlists.length === 0) {
       console.log(`No valid playlists found for user ${userId}`);
       return [];
     }
 
-    const playlistTracksPromises = playlists
-      .slice(0, 3)
-      .map(playlist => fetchPlaylistTracks(playlist.id));
+    // Take the top 3 most recently updated playlists owned by the user
+    const topPlaylists = playlists.slice(0, 3);
 
+    const playlistTracksPromises = topPlaylists.map(playlist => fetchPlaylistTracks(playlist.id));
     const playlistTracks = await Promise.all(playlistTracksPromises);
+
+    console.log(playlistTracks);
 
     const allTracks = playlistTracks
       .flat()
-      .filter((item): item is SpotifyPlaylistTrack => 
-        item?.track?.id !== undefined &&
-        item?.track?.name !== undefined &&
-        Array.isArray(item?.track?.artists) &&
-        item.track.artists.length > 0
-      )
       .map(item => ({
         id: item.track.id,
         title: item.track.name,
@@ -133,10 +165,10 @@ export async function fetchUserTopTracks(userProfileUrl: string): Promise<Track[
       return [];
     }
 
-    return allTracks
-      .sort(() => Math.random() - 0.5)
-      .slice(0, Math.min(10, allTracks.length));
+    // Shuffle all tracks
+    const shuffledTracks = allTracks.sort(() => Math.random() - 0.5);
 
+    return shuffledTracks.slice(0, Math.min(35, shuffledTracks.length));
   } catch (error) {
     console.error('Error fetching user tracks:', error);
     return [];
@@ -194,31 +226,28 @@ export async function handleSpotifyCallback(code: string): Promise<string> {
 }
 
 async function spotifyFetch<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
-  if (!accessToken) {
-    throw new Error('No access token available');
-  }
-
   const response = await fetch(`${SPOTIFY_API_BASE}${endpoint}`, {
     ...options,
     headers: {
       ...options.headers,
-      'Authorization': `Bearer ${accessToken}`,
+      Authorization: `Bearer ${accessToken}`,
     },
   });
 
+  if (response.status === 429) { // Rate limit exceeded
+    const retryAfter = parseInt(response.headers.get('Retry-After') || '1', 10) * 1000;
+    console.warn(`Rate limit exceeded. Retrying after ${retryAfter}ms`);
+    await new Promise(resolve => setTimeout(resolve, retryAfter));
+    return spotifyFetch(endpoint, options);
+  }
+
   if (!response.ok) {
-    if (response.status === 401) {
-      accessToken = null;
-      tokenExpirationTime = null;
-      window.location.href = getSpotifyLoginUrl();
-      throw new Error('Authentication required');
-    }
-    const errorData = await response.json();
-    throw new Error(`Spotify API request failed: ${errorData.error?.message || 'Unknown error'}`);
+    throw new Error(`Spotify API request failed: ${response.statusText}`);
   }
 
   return response.json();
 }
+
 
 export async function fetchSpotifyPlaylist(playlistUrl: string): Promise<Track[]> {
   try {
