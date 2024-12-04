@@ -51,6 +51,7 @@ const SongGame: React.FC<SongGameProps> = ({
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentRoundDisplay, setCurrentRoundDisplay] = useState(currentRound);
   const [gameOver, setGameOver] = useState(false);
+  const [showResults, setShowResults] = useState(false);
   const [playerKey, setPlayerKey] = useState(0);
   const playerRef = useRef<any>(null);
   const songStartTimeRef = useRef<number>(Date.now());
@@ -112,7 +113,7 @@ const SongGame: React.FC<SongGameProps> = ({
   useEffect(() => {
     const handleGameOver = ({ finalScores }: { finalScores: Record<string, number> }) => {
       setGameScores(finalScores);
-      setGameOver(true);
+      setShowResults(true);
       setShowVideo(false);
       setIsPlaying(false);
     };
@@ -154,13 +155,14 @@ const SongGame: React.FC<SongGameProps> = ({
   };
 
   const returnToLobby = () => {
+    setGameOver(true);
     socket.emit('return_to_lobby', { lobbyId });
   };
 
   const sortedScores = Object.entries(gameScores)
     .sort(([, a], [, b]) => b - a);
 
-  if (gameOver) {
+  if (showResults) {
     return (
       <div className="bg-black/40 rounded-lg p-8 text-center">
         <h2 className="text-3xl font-bold text-white mb-6">Game Over!</h2>
@@ -231,6 +233,12 @@ const SongGame: React.FC<SongGameProps> = ({
                         height: '300px'
                       }}
                     />
+                      {currentSong.addedBy && (
+          <div className="flex items-center gap-2 text-sm text-gray-400">
+            <User className="w-4 h-4 text-green-400" />
+            <span>Added by: {currentSong.addedBy.displayName}</span>
+          </div>
+        )}
                   </div>
                 ) : (
                   <div className="bg-black/40 p-4 rounded-lg space-y-3">
@@ -242,6 +250,12 @@ const SongGame: React.FC<SongGameProps> = ({
                       <User className="w-5 h-5 text-blue-400" />
                       <span className="text-gray-300">{currentSong.artist}</span>
                     </div>
+                    {currentSong.addedBy && (
+          <div className="flex items-center gap-2 text-sm text-gray-400">
+            <User className="w-4 h-4 text-green-400" />
+            <span>Added by: {currentSong.addedBy.displayName}</span>
+          </div>
+        )}
                   </div>
                 )
               ) : (

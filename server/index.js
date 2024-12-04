@@ -351,7 +351,6 @@ io.on('connection', (socket) => {
     if (lobby) {
       if (lobby.currentRound > lobby.totalRounds) {
         io.to(lobbyId).emit('game_over', { finalScores: lobby.scores });
-        lobby.gameState = 'waiting';
         io.to(lobbyId).emit('lobby_update', lobby);
         return;
       } else {

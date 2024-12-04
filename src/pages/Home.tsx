@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import SpotifyPlayer from 'react-spotify-web-playback';
 import { Play, Users, Settings, X } from 'lucide-react';
