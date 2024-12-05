@@ -29,6 +29,7 @@ const Game: React.FC<GameProps> = ({ lobbyId, currentUser, scores, isHost }) => 
   const [timeLeft, setTimeLeft] = useState(0);
   const [gameScores, setGameScores] = useState<Record<string, number>>(scores);
   const [showShop, setShowShop] = useState(false);
+  const [gameOver, setGameOver] = useState(false);
   const [inventory, setInventory] = useState<PlayerInventory>({
     powerUps: {},
     points: scores[currentUser] || 0
@@ -39,15 +40,24 @@ const Game: React.FC<GameProps> = ({ lobbyId, currentUser, scores, isHost }) => 
       setCurrentGame(game);
       setShowSplash(true);
       setShowShop(false);
+      setGameOver(false);
     });
 
     socket.on('minigame_start', (game: MinigameConfig) => {
       setCurrentGame(game);
       setTimeLeft(game.duration);
+      setShowShop(false);
     });
 
     socket.on('minigame_end', () => {
       setShowShop(true);
+      setCurrentGame(null);
+    });
+
+    socket.on('game_over', ({ finalScores }) => {
+      setGameScores(finalScores);
+      setGameOver(true);
+      setShowShop(false);
       setCurrentGame(null);
     });
 
@@ -76,6 +86,7 @@ const Game: React.FC<GameProps> = ({ lobbyId, currentUser, scores, isHost }) => 
       socket.off('minigame_splash_start');
       socket.off('minigame_start');
       socket.off('minigame_end');
+      socket.off('game_over');
       socket.off('minigame_tick');
       socket.off('scores_update');
       socket.off('power_up_purchased');
@@ -128,6 +139,35 @@ const Game: React.FC<GameProps> = ({ lobbyId, currentUser, scores, isHost }) => 
   const sortedScores = Object.entries(gameScores)
     .sort(([, a], [, b]) => b - a);
 
+  if (gameOver) {
+    return (
+      <div className="bg-black/40 rounded-lg p-8 text-center">
+        <h2 className="text-3xl font-bold text-white mb-6">Game Over!</h2>
+        <div className="max-w-md mx-auto bg-black/20 rounded-lg p-4 border border-white/10">
+          <h3 className="text-white font-semibold mb-4 flex items-center justify-center gap-2">
+            <Trophy className="w-6 h-6 text-yellow-500" />
+            Final Scores
+          </h3>
+          <div className="space-y-2">
+            {sortedScores.map(([username, score], index) => (
+              <div
+                key={username}
+                className={`p-3 rounded-md ${
+                  index === 0 ? 'bg-yellow-500/20 text-yellow-300' :
+                  username === currentUser ? 'bg-purple-500/20 text-purple-300' :
+                  'bg-white/5 text-gray-300'
+                } flex justify-between items-center`}
+              >
+                <span>{username} {index === 0 && '👑'}</span>
+                <span className="font-mono text-lg">{score}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
       <div className="md:col-span-3">
@@ -139,7 +179,7 @@ const Game: React.FC<GameProps> = ({ lobbyId, currentUser, scores, isHost }) => 
             />
           )}
           {!showSplash && renderGame()}
-          {!currentGame && !showShop && (
+          {!currentGame && !showShop && !gameOver && (
             <div className="absolute inset-0 flex items-center justify-center">
               <p className="text-white text-xl">
                 {isHost ? "Start the next minigame when ready!" : "Waiting for host to start next minigame..."}
@@ -156,13 +196,15 @@ const Game: React.FC<GameProps> = ({ lobbyId, currentUser, scores, isHost }) => 
               <Trophy className="w-5 h-5 text-yellow-500" />
               Scoreboard
             </h3>
-            <button
-              onClick={() => setShowShop(true)}
-              className="flex items-center gap-2 px-3 py-1 bg-purple-600 rounded-md hover:bg-purple-700 transition-colors"
-            >
-              <ShoppingBag className="w-4 h-4" />
-              <span className="text-sm">Shop</span>
-            </button>
+            {!gameOver && (
+              <button
+                onClick={() => setShowShop(true)}
+                className="flex items-center gap-2 px-3 py-1 bg-purple-600 rounded-md hover:bg-purple-700 transition-colors"
+              >
+                <ShoppingBag className="w-4 h-4" />
+                <span className="text-sm">Shop</span>
+              </button>
+            )}
           </div>
           <div className="space-y-2">
             {sortedScores.map(([username, score]) => (
@@ -189,7 +231,7 @@ const Game: React.FC<GameProps> = ({ lobbyId, currentUser, scores, isHost }) => 
         />
       </div>
 
-      {showShop && (
+      {showShop && !gameOver && (
         <ShopModal
           isOpen={true}
           onClose={() => setShowShop(false)}

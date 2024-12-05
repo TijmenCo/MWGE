@@ -3,25 +3,9 @@ export const MINIGAMES = [
       type: 'buttonmash',
       name: 'Button Masher',
       description: 'Mash the button as fast as you can!',
-      duration: 10,
+      duration: 5,
       maxScore: 100,
       instruction: 'Click the button as many times as possible!'
-    },
-    {
-      type: 'whackamole',
-      name: 'Whack-a-Mole',
-      description: 'Whack the moles as they appear!',
-      duration: 20,
-      maxScore: 30,
-      instruction: 'Click the moles when they pop up!'
-    },
-    {
-      type: 'colorclick',
-      name: 'Color Match',
-      description: 'Click the correct color as fast as you can!',
-      duration: 15,
-      maxScore: 20,
-      instruction: 'Click the color that matches the text!'
     },
     {
       type: 'quickmath',
@@ -30,6 +14,14 @@ export const MINIGAMES = [
       duration: 20,
       maxScore: 15,
       instruction: 'Solve the math problems as fast as you can!'
+    },
+    {
+      type: 'colorclick',
+      name: 'Color Match',
+      description: 'Click the correct color as fast as you can!',
+      duration: 15,
+      maxScore: 20,
+      instruction: 'Click the color that matches the text!'
     },
     {
       type: 'typespeed',
@@ -43,7 +35,7 @@ export const MINIGAMES = [
       type: 'memorymatch',
       name: 'Memory Match',
       description: 'Match the pairs of cards!',
-      duration: 30,
+      duration: 15,
       maxScore: 6,
       instruction: 'Find all matching pairs before time runs out!'
     },

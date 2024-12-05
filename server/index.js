@@ -62,16 +62,9 @@ io.on('connection', (socket) => {
     if (lobby) {
       const user = lobby.users.find(u => u.username === socket.username);
       if (user?.isHost) {
-        startNextMinigame(io, lobby, lobbyId);
-      }
-    }
-  });
-
-  socket.on('start_next_minigame', ({ lobbyId }) => {
-    const lobby = lobbies.get(lobbyId);
-    if (lobby) {
-      const user = lobby.users.find(u => u.username === socket.username);
-      if (user?.isHost) {
+        if (lobby.minigameState) {
+          lobby.minigameState.inShop = false;
+        }
         startNextMinigame(io, lobby, lobbyId);
       }
     }
@@ -81,10 +74,11 @@ io.on('connection', (socket) => {
 
   socket.on('minigame_action', ({ lobbyId, username, action, data }) => {
     const lobby = lobbies.get(lobbyId);
-    if (!lobby) return;
+    if (!lobby || (lobby.minigameState && lobby.minigameState.inShop)) return;
 
     updateMinigameScore(io, lobby, lobbyId, username, data.score, action);
   });
+
 
   socket.on('return_to_lobby', ({ lobbyId }) => {
     const lobby = lobbies.get(lobbyId);

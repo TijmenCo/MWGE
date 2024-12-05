@@ -6,24 +6,30 @@ export function startMinigameSequence(io, lobby, lobbyId) {
       currentGameIndex: 0,
       scores: {},
       isActive: false,
-      showingSplash: false
+      showingSplash: false,
+      completedGames: 0,
+      inShop: false
     };
   }
 
   lobby.minigameState.currentGameIndex = 0;
   lobby.minigameState.isActive = true;
+  lobby.minigameState.completedGames = 0;
+  lobby.minigameState.inShop = false;
 
   startNextMinigame(io, lobby, lobbyId);
 }
 
 export function startNextMinigame(io, lobby, lobbyId) {
-  if (!lobby.minigameState.isActive) return;
+  if (!lobby.minigameState || !lobby.minigameState.isActive) return;
 
   const game = MINIGAMES[lobby.minigameState.currentGameIndex];
   
   if (lobby.timer) {
     clearInterval(lobby.timer);
   }
+
+  lobby.minigameState.inShop = false;
 
   // Set splash screen state
   lobby.minigameState.showingSplash = true;
@@ -35,6 +41,8 @@ export function startNextMinigame(io, lobby, lobbyId) {
 
   // Wait for splash screen duration
   setTimeout(() => {
+    if (!lobby.minigameState?.isActive) return; // Check if game is still active
+
     lobby.minigameState.showingSplash = false;
     io.to(lobbyId).emit('minigame_splash_end');
 
@@ -48,15 +56,33 @@ export function startNextMinigame(io, lobby, lobbyId) {
     let timeLeft = game.duration;
     
     lobby.timer = setInterval(() => {
+      if (!lobby.minigameState?.isActive || lobby.minigameState.inShop) {
+        return;
+      }
+
       if (timeLeft <= 0) {
         clearInterval(lobby.timer);
         
-        lobby.minigameState.currentGameIndex = (lobby.minigameState.currentGameIndex + 1) % MINIGAMES.length;
-        
-        io.to(lobbyId).emit('minigame_end', {
-          nextGameIndex: lobby.minigameState.currentGameIndex,
-          scores: lobby.scores
-        });
+        // Only increment completed games if not in shop
+        if (!lobby.minigameState.inShop) {
+          lobby.minigameState.completedGames++;
+          
+          // Check if we've completed all games
+          if (lobby.minigameState.completedGames >= MINIGAMES.length) {
+            lobby.minigameState.isActive = false;
+            io.to(lobbyId).emit('game_over', { finalScores: lobby.scores });
+            return;
+          }
+
+          lobby.minigameState.currentGameIndex = 
+            (lobby.minigameState.currentGameIndex + 1) % MINIGAMES.length;
+          
+          lobby.minigameState.inShop = true;
+          io.to(lobbyId).emit('minigame_end', {
+            nextGameIndex: lobby.minigameState.currentGameIndex,
+            scores: lobby.scores
+          });
+        }
       } else {
         io.to(lobbyId).emit('minigame_tick', { 
           timeLeft,
@@ -76,6 +102,8 @@ export function stopMinigameSequence(lobby) {
   if (lobby.minigameState) {
     lobby.minigameState.isActive = false;
     lobby.minigameState.showingSplash = false;
+    lobby.minigameState.completedGames = 0;
+    lobby.minigameState.inShop = false;
   }
 }
 
