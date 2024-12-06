@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { PowerUp, PlayerInventory } from '../types/shop';
 import { getPowerUpById } from '../utils/PowerUps';
 import { socket } from '../socket';
+import DrinkCommandModal from './DrinkCommandModal';
 
 interface PowerUpInventoryProps {
   inventory: PlayerInventory;
@@ -63,6 +64,8 @@ const PowerUpInventory: React.FC<PowerUpInventoryProps> = ({
 }) => {
   const [showDrinkModal, setShowDrinkModal] = useState(false);
   const [selectedPowerUp, setSelectedPowerUp] = useState<PowerUp | null>(null);
+  const [showDrinkCommandModal, setShowDrinkCommandModal] = useState(false);
+  const [drinkCommandMessage, setDrinkCommandMessage] = useState('');
 
   const handleUsePowerUp = (powerUpId: string) => {   
     const powerUp = getPowerUpById(powerUpId);
@@ -100,14 +103,20 @@ const PowerUpInventory: React.FC<PowerUpInventoryProps> = ({
       fromUser: string;
       toUser?: string;
     }) => {
+      let message = '';
       if (data.type === 'sip' || data.type === 'shot') {
         if (data.toUser === currentUser) {
-          alert(`${data.fromUser} says you need to take a ${data.type}! 🍻`);
+          message = `${data.fromUser} says you need to take a ${data.type}! 🍻`;
         }
       } else if (data.type === 'all') {
-        alert(`${data.fromUser} says everyone needs to drink! 🍻`);
+        message = `${data.fromUser} says everyone needs to drink! 🍻`;
       } else if (data.type === 'waterfall') {
-        alert(`${data.fromUser} started a waterfall! Keep drinking until the person before you stops! 🌊`);
+        message = `${data.fromUser} started a waterfall! Keep drinking until the person before you stops! 🌊`;
+      }
+
+      if (message) {
+        setDrinkCommandMessage(message);
+        setShowDrinkCommandModal(true);
       }
     };
 
@@ -119,48 +128,56 @@ const PowerUpInventory: React.FC<PowerUpInventoryProps> = ({
   }, [currentUser]);
 
   return (
-    <div className="bg-black/20 rounded-lg p-4 border border-white/10">
-      <h3 className="text-white font-semibold mb-4">Your Power-Ups</h3>
-      <div className="grid grid-cols-2 gap-2">
-        {Object.entries(inventory.powerUps).map(([powerUpId, quantity]) => {
-          if (quantity === 0) return null;
-          const powerUp = getPowerUpById(powerUpId);
-          if (!powerUp) return null;
+    <>
+      <div className="bg-black/20 rounded-lg p-4 border border-white/10">
+        <h3 className="text-white font-semibold mb-4">Your Power-Ups</h3>
+        <div className="grid grid-cols-2 gap-2">
+          {Object.entries(inventory.powerUps).map(([powerUpId, quantity]) => {
+            if (quantity === 0) return null;
+            const powerUp = getPowerUpById(powerUpId);
+            if (!powerUp) return null;
 
-          return (
-            <button
-              key={powerUpId}
-              onClick={() => handleUsePowerUp(powerUpId)}
-              className={`p-2 rounded-md border border-white/10 transition-colors'`}
-            >
-              <div className="flex items-center space-x-2">
-                <span className="text-xl">{powerUp.icon}</span>
-                <div className="text-left">
-                  <div className="text-white text-sm font-medium">
-                    {powerUp.name}
-                  </div>
-                  <div className="text-gray-400 text-xs">
-                    Quantity: {quantity}
+            return (
+              <button
+                key={powerUpId}
+                onClick={() => handleUsePowerUp(powerUpId)}
+                className={`p-2 rounded-md border border-white/10 transition-colors`}
+              >
+                <div className="flex items-center space-x-2">
+                  <span className="text-xl">{powerUp.icon}</span>
+                  <div className="text-left">
+                    <div className="text-white text-sm font-medium">
+                      {powerUp.name}
+                    </div>
+                    <div className="text-gray-400 text-xs">
+                      Quantity: {quantity}
+                    </div>
                   </div>
                 </div>
-              </div>
-            </button>
-          );
-        })}
-      </div>
+              </button>
+            );
+          })}
+        </div>
 
-      <DrinkModal
-        isOpen={showDrinkModal}
-        onClose={() => {
-          setShowDrinkModal(false);
-          setSelectedPowerUp(null);
-        }}
-        users={users.filter(u => u.username !== currentUser)}
-        onSelectUser={handleSelectUser}
-        powerUp={selectedPowerUp!}
+        <DrinkModal
+          isOpen={showDrinkModal}
+          onClose={() => {
+            setShowDrinkModal(false);
+            setSelectedPowerUp(null);
+          }}
+          users={users.filter(u => u.username !== currentUser)}
+          onSelectUser={handleSelectUser}
+          powerUp={selectedPowerUp!}
+        />
+      </div>
+      <DrinkCommandModal
+        isOpen={showDrinkCommandModal}
+        onClose={() => setShowDrinkCommandModal(false)}
+        message={drinkCommandMessage}
       />
-    </div>
+    </>
   );
 };
 
 export default PowerUpInventory;
+
