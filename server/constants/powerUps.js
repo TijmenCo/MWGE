@@ -1,54 +1,46 @@
 export const POWER_UPS = [
-    {
-      id: 'double-points',
-      name: 'Double Points',
-      description: 'Double your points for the next minigame',
-      cost: 100,
-      type: 'buff',
-      effect: 'multiply_score',
-      icon: '✨',
-      duration: 1,
-      uses: 1
-    },
-    {
-      id: 'time-freeze',
-      name: 'Time Freeze',
-      description: 'Add 5 seconds to the current game timer',
-      cost: 150,
-      type: 'utility',
-      effect: 'add_time',
-      icon: '⏰',
-      uses: 1
-    },
-    {
-      id: 'confusion',
-      name: 'Confusion',
-      description: 'Reverse controls for all other players',
-      cost: 200,
-      type: 'debuff',
-      effect: 'reverse_controls',
-      icon: '🌀',
-      duration: 1,
-      uses: 1
-    },
-    {
-      id: 'shield',
-      name: 'Shield',
-      description: 'Block the next debuff used against you',
-      cost: 125,
-      type: 'utility',
-      effect: 'block_debuff',
-      icon: '🛡️',
-      uses: 1
-    },
-    {
-      id: 'point-steal',
-      name: 'Point Steal',
-      description: 'Steal 50 points from a random player',
-      cost: 300,
-      type: 'debuff',
-      effect: 'steal_points',
-      icon: '💰',
-      uses: 1
-    }
-  ];
+  {
+    id: 'take-sip',
+    name: 'Take a Sip',
+    description: 'Make someone take a sip of their drink',
+    cost: 100,
+    type: 'drink',
+    effect: 'make_drink',
+    icon: '🍺',
+    target: 'single',
+    uses: 1
+  },
+  {
+    id: 'take-shot',
+    name: 'Take a Shot',
+    description: 'Make someone take a shot',
+    cost: 250,
+    type: 'drink',
+    effect: 'make_shot',
+    icon: '🥃',
+    target: 'single',
+    uses: 1
+  },
+  {
+    id: 'everyone-drinks',
+    name: 'Everyone Drinks',
+    description: 'Everyone takes a sip!',
+    cost: 300,
+    type: 'drink',
+    effect: 'all_drink',
+    icon: '🍻',
+    target: 'all',
+    uses: 1
+  },
+  {
+    id: 'waterfall',
+    name: 'Waterfall',
+    description: 'Start a waterfall! Everyone drinks until the person before them stops',
+    cost: 500,
+    type: 'drink',
+    effect: 'waterfall',
+    icon: '🌊',
+    target: 'all',
+    uses: 1
+  }
+];

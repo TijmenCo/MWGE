@@ -23,17 +23,26 @@ interface GameProps {
   isHost: boolean;
 }
 
+interface User {
+  username: string;
+  isHost: boolean;
+  color: string;
+}
+
 const Game: React.FC<GameProps> = ({ lobbyId, currentUser, scores, isHost }) => {
   const [currentGame, setCurrentGame] = useState<MinigameConfig | null>(null);
   const [showSplash, setShowSplash] = useState(false);
   const [timeLeft, setTimeLeft] = useState(0);
   const [gameScores, setGameScores] = useState<Record<string, number>>(scores);
+  const [guesses, setGuesses] = useState<any[]>([]);
+  const [guess, setGuess] = useState('');
   const [showShop, setShowShop] = useState(false);
   const [gameOver, setGameOver] = useState(false);
   const [inventory, setInventory] = useState<PlayerInventory>({
     powerUps: {},
     points: scores[currentUser] || 0
   });
+  const [users, setUsers] = useState<User[]>([]);
 
   useEffect(() => {
     socket.on('minigame_splash_start', (game: MinigameConfig) => {
@@ -82,6 +91,15 @@ const Game: React.FC<GameProps> = ({ lobbyId, currentUser, scores, isHost }) => 
       }
     });
 
+    socket.on('lobby_update', (state) => {
+      if (state.users) {
+        setUsers(state.users);
+      }
+    });
+
+    // Request initial lobby state
+    socket.emit('request_lobby_state', { lobbyId });
+
     return () => {
       socket.off('minigame_splash_start');
       socket.off('minigame_start');
@@ -90,8 +108,9 @@ const Game: React.FC<GameProps> = ({ lobbyId, currentUser, scores, isHost }) => 
       socket.off('minigame_tick');
       socket.off('scores_update');
       socket.off('power_up_purchased');
+      socket.off('lobby_update');
     };
-  }, [currentUser]);
+  }, [currentUser, lobbyId]);
 
   const handleScore = (score: number) => {
     socket.emit('minigame_action', {
@@ -227,7 +246,7 @@ const Game: React.FC<GameProps> = ({ lobbyId, currentUser, scores, isHost }) => 
           inventory={inventory}
           lobbyId={lobbyId}
           currentUser={currentUser}
-          isGameActive={!!currentGame && !showSplash}
+          users={users}
         />
       </div>
 
