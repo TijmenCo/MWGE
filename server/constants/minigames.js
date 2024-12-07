@@ -62,5 +62,13 @@ export const MINIGAMES = [
       duration: 20,
       maxScore: 15,
       instruction: 'Rearrange the letters to form the correct word!'
-    }
+    },
+    {
+      type: 'votingquestion',
+      name: 'Group Vote',
+      description: 'Vote on fun questions about the group!',
+      duration: 15,
+      maxScore: 10,
+      instruction: 'Choose someone from the group!'
+    },
   ];

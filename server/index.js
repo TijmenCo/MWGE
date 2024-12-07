@@ -5,7 +5,7 @@ import { randomUUID } from 'crypto';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 import fetch from 'node-fetch';
-import { startMinigameSequence, stopMinigameSequence, updateMinigameScore, startNextMinigame } from './games.js';
+import { startMinigameSequence, stopMinigameSequence, updateMinigameScore, startNextMinigame, handleVote } from './games.js';
 import { handlePowerUpPurchase } from './powerUps.js';
 import { MINIGAMES } from './constants/minigames.js';
 
@@ -79,6 +79,12 @@ io.on('connection', (socket) => {
     updateMinigameScore(io, lobby, lobbyId, username, data.score, action);
   });
 
+  socket.on('cast_vote', ({ lobbyId, votedFor }) => {
+    const lobby = lobbies.get(lobbyId);
+    if (lobby && socket.username) {
+      handleVote(io, lobby, lobbyId, socket.username, votedFor);
+    }
+  });
 
   socket.on('return_to_lobby', ({ lobbyId }) => {
     const lobby = lobbies.get(lobbyId);

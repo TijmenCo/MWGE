@@ -1,4 +1,5 @@
 import { MINIGAMES } from './constants/minigames.js';
+import { VOTING_QUESTIONS } from './constants/votingQuestions.js';
 
 export function startMinigameSequence(io, lobby, lobbyId) {
   if (!lobby.minigameState) {
@@ -8,7 +9,12 @@ export function startMinigameSequence(io, lobby, lobbyId) {
       isActive: false,
       showingSplash: false,
       completedGames: 0,
-      inShop: false
+      inShop: false,
+      votingState: {
+        currentQuestion: null,
+        votes: {},
+        results: null
+      }
     };
   }
 
@@ -31,17 +37,28 @@ export function startNextMinigame(io, lobby, lobbyId) {
 
   lobby.minigameState.inShop = false;
 
+  // Reset voting state for new game
+  if (game.type === 'votingquestion') {
+    const randomQuestion = VOTING_QUESTIONS[Math.floor(Math.random() * VOTING_QUESTIONS.length)];
+    lobby.minigameState.votingState = {
+      currentQuestion: randomQuestion,
+      votes: {},
+      results: null
+    };
+  }
+
   // Set splash screen state
   lobby.minigameState.showingSplash = true;
   io.to(lobbyId).emit('minigame_splash_start', {
     ...game,
     currentGameIndex: lobby.minigameState.currentGameIndex,
-    totalGames: MINIGAMES.length
+    totalGames: MINIGAMES.length,
+    votingQuestion: game.type === 'votingquestion' ? lobby.minigameState.votingState.currentQuestion : null
   });
 
   // Wait for splash screen duration
   setTimeout(() => {
-    if (!lobby.minigameState?.isActive) return; // Check if game is still active
+    if (!lobby.minigameState?.isActive) return;
 
     lobby.minigameState.showingSplash = false;
     io.to(lobbyId).emit('minigame_splash_end');
@@ -50,7 +67,8 @@ export function startNextMinigame(io, lobby, lobbyId) {
     io.to(lobbyId).emit('minigame_start', {
       ...game,
       currentGameIndex: lobby.minigameState.currentGameIndex,
-      totalGames: MINIGAMES.length
+      totalGames: MINIGAMES.length,
+      votingQuestion: game.type === 'votingquestion' ? lobby.minigameState.votingState.currentQuestion : null
     });
 
     let timeLeft = game.duration;
@@ -62,6 +80,35 @@ export function startNextMinigame(io, lobby, lobbyId) {
 
       if (timeLeft <= 0) {
         clearInterval(lobby.timer);
+        
+        if (game.type === 'votingquestion') {
+          // Calculate voting results
+          const voteCount = {};
+          Object.values(lobby.minigameState.votingState.votes).forEach(vote => {
+            voteCount[vote] = (voteCount[vote] || 0) + 1;
+          });
+          
+          const results = Object.entries(voteCount).map(([username, count]) => ({
+            username,
+            votes: count
+          })).sort((a, b) => b.votes - a.votes);
+
+          lobby.minigameState.votingState.results = results;
+          
+          // Award points to the most voted player
+          if (results.length > 0) {
+            const winner = results[0].username;
+            if (!lobby.scores[winner]) {
+              lobby.scores[winner] = 0;
+            }
+            lobby.scores[winner] += 10;
+          }
+
+          io.to(lobbyId).emit('voting_results', {
+            results: lobby.minigameState.votingState.results,
+            question: lobby.minigameState.votingState.currentQuestion
+          });
+        }
         
         // Only increment completed games if not in shop
         if (!lobby.minigameState.inShop) {
@@ -87,12 +134,15 @@ export function startNextMinigame(io, lobby, lobbyId) {
         io.to(lobbyId).emit('minigame_tick', { 
           timeLeft,
           currentGame: game.type,
-          scores: lobby.scores
+          scores: lobby.scores,
+          votingState: game.type === 'votingquestion' ? {
+            votes: Object.keys(lobby.minigameState.votingState.votes)
+          } : null
         });
         timeLeft--;
       }
     }, 1000);
-  }, 3000); // Splash screen duration
+  }, 3000);
 }
 
 export function stopMinigameSequence(lobby) {
@@ -115,11 +165,18 @@ export function updateMinigameScore(io, lobby, lobbyId, username, score, gameTyp
   if (!lobby.scores[username]) {
     lobby.scores[username] = 0;
   }
-
-  console.log("current score")
-  console.log(lobby.scores[username])
-  console.log(score);
   
-    lobby.scores[username] += score;
-    io.to(lobbyId).emit('scores_update', lobby.scores);
+  lobby.scores[username] += score;
+  io.to(lobbyId).emit('scores_update', lobby.scores);
+}
+
+export function handleVote(io, lobby, lobbyId, username, votedFor) {
+  if (!lobby.minigameState?.votingState) return;
+  
+  lobby.minigameState.votingState.votes[username] = votedFor;
+  
+  // Emit updated voting state
+  io.to(lobbyId).emit('vote_update', {
+    votedUsers: Object.keys(lobby.minigameState.votingState.votes)
+  });
 }

@@ -15,6 +15,7 @@ import PowerUpInventory from './PowerUpInventory';
 import ReactionTime from './minigames/ReactionTime';
 import PatternMemory from './minigames/PaternMemory';
 import WordScramble from './minigames/WordScramble';
+import VotingQuestion from './minigames/VotingQuestion';
 
 interface GameProps {
   lobbyId: string;
@@ -38,20 +39,27 @@ const Game: React.FC<GameProps> = ({ lobbyId, currentUser, scores, isHost }) => 
   const [gameOver, setGameOver] = useState(false);
   const [inventory, setInventory] = useState<PlayerInventory>({
     powerUps: {},
-    points: scores[currentUser] || 0
+    points: scores[currentUser] || 0,
   });
   const [users, setUsers] = useState<User[]>([]);
+  const [votingQuestion, setVotingQuestion] = useState<{ id: string; text: string } | null>(null);
 
   useEffect(() => {
-    socket.on('minigame_splash_start', (game: MinigameConfig) => {
+    socket.on('minigame_splash_start', (game: MinigameConfig & { votingQuestion?: { id: string; text: string } }) => {
       setCurrentGame(game);
+      if (game.votingQuestion) {
+        setVotingQuestion(game.votingQuestion);
+      }
       setShowSplash(true);
       setShowShop(false);
       setGameOver(false);
     });
 
-    socket.on('minigame_start', (game: MinigameConfig) => {
+    socket.on('minigame_start', (game: MinigameConfig & { votingQuestion?: { id: string; text: string } }) => {
       setCurrentGame(game);
+      if (game.votingQuestion) {
+        setVotingQuestion(game.votingQuestion);
+      }
       setTimeLeft(game.duration);
       setShowShop(false);
     });
@@ -59,6 +67,7 @@ const Game: React.FC<GameProps> = ({ lobbyId, currentUser, scores, isHost }) => 
     socket.on('minigame_end', () => {
       setShowShop(true);
       setCurrentGame(null);
+      setVotingQuestion(null);
     });
 
     socket.on('game_over', ({ finalScores }) => {
@@ -66,6 +75,7 @@ const Game: React.FC<GameProps> = ({ lobbyId, currentUser, scores, isHost }) => 
       setGameOver(true);
       setShowShop(false);
       setCurrentGame(null);
+      setVotingQuestion(null);
     });
 
     socket.on('minigame_tick', ({ timeLeft }) => {
@@ -74,17 +84,17 @@ const Game: React.FC<GameProps> = ({ lobbyId, currentUser, scores, isHost }) => 
 
     socket.on('scores_update', (newScores) => {
       setGameScores(newScores);
-      setInventory(prev => ({
+      setInventory((prev) => ({
         ...prev,
-        points: newScores[currentUser] || 0
+        points: newScores[currentUser] || 0,
       }));
     });
 
     socket.on('power_up_purchased', ({ username, inventory: newInventory }) => {
       if (username === currentUser) {
-        setInventory(prev => ({
+        setInventory((prev) => ({
           ...prev,
-          powerUps: newInventory
+          powerUps: newInventory,
         }));
       }
     });
@@ -95,7 +105,6 @@ const Game: React.FC<GameProps> = ({ lobbyId, currentUser, scores, isHost }) => 
       }
     });
 
-    // Request initial lobby state
     socket.emit('request_lobby_state', { lobbyId });
 
     return () => {
@@ -115,7 +124,7 @@ const Game: React.FC<GameProps> = ({ lobbyId, currentUser, scores, isHost }) => 
       lobbyId,
       username: currentUser,
       action: currentGame?.type,
-      data: { score }
+      data: { score },
     });
   };
 
@@ -126,7 +135,8 @@ const Game: React.FC<GameProps> = ({ lobbyId, currentUser, scores, isHost }) => 
       lobbyId,
       currentUser,
       onScore: handleScore,
-      timeLeft
+      timeLeft,
+      users,
     };
 
     switch (currentGame.type) {
@@ -148,13 +158,14 @@ const Game: React.FC<GameProps> = ({ lobbyId, currentUser, scores, isHost }) => 
         return <PatternMemory {...props} />;
       case 'wordscramble':
         return <WordScramble {...props} />;
+      case 'votingquestion':
+        return votingQuestion ? <VotingQuestion {...props} question={votingQuestion} /> : null;
       default:
         return null;
     }
   };
 
-  const sortedScores = Object.entries(gameScores)
-    .sort(([, a], [, b]) => b - a);
+  const sortedScores = Object.entries(gameScores).sort(([, a], [, b]) => b - a);
 
   if (gameOver) {
     return (
@@ -170,9 +181,11 @@ const Game: React.FC<GameProps> = ({ lobbyId, currentUser, scores, isHost }) => 
               <div
                 key={username}
                 className={`p-3 rounded-md ${
-                  index === 0 ? 'bg-yellow-500/20 text-yellow-300' :
-                  username === currentUser ? 'bg-purple-500/20 text-purple-300' :
-                  'bg-white/5 text-gray-300'
+                  index === 0
+                    ? 'bg-yellow-500/20 text-yellow-300'
+                    : username === currentUser
+                    ? 'bg-purple-500/20 text-purple-300'
+                    : 'bg-white/5 text-gray-300'
                 } flex justify-between items-center`}
               >
                 <span>{username} {index === 0 && '👑'}</span>
@@ -199,7 +212,7 @@ const Game: React.FC<GameProps> = ({ lobbyId, currentUser, scores, isHost }) => 
           {!currentGame && !showShop && !gameOver && (
             <div className="absolute inset-0 flex items-center justify-center">
               <p className="text-white text-xl">
-                {isHost ? "Start the next minigame when ready!" : "Waiting for host to start next minigame..."}
+                {isHost ? 'Start the next minigame when ready!' : 'Waiting for host to start next minigame...'}
               </p>
             </div>
           )}
