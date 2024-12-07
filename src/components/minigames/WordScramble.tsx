@@ -41,15 +41,9 @@ const WordScramble: React.FC<WordScrambleProps> = ({ lobbyId, currentUser, onSco
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (userInput.toUpperCase() === currentWord) {
-      const newScore = score + 1;
-      setScore(newScore);
+      const newScore = 1;
+      setScore(score + newScore);
       onScore(newScore);
-      socket.emit('minigame_action', {
-        lobbyId,
-        username: currentUser,
-        action: 'wordscramble',
-        data: { score: newScore }
-      });
       generateNewWord();
     }
     setUserInput('');

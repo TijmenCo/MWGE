@@ -111,9 +111,15 @@ export function updateMinigameScore(io, lobby, lobbyId, username, score, gameTyp
   if (!lobby.scores) {
     lobby.scores = {};
   }
-  
-  if (!lobby.scores[username] || score > lobby.scores[username]) {
-    lobby.scores[username] = score;
-    io.to(lobbyId).emit('scores_update', lobby.scores);
+
+  if (!lobby.scores[username]) {
+    lobby.scores[username] = 0;
   }
+
+  console.log("current score")
+  console.log(lobby.scores[username])
+  console.log(score);
+  
+    lobby.scores[username] += score;
+    io.to(lobbyId).emit('scores_update', lobby.scores);
 }

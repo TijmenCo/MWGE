@@ -29,18 +29,13 @@ const ReactionTime: React.FC<ReactionTimeProps> = ({ lobbyId, currentUser, onSco
     if (state === 'ready' && startTime) {
       const reactionTime = Date.now() - startTime;
       const points = Math.max(0, Math.floor(1000 - reactionTime));
-      const newScore = score + points;
-      setScore(newScore);
+      const newScore = points;
+      setScore(score + points);
       onScore(newScore);
-      socket.emit('minigame_action', {
-        lobbyId,
-        username: currentUser,
-        action: 'reactiontime',
-        data: { score: newScore }
-      });
     } else if (state === 'waiting') {
       // Clicked too early
       setScore(Math.max(0, score - 100));
+      onScore(score)
     }
 
     setAttempts(attempts + 1);

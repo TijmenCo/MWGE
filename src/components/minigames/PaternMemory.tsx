@@ -54,13 +54,12 @@ const PatternMemory: React.FC<PatternMemoryProps> = ({ lobbyId, currentUser, onS
 
     if (newPlayerPattern.length === pattern.length) {
       // Completed pattern correctly
-      const newScore = score + currentLength;
-      setScore(newScore);
-      onScore(newScore);
+      const newScore = currentLength;
+      setScore(score + currentLength);
       socket.emit('minigame_action', {
         lobbyId,
         username: currentUser,
-        action: 'patternmemory',
+        action: 'buttonmash',
         data: { score: newScore }
       });
       setCurrentLength(currentLength + 1);

@@ -34,15 +34,9 @@ const TypeSpeed: React.FC<TypeSpeedProps> = ({ lobbyId, currentUser, onScore, ti
     setUserInput(input);
 
     if (input === currentWord) {
-      const newScore = score + 1;
-      setScore(newScore);
+      const newScore = 1;
+      setScore(score +  newScore);
       onScore(newScore);
-      socket.emit('minigame_action', {
-        lobbyId,
-        username: currentUser,
-        action: 'typespeed',
-        data: { score: newScore }
-      });
       generateNewWord();
     }
   };

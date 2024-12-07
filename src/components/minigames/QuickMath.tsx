@@ -45,15 +45,9 @@ const QuickMath: React.FC<QuickMathProps> = ({ lobbyId, currentUser, onScore, ti
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (parseInt(userAnswer) === problem.answer) {
-      const newScore = score + 1;
-      setScore(newScore);
+      const newScore = 1;
+      setScore(newScore + 1);
       onScore(newScore);
-      socket.emit('minigame_action', {
-        lobbyId,
-        username: currentUser,
-        action: 'quickmath',
-        data: { score: newScore }
-      });
       generateProblem();
     }
     setUserAnswer('');

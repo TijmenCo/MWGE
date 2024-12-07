@@ -46,15 +46,9 @@ const MemoryMatch: React.FC<MemoryMatchProps> = ({ lobbyId, currentUser, onScore
           matchedCards[secondIndex].matched = true;
           setCards(matchedCards);
           setFlippedIndexes([]);
-          const newScore = score + 1;
-          setScore(newScore);
+          const newScore = 1;
+          setScore(score + newScore);
           onScore(newScore);
-          socket.emit('minigame_action', {
-            lobbyId,
-            username: currentUser,
-            action: 'memorymatch',
-            data: { score: newScore }
-          });
         }, 500);
       } else {
         setTimeout(() => {

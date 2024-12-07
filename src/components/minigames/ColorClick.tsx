@@ -28,15 +28,9 @@ const ColorClick: React.FC<ColorClickProps> = ({ lobbyId, currentUser, onScore, 
 
   const handleColorClick = (color: string) => {
     if (color === targetColor) {
-      const newScore = score + 1;
-      setScore(newScore);
+      const newScore = 1;
+      setScore(score + newScore);
       onScore(newScore);
-      socket.emit('minigame_action', {
-        lobbyId,
-        username: currentUser,
-        action: 'colorclick',
-        data: { score: newScore }
-      });
       generateNewRound();
     }
   };
