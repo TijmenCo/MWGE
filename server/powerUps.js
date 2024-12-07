@@ -80,6 +80,7 @@ export function handlePowerUpPurchase(socket, io, lobbies) {
         break;
     }
 
+    // Emit the updated inventory after using the power-up
     io.to(lobbyId).emit('power_up_used', {
       username,
       powerUpId,

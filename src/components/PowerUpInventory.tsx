@@ -66,6 +66,56 @@ const PowerUpInventory: React.FC<PowerUpInventoryProps> = ({
   const [selectedPowerUp, setSelectedPowerUp] = useState<PowerUp | null>(null);
   const [showDrinkCommandModal, setShowDrinkCommandModal] = useState(false);
   const [drinkCommandMessage, setDrinkCommandMessage] = useState('');
+  const [localInventory, setLocalInventory] = useState<PlayerInventory>(inventory);
+
+  React.useEffect(() => {
+    setLocalInventory(inventory);
+  }, [inventory]);
+
+  React.useEffect(() => {
+    const handlePowerUpUsed = ({ username, powerUpId, inventory: newInventory }: { 
+      username: string; 
+      powerUpId: string; 
+      inventory: Record<string, number>;
+    }) => {
+      if (username === currentUser) {
+        setLocalInventory(prev => ({
+          ...prev,
+          powerUps: newInventory
+        }));
+      }
+    };
+
+    const handleDrinkCommand = (data: {
+      type: 'sip' | 'shot' | 'all' | 'waterfall';
+      fromUser: string;
+      toUser?: string;
+    }) => {
+      let message = '';
+      if (data.type === 'sip' || data.type === 'shot') {
+        if (data.toUser === currentUser) {
+          message = `${data.fromUser} says you need to take a ${data.type}! 🍻`;
+        }
+      } else if (data.type === 'all') {
+        message = `${data.fromUser} says everyone needs to drink! 🍻`;
+      } else if (data.type === 'waterfall') {
+        message = `${data.fromUser} started a waterfall! Keep drinking until the person before you stops! 🌊`;
+      }
+
+      if (message) {
+        setDrinkCommandMessage(message);
+        setShowDrinkCommandModal(true);
+      }
+    };
+
+    socket.on('power_up_used', handlePowerUpUsed);
+    socket.on('drink_command', handleDrinkCommand);
+
+    return () => {
+      socket.off('power_up_used', handlePowerUpUsed);
+      socket.off('drink_command', handleDrinkCommand);
+    };
+  }, [currentUser]);
 
   const handleUsePowerUp = (powerUpId: string) => {   
     const powerUp = getPowerUpById(powerUpId);
@@ -97,42 +147,12 @@ const PowerUpInventory: React.FC<PowerUpInventoryProps> = ({
     setSelectedPowerUp(null);
   };
 
-  React.useEffect(() => {
-    const handleDrinkCommand = (data: {
-      type: 'sip' | 'shot' | 'all' | 'waterfall';
-      fromUser: string;
-      toUser?: string;
-    }) => {
-      let message = '';
-      if (data.type === 'sip' || data.type === 'shot') {
-        if (data.toUser === currentUser) {
-          message = `${data.fromUser} says you need to take a ${data.type}! 🍻`;
-        }
-      } else if (data.type === 'all') {
-        message = `${data.fromUser} says everyone needs to drink! 🍻`;
-      } else if (data.type === 'waterfall') {
-        message = `${data.fromUser} started a waterfall! Keep drinking until the person before you stops! 🌊`;
-      }
-
-      if (message) {
-        setDrinkCommandMessage(message);
-        setShowDrinkCommandModal(true);
-      }
-    };
-
-    socket.on('drink_command', handleDrinkCommand);
-
-    return () => {
-      socket.off('drink_command', handleDrinkCommand);
-    };
-  }, [currentUser]);
-
   return (
     <>
       <div className="bg-black/20 rounded-lg p-4 border border-white/10">
         <h3 className="text-white font-semibold mb-4">Your Power-Ups</h3>
         <div className="grid grid-cols-2 gap-2">
-          {Object.entries(inventory.powerUps).map(([powerUpId, quantity]) => {
+          {Object.entries(localInventory.powerUps).map(([powerUpId, quantity]) => {
             if (quantity === 0) return null;
             const powerUp = getPowerUpById(powerUpId);
             if (!powerUp) return null;
@@ -180,4 +200,3 @@ const PowerUpInventory: React.FC<PowerUpInventoryProps> = ({
 };
 
 export default PowerUpInventory;
-

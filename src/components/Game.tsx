@@ -34,8 +34,6 @@ const Game: React.FC<GameProps> = ({ lobbyId, currentUser, scores, isHost }) => 
   const [showSplash, setShowSplash] = useState(false);
   const [timeLeft, setTimeLeft] = useState(0);
   const [gameScores, setGameScores] = useState<Record<string, number>>(scores);
-  const [guesses, setGuesses] = useState<any[]>([]);
-  const [guess, setGuess] = useState('');
   const [showShop, setShowShop] = useState(false);
   const [gameOver, setGameOver] = useState(false);
   const [inventory, setInventory] = useState<PlayerInventory>({
