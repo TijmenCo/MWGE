@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { socket } from '../../socket';
-import DrinkModal from '../DrinkCommandModal';
+import { FastForward } from 'lucide-react';
 
 interface VotingQuestionProps {
   lobbyId: string;
   currentUser: string;
   onScore: (score: number) => void;
   timeLeft: number;
-  users: { username: string }[];
+  users: { username: string; isHost?: boolean }[];
   question: { id: string; text: string };
 }
 
@@ -21,16 +21,16 @@ const VotingQuestion: React.FC<VotingQuestionProps> = ({
   const [hasVoted, setHasVoted] = useState(false);
   const [votedUsers, setVotedUsers] = useState<string[]>([]);
   const [results, setResults] = useState<{ username: string; votes: number }[] | null>(null);
-  const [showModal, setShowModal] = useState(false);
+
+  const isHost = users.find(u => u.username === currentUser)?.isHost ?? false;
 
   useEffect(() => {
     socket.on('vote_update', ({ votedUsers }) => {
       setVotedUsers(votedUsers);
     });
 
-    socket.on('voting_results', ({ results, question }) => {
+    socket.on('voting_results', ({ results }) => {
       setResults(results);
-      setShowModal(true);
     });
 
     return () => {
@@ -45,6 +45,10 @@ const VotingQuestion: React.FC<VotingQuestionProps> = ({
     setHasVoted(true);
   };
 
+  const handleProceedToShop = () => {
+    socket.emit('proceed_to_shop', { lobbyId });
+  };
+
   const getVoteStatus = () => {
     const totalUsers = users.length;
     const votedCount = votedUsers.length;
@@ -53,13 +57,33 @@ const VotingQuestion: React.FC<VotingQuestionProps> = ({
 
   if (results) {
     return (
-      <DrinkModal
-        isOpen={showModal}
-        onClose={() => setShowModal(false)}
-        message={`Results for "${question.text}":
-          ${results.map((r, i) => `
-            ${i + 1}. ${r.username}: ${r.votes} vote${r.votes !== 1 ? 's' : ''}`).join('')}`}
-      />
+      <div className="flex flex-col items-center justify-center h-full">
+        <div className="bg-black/40 p-6 rounded-lg max-w-md w-full">
+          <h2 className="text-2xl font-bold text-white mb-4">Voting Results</h2>
+          <div className="space-y-2 mb-6">
+            {results.map((result, index) => (
+              <div
+                key={result.username}
+                className={`p-3 rounded-md ${
+                  index === 0 ? 'bg-yellow-500/20 text-yellow-300' : 'bg-white/5 text-gray-300'
+                } flex justify-between items-center`}
+              >
+                <span>{result.username} {index === 0 && '👑'}</span>
+                <span>{result.votes} vote{result.votes !== 1 ? 's' : ''}</span>
+              </div>
+            ))}
+          </div>
+          {isHost && (
+            <button
+              onClick={handleProceedToShop}
+              className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-md hover:from-purple-700 hover:to-pink-700 transition-colors"
+            >
+              <FastForward className="w-5 h-5" />
+              <span>Continue to Shop</span>
+            </button>
+          )}
+        </div>
+      </div>
     );
   }
 

@@ -13,7 +13,8 @@ export function startMinigameSequence(io, lobby, lobbyId) {
       votingState: {
         currentQuestion: null,
         votes: {},
-        results: null
+        results: null,
+        showingResults: false
       }
     };
   }
@@ -43,7 +44,8 @@ export function startNextMinigame(io, lobby, lobbyId) {
     lobby.minigameState.votingState = {
       currentQuestion: randomQuestion,
       votes: {},
-      results: null
+      results: null,
+      showingResults: false
     };
   }
 
@@ -94,6 +96,7 @@ export function startNextMinigame(io, lobby, lobbyId) {
           })).sort((a, b) => b.votes - a.votes);
 
           lobby.minigameState.votingState.results = results;
+          lobby.minigameState.votingState.showingResults = true;
           
           // Award points to the most voted player
           if (results.length > 0) {
@@ -101,34 +104,34 @@ export function startNextMinigame(io, lobby, lobbyId) {
             if (!lobby.scores[winner]) {
               lobby.scores[winner] = 0;
             }
-            lobby.scores[winner] += 10;
+            lobby.scores[winner] += game.maxScore;
           }
 
           io.to(lobbyId).emit('voting_results', {
             results: lobby.minigameState.votingState.results,
             question: lobby.minigameState.votingState.currentQuestion
           });
-        }
-        
-        // Only increment completed games if not in shop
-        if (!lobby.minigameState.inShop) {
-          lobby.minigameState.completedGames++;
-          
-          // Check if we've completed all games
-          if (lobby.minigameState.completedGames >= MINIGAMES.length) {
-            lobby.minigameState.isActive = false;
-            io.to(lobbyId).emit('game_over', { finalScores: lobby.scores });
-            return;
-          }
+        } else {
+          // Only increment completed games if not in shop
+          if (!lobby.minigameState.inShop) {
+            lobby.minigameState.completedGames++;
+            
+            // Check if we've completed all games
+            if (lobby.minigameState.completedGames >= MINIGAMES.length) {
+              lobby.minigameState.isActive = false;
+              io.to(lobbyId).emit('game_over', { finalScores: lobby.scores });
+              return;
+            }
 
-          lobby.minigameState.currentGameIndex = 
-            (lobby.minigameState.currentGameIndex + 1) % MINIGAMES.length;
-          
-          lobby.minigameState.inShop = true;
-          io.to(lobbyId).emit('minigame_end', {
-            nextGameIndex: lobby.minigameState.currentGameIndex,
-            scores: lobby.scores
-          });
+            lobby.minigameState.currentGameIndex = 
+              (lobby.minigameState.currentGameIndex + 1) % MINIGAMES.length;
+            
+            lobby.minigameState.inShop = true;
+            io.to(lobbyId).emit('minigame_end', {
+              nextGameIndex: lobby.minigameState.currentGameIndex,
+              scores: lobby.scores
+            });
+          }
         }
       } else {
         io.to(lobbyId).emit('minigame_tick', { 
@@ -143,6 +146,29 @@ export function startNextMinigame(io, lobby, lobbyId) {
       }
     }, 1000);
   }, 3000);
+}
+
+export function proceedToShop(io, lobby, lobbyId) {
+  if (!lobby.minigameState?.votingState?.showingResults) return;
+
+  lobby.minigameState.completedGames++;
+  
+  if (lobby.minigameState.completedGames >= MINIGAMES.length) {
+    lobby.minigameState.isActive = false;
+    io.to(lobbyId).emit('game_over', { finalScores: lobby.scores });
+    return;
+  }
+
+  lobby.minigameState.currentGameIndex = 
+    (lobby.minigameState.currentGameIndex + 1) % MINIGAMES.length;
+  
+  lobby.minigameState.inShop = true;
+  lobby.minigameState.votingState.showingResults = false;
+  
+  io.to(lobbyId).emit('minigame_end', {
+    nextGameIndex: lobby.minigameState.currentGameIndex,
+    scores: lobby.scores
+  });
 }
 
 export function stopMinigameSequence(lobby) {

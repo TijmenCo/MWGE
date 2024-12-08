@@ -47,7 +47,6 @@ const WhackAMole: React.FC<WhackAMoleProps> = ({ lobbyId, currentUser, onScore, 
 
       const newScore = score + 1;
       setScore(newScore);
-      onScore(newScore);
       
       socket.emit('minigame_action', {
         lobbyId,
@@ -55,6 +54,8 @@ const WhackAMole: React.FC<WhackAMoleProps> = ({ lobbyId, currentUser, onScore, 
         action: 'whackamole',
         data: { score: newScore }
       });
+
+      
       
       setActiveMole(null);
     }

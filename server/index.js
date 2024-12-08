@@ -5,9 +5,8 @@ import { randomUUID } from 'crypto';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 import fetch from 'node-fetch';
-import { startMinigameSequence, stopMinigameSequence, updateMinigameScore, startNextMinigame, handleVote } from './games.js';
+import { startMinigameSequence, stopMinigameSequence, updateMinigameScore, startNextMinigame, handleVote, proceedToShop } from './games.js';
 import { handlePowerUpPurchase } from './powerUps.js';
-import { MINIGAMES } from './constants/minigames.js';
 
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -66,6 +65,16 @@ io.on('connection', (socket) => {
           lobby.minigameState.inShop = false;
         }
         startNextMinigame(io, lobby, lobbyId);
+      }
+    }
+  });
+
+  socket.on('proceed_to_shop', ({ lobbyId }) => {
+    const lobby = lobbies.get(lobbyId);
+    if (lobby) {
+      const user = lobby.users.find(u => u.username === socket.username);
+      if (user?.isHost) {
+        proceedToShop(io, lobby, lobbyId);
       }
     }
   });
