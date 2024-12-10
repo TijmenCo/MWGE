@@ -7,6 +7,7 @@ import { dirname, join } from 'path';
 import fetch from 'node-fetch';
 import { startMinigameSequence, stopMinigameSequence, updateMinigameScore, startNextMinigame, handleVote, proceedToShop } from './games.js';
 import { handlePowerUpPurchase } from './powerUps.js';
+import { handleQuizAnswer, startQuizQuestion } from './quiz.js'
 
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -55,6 +56,14 @@ io.on('connection', (socket) => {
       socket.emit('lobby_update', lobby);
     }
   });
+
+  socket.on('quiz_answer', ({ lobbyId, answer }) => {
+    const lobby = lobbies.get(lobbyId);
+    if (lobby && socket.username) {
+      handleQuizAnswer(io, lobby, lobbyId, socket.username, answer);
+    }
+  });
+  
 
   socket.on('start_next_minigame', ({ lobbyId }) => {
     const lobby = lobbies.get(lobbyId);

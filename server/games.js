@@ -1,5 +1,6 @@
 import { MINIGAMES } from './constants/minigames.js';
 import { VOTING_QUESTIONS } from './constants/votingQuestions.js';
+import { startQuizQuestion } from './quiz.js';
 
 export function startMinigameSequence(io, lobby, lobbyId) {
   if (!lobby.minigameState) {
@@ -66,6 +67,10 @@ export function startNextMinigame(io, lobby, lobbyId) {
     io.to(lobbyId).emit('minigame_splash_end');
 
     // Start the actual game
+    if (game.type === 'quiz') {
+      startQuizQuestion(io, lobby, lobbyId);
+    }
+
     io.to(lobbyId).emit('minigame_start', {
       ...game,
       currentGameIndex: lobby.minigameState.currentGameIndex,
@@ -111,27 +116,52 @@ export function startNextMinigame(io, lobby, lobbyId) {
             results: lobby.minigameState.votingState.results,
             question: lobby.minigameState.votingState.currentQuestion
           });
-        } else {
-          // Only increment completed games if not in shop
-          if (!lobby.minigameState.inShop) {
-            lobby.minigameState.completedGames++;
-            
-            // Check if we've completed all games
-            if (lobby.minigameState.completedGames >= MINIGAMES.length) {
-              lobby.minigameState.isActive = false;
-              io.to(lobbyId).emit('game_over', { finalScores: lobby.scores });
-              return;
-            }
+        } else if (game.type === 'quiz') {
+          // Force show results if time runs out
+          if (lobby.quizState && lobby.quizState.currentQuestion) {
+            const correctAnswer = lobby.quizState.currentQuestion.correctAnswer;
+            const results = [];
+            const correctUsers = [];
 
-            lobby.minigameState.currentGameIndex = 
-              (lobby.minigameState.currentGameIndex + 1) % MINIGAMES.length;
-            
-            lobby.minigameState.inShop = true;
-            io.to(lobbyId).emit('minigame_end', {
-              nextGameIndex: lobby.minigameState.currentGameIndex,
+            Object.entries(lobby.quizState.answers).forEach(([username, userAnswer]) => {
+              if (userAnswer === correctAnswer) {
+                if (!lobby.scores[username]) {
+                  lobby.scores[username] = 0;
+                }
+                lobby.scores[username] += 10;
+                correctUsers.push(username);
+              }
+              results.push({ username, answer: userAnswer });
+            });
+
+            io.to(lobbyId).emit('quiz_results', {
+              results,
+              correctAnswer,
+              correctUsers,
               scores: lobby.scores
             });
           }
+        }
+
+        // Only increment completed games if not in shop
+        if (!lobby.minigameState.inShop) {
+          lobby.minigameState.completedGames++;
+          
+          // Check if we've completed all games
+          if (lobby.minigameState.completedGames >= MINIGAMES.length) {
+            lobby.minigameState.isActive = false;
+            io.to(lobbyId).emit('game_over', { finalScores: lobby.scores });
+            return;
+          }
+
+          lobby.minigameState.currentGameIndex = 
+            (lobby.minigameState.currentGameIndex + 1) % MINIGAMES.length;
+          
+          lobby.minigameState.inShop = true;
+          io.to(lobbyId).emit('minigame_end', {
+            nextGameIndex: lobby.minigameState.currentGameIndex,
+            scores: lobby.scores
+          });
         }
       } else {
         io.to(lobbyId).emit('minigame_tick', { 

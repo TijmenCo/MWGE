@@ -16,6 +16,7 @@ import ReactionTime from './minigames/ReactionTime';
 import PatternMemory from './minigames/PaternMemory';
 import WordScramble from './minigames/WordScramble';
 import VotingQuestion from './minigames/VotingQuestion';
+import QuizGame from './minigames/QuizGame';
 
 interface GameProps {
   lobbyId: string;
@@ -142,6 +143,8 @@ const Game: React.FC<GameProps> = ({ lobbyId, currentUser, scores, isHost }) => 
     switch (currentGame.type) {
       case 'whackamole':
         return <WhackAMole {...props} />;
+      case 'quiz':
+       return <QuizGame {...props} />;
       case 'buttonmash':
         return <ButtonMash {...props} />;
       case 'colorclick':
