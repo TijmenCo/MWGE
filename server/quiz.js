@@ -76,8 +76,7 @@ export function handleQuizAnswer(io, lobby, lobbyId, username, answer) {
       results.push({ username, answer: userAnswer });
     });
 
-    // Emit score updates first
-    // io.to(lobbyId).emit('scores_update', lobby.scores);
+    io.to(lobbyId).emit('scores_update', lobby.scores);
 
     // Emit results to all players
     io.to(lobbyId).emit('quiz_results', {
