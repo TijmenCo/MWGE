@@ -24,7 +24,6 @@ interface QuizResults {
 
 const QuizGame: React.FC<QuizGameProps> = ({
   lobbyId,
-  onScore,
   currentUser,
   timeLeft,
   users
@@ -36,28 +35,35 @@ const QuizGame: React.FC<QuizGameProps> = ({
   const [results, setResults] = useState<QuizResults | null>(null);
 
   useEffect(() => {
-    socket.on('quiz_question', (newQuestion: QuizQuestion) => {
+    const handleQuizQuestion = (newQuestion: QuizQuestion) => {
       setQuestion(newQuestion);
       setSelectedAnswer(null);
       setHasAnswered(false);
       setAnsweredUsers([]);
       setResults(null);
-    });
+    };
 
-    socket.on('quiz_answer_update', ({ answeredUsers }) => {
+    const handleAnswerUpdate = ({ answeredUsers }: { answeredUsers: string[] }) => {
       setAnsweredUsers(answeredUsers);
-    });
+    };
 
-    socket.on('quiz_results', (results: QuizResults) => {
+    const handleQuizResults = (results: QuizResults) => {
       setResults(results);
-    });
+    };
+
+    socket.on('quiz_question', handleQuizQuestion);
+    socket.on('quiz_answer_update', handleAnswerUpdate);
+    socket.on('quiz_results', handleQuizResults);
+
+    // Request current question state when component mounts
+    socket.emit('request_quiz_state', { lobbyId });
 
     return () => {
-      socket.off('quiz_question');
-      socket.off('quiz_answer_update');
-      socket.off('quiz_results');
+      socket.off('quiz_question', handleQuizQuestion);
+      socket.off('quiz_answer_update', handleAnswerUpdate);
+      socket.off('quiz_results', handleQuizResults);
     };
-  }, []);
+  }, [lobbyId]);
 
   const handleAnswer = (answerIndex: number) => {
     if (hasAnswered || !question) return;
@@ -87,46 +93,55 @@ const QuizGame: React.FC<QuizGameProps> = ({
     return 'w-full p-4 rounded-lg bg-white/5 text-white';
   };
 
+  if (!question) {
+    return (
+      <div className="flex items-center justify-center h-full">
+        <p className="text-white text-xl">Waiting for question...</p>
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col items-center justify-center h-full">
       <div className="text-4xl font-bold text-white mb-8">{timeLeft}s</div>
       
-      {question && (
-        <div className="w-full max-w-2xl space-y-6">
-          <h2 className="text-2xl text-white text-center mb-8">{question.text}</h2>
-          
-          <div className="grid grid-cols-1 gap-4">
-            {question.options.map((option, index) => (
-              <button
-                key={index}
-                onClick={() => handleAnswer(index)}
-                disabled={hasAnswered}
-                className={getAnswerButtonClass(index)}
-              >
-                {option}
-                {results && results.results.some(r => r.answer === index) && (
-                  <span className="ml-2 text-sm">
-                    ({results.results.filter(r => r.answer === index).length} votes)
-                  </span>
-                )}
-              </button>
-            ))}
-          </div>
-
-          <div className="mt-8 text-center">
-            <p className="text-gray-300">
-              {answeredUsers.length} / {users.length} players have answered
-            </p>
-            {results && (
-              <div className="mt-4 text-green-400">
-                {results.correctUsers.includes(currentUser)
-                  ? 'You got it right! +10 points'
-                  : 'Better luck next time!'}
-              </div>
-            )}
-          </div>
+      <div className="w-full max-w-2xl space-y-6">
+        <h2 className="text-2xl text-white text-center mb-8">{question.text}</h2>
+        
+        <div className="grid grid-cols-1 gap-4">
+          {question.options.map((option, index) => (
+            <button
+              key={index}
+              onClick={() => handleAnswer(index)}
+              disabled={hasAnswered}
+              className={getAnswerButtonClass(index)}
+            >
+              {option}
+              {results && results.results.some(r => r.answer === index) && (
+                <span className="ml-2 text-sm">
+                  ({results.results.filter(r => r.answer === index).length} votes)
+                </span>
+              )}
+            </button>
+          ))}
         </div>
-      )}
+
+        <div className="mt-8 text-center">
+          <p className="text-gray-300">
+            {answeredUsers.length} / {users.length} players have answered
+          </p>
+          <div className="mt-2 text-sm text-gray-400">
+            Players who answered: {answeredUsers.join(', ')}
+          </div>
+          {results && (
+            <div className="mt-4 text-green-400">
+              {results.correctUsers.includes(currentUser)
+                ? 'You got it right! +10 points'
+                : 'Better luck next time!'}
+            </div>
+          )}
+        </div>
+      </div>
     </div>
   );
 };
