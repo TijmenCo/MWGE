@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { socket } from '../../socket';
 
 interface MemoryMatchProps {
   lobbyId: string;

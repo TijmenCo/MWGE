@@ -13,7 +13,6 @@ import MemoryMatch from './minigames/MemoryMatch';
 import ShopModal from './shop/ShopModal';
 import PowerUpInventory from './PowerUpInventory';
 import ReactionTime from './minigames/ReactionTime';
-import PatternMemory from './minigames/PaternMemory';
 import WordScramble from './minigames/WordScramble';
 import VotingQuestion from './minigames/VotingQuestion';
 import QuizGame from './minigames/QuizGame';
