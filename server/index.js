@@ -5,6 +5,10 @@ import { randomUUID } from 'crypto';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 import fetch from 'node-fetch';
+import { startMinigameSequence, stopMinigameSequence, updateMinigameScore, startNextMinigame, handleVote, proceedToShop } from './games.js';
+import { handlePowerUpPurchase } from './powerUps.js';
+import { handleQuizAnswer, startQuizQuestion, handleQuizStateRequest} from './quiz.js'
+
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -53,6 +57,60 @@ io.on('connection', (socket) => {
     }
   });
 
+  socket.on('request_quiz_state', ({ lobbyId }) => {
+    const lobby = lobbies.get(lobbyId);
+    if (lobby) {
+      handleQuizStateRequest(socket, lobby);
+    }
+  });
+
+  socket.on('quiz_answer', ({ lobbyId, answer }) => {
+    const lobby = lobbies.get(lobbyId);
+    if (lobby && socket.username) {
+      handleQuizAnswer(io, lobby, lobbyId, socket.username, answer);
+    }
+  });
+  
+
+  socket.on('start_next_minigame', ({ lobbyId }) => {
+    const lobby = lobbies.get(lobbyId);
+    if (lobby) {
+      const user = lobby.users.find(u => u.username === socket.username);
+      if (user?.isHost) {
+        if (lobby.minigameState) {
+          lobby.minigameState.inShop = false;
+        }
+        startNextMinigame(io, lobby, lobbyId);
+      }
+    }
+  });
+
+  socket.on('proceed_to_shop', ({ lobbyId }) => {
+    const lobby = lobbies.get(lobbyId);
+    if (lobby) {
+      const user = lobby.users.find(u => u.username === socket.username);
+      if (user?.isHost) {
+        proceedToShop(io, lobby, lobbyId);
+      }
+    }
+  });
+
+  handlePowerUpPurchase(socket, io, lobbies);
+
+  socket.on('minigame_action', ({ lobbyId, username, action, data }) => {
+    const lobby = lobbies.get(lobbyId);
+    if (!lobby || (lobby.minigameState && lobby.minigameState.inShop)) return;
+
+    updateMinigameScore(io, lobby, lobbyId, username, data.score, action);
+  });
+
+  socket.on('cast_vote', ({ lobbyId, votedFor }) => {
+    const lobby = lobbies.get(lobbyId);
+    if (lobby && socket.username) {
+      handleVote(io, lobby, lobbyId, socket.username, votedFor);
+    }
+  });
+
   socket.on('return_to_lobby', ({ lobbyId }) => {
     const lobby = lobbies.get(lobbyId);
     if (lobby) {
@@ -80,6 +138,7 @@ io.on('connection', (socket) => {
         lobby.currentRound = 0;
         lobby.currentSongIndex = 0;
         lobby.remainingGuesses = {};
+        lobby.minigameState = null;
         lobby.correctGuessOrder = { title: [], artist: [], addedBy: [] };
   
         // Reset user scores
@@ -116,7 +175,6 @@ io.on('connection', (socket) => {
       }],
       gameState: 'waiting',
       gameMode: null,
-      activeMole: null,
       scores: {},
       currentSong: null,
       currentSongIndex: 1,
@@ -128,7 +186,8 @@ io.on('connection', (socket) => {
       timer: null,
       playlist: [...DEFAULT_PLAYLIST],
       spotifyToken: accessToken,
-      musicProvider: 'youtube'
+      musicProvider: 'youtube',
+      minigameState: null
     });
     
     socket.join(lobbyId);
@@ -222,8 +281,8 @@ io.on('connection', (socket) => {
     if (lobby) {
       lobby.gameState = 'countdown';
       lobby.scores = {};
-      lobby.currentSongIndex = 1;
-      lobby.currentRound = 1;
+      
+      // Initialize scores for all users
       lobby.users.forEach(user => {
         lobby.scores[user.username] = 0;
       });
@@ -234,10 +293,10 @@ io.on('connection', (socket) => {
         lobby.gameState = 'playing';
         io.to(lobbyId).emit('lobby_update', lobby);
         
-        if (lobby.gameMode === 'songguess') {
+        if (lobby.gameMode === 'minigames') {
+          startMinigameSequence(io, lobby, lobbyId);
+        } else if (lobby.gameMode === 'songguess') {
           startNextSong(lobbyId);
-        } else {
-          startMoleSpawning(lobbyId);
         }
       }, 3000);
     }
