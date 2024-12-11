@@ -1,19 +1,19 @@
 export const MINIGAMES = [
   {
-    type: 'quiz',
-    name: 'Quick Quiz',
-    description: 'Test your knowledge with multiple choice questions!',
-    duration: 20,
-    maxScore: 10,
-    instruction: 'Choose the correct answer!'
-  },
-  {
     type: 'votingquestion',
     name: 'Group Vote',
     description: 'Vote on fun questions about the group!',
     duration: 15,
     maxScore: 10,
     instruction: 'Choose someone from the group!'
+  },
+  {
+    type: 'quiz',
+    name: 'Quick Quiz',
+    description: 'Test your knowledge with multiple choice questions!',
+    duration: 20,
+    maxScore: 10,
+    instruction: 'Choose the correct answer!'
   },
     {
       type: 'buttonmash',

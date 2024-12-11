@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { socket } from '../../socket';
+import { FastForward } from 'lucide-react';
 
 interface QuizGameProps {
   lobbyId: string;
@@ -73,6 +74,10 @@ const QuizGame: React.FC<QuizGameProps> = ({
     socket.emit('quiz_answer', { lobbyId, answer: answerIndex });
   };
 
+  const handleProceedToShop = () => {
+    socket.emit('proceed_to_shop', { lobbyId });
+  };
+
   const getAnswerButtonClass = (index: number) => {
     if (!results) {
       return `w-full p-4 rounded-lg transition-colors ${
@@ -138,6 +143,14 @@ const QuizGame: React.FC<QuizGameProps> = ({
               {results.correctUsers.includes(currentUser)
                 ? 'You got it right! +10 points'
                 : 'Better luck next time!'}
+
+              <button
+              onClick={handleProceedToShop}
+              className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-md hover:from-purple-700 hover:to-pink-700 transition-colors"
+            >
+              <FastForward className="w-5 h-5" />
+              <span>Continue to Shop</span>
+            </button>
             </div>
           )}
         </div>

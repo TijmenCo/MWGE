@@ -44,16 +44,17 @@ export function startNextMinigame(io, lobby, lobbyId) {
   }
 
   lobby.minigameState.inShop = false;
+  lobby.minigameState.votingState = {
+    currentQuestion: null,
+    votes: {},
+    results: null,
+    showingResults: false
+  };
 
   // Reset voting state for new game
   if (game.type === 'votingquestion') {
     const randomQuestion = VOTING_QUESTIONS[Math.floor(Math.random() * VOTING_QUESTIONS.length)];
-    lobby.minigameState.votingState = {
-      currentQuestion: randomQuestion,
-      votes: {},
-      results: null,
-      showingResults: false
-    };
+    lobby.minigameState.votingState.currentQuestion = randomQuestion;
   }
 
   // Set splash screen state
@@ -87,7 +88,8 @@ export function startNextMinigame(io, lobby, lobbyId) {
     let timeLeft = game.duration;
     
     lobby.timer = setInterval(() => {
-      if (!lobby.minigameState?.isActive || lobby.minigameState.inShop) {
+      if (!lobby.minigameState?.isActive) {
+        clearInterval(lobby.timer);
         return;
       }
 
@@ -98,28 +100,8 @@ export function startNextMinigame(io, lobby, lobbyId) {
           handleVotingEnd(io, lobby, lobbyId);
         } else if (game.type === 'quiz') {
           handleQuizEnd(io, lobby, lobbyId);
-        }
-
-        // Only increment completed games if not in shop
-        if (!lobby.minigameState.inShop) {
-          lobby.minigameState.completedGames++;
-          
-          // Check if we've completed all games
-          if (lobby.minigameState.completedGames >= lobby.minigameState.gameSequence.length) {
-            lobby.minigameState.isActive = false;
-            io.to(lobbyId).emit('game_over', { finalScores: lobby.scores });
-            return;
-          }
-
-          lobby.minigameState.currentGameIndex = 
-            (lobby.minigameState.currentGameIndex + 1) % lobby.minigameState.gameSequence.length;
-          
-          lobby.minigameState.inShop = true;
-          io.to(lobbyId).emit('minigame_end', {
-            nextGameIndex: lobby.minigameState.currentGameIndex,
-            scores: lobby.scores,
-            nextGameType: lobby.minigameState.gameSequence[lobby.minigameState.currentGameIndex]
-          });
+        } else {
+          handleRegularGameEnd(io, lobby, lobbyId);
         }
       } else {
         io.to(lobbyId).emit('minigame_tick', { 
@@ -134,6 +116,26 @@ export function startNextMinigame(io, lobby, lobbyId) {
       }
     }, 1000);
   }, 3000);
+}
+
+function handleRegularGameEnd(io, lobby, lobbyId) {
+  lobby.minigameState.completedGames++;
+  
+  if (lobby.minigameState.completedGames >= lobby.minigameState.gameSequence.length) {
+    lobby.minigameState.isActive = false;
+    io.to(lobbyId).emit('game_over', { finalScores: lobby.scores });
+    return;
+  }
+
+  lobby.minigameState.currentGameIndex = 
+    (lobby.minigameState.currentGameIndex + 1) % lobby.minigameState.gameSequence.length;
+  
+  lobby.minigameState.inShop = true;
+  io.to(lobbyId).emit('minigame_end', {
+    nextGameIndex: lobby.minigameState.currentGameIndex,
+    scores: lobby.scores,
+    nextGameType: lobby.minigameState.gameSequence[lobby.minigameState.currentGameIndex]
+  });
 }
 
 function handleVotingEnd(io, lobby, lobbyId) {
@@ -162,6 +164,8 @@ function handleVotingEnd(io, lobby, lobbyId) {
     results: lobby.minigameState.votingState.results,
     question: lobby.minigameState.votingState.currentQuestion
   });
+
+  io.to(lobbyId).emit('scores_update', lobby.scores);
 }
 
 function handleQuizEnd(io, lobby, lobbyId) {
@@ -226,7 +230,7 @@ export function handleVote(io, lobby, lobbyId, username, votedFor) {
 }
 
 export function proceedToShop(io, lobby, lobbyId) {
-  if (!lobby.minigameState?.votingState?.showingResults) return;
+  if (!lobby.minigameState?.isActive) return;
 
   lobby.minigameState.completedGames++;
   
