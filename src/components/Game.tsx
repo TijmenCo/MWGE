@@ -172,18 +172,18 @@ const Game: React.FC<GameProps> = ({ lobbyId, currentUser, scores, isHost }) => 
 
   if (gameOver) {
     return (
-      <div className="bg-black/40 rounded-lg p-8 text-center">
-        <h2 className="text-3xl font-bold text-white mb-6">Game Over!</h2>
+      <div className="bg-black/40 rounded-lg p-4 sm:p-8 text-center">
+        <h2 className="text-2xl sm:text-3xl font-bold text-white mb-4 sm:mb-6">Game Over!</h2>
         <div className="max-w-md mx-auto bg-black/20 rounded-lg p-4 border border-white/10">
           <h3 className="text-white font-semibold mb-4 flex items-center justify-center gap-2">
-            <Trophy className="w-6 h-6 text-yellow-500" />
+            <Trophy className="w-5 h-5 sm:w-6 sm:h-6 text-yellow-500" />
             Final Scores
           </h3>
           <div className="space-y-2">
             {sortedScores.map(([username, score], index) => (
               <div
                 key={username}
-                className={`p-3 rounded-md ${
+                className={`p-2 sm:p-3 rounded-md ${
                   index === 0
                     ? 'bg-yellow-500/20 text-yellow-300'
                     : username === currentUser
@@ -191,8 +191,8 @@ const Game: React.FC<GameProps> = ({ lobbyId, currentUser, scores, isHost }) => 
                     : 'bg-white/5 text-gray-300'
                 } flex justify-between items-center`}
               >
-                <span>{username} {index === 0 && '👑'}</span>
-                <span className="font-mono text-lg">{score}</span>
+                <span className="text-sm sm:text-base">{username} {index === 0 && '👑'}</span>
+                <span className="font-mono text-base sm:text-lg">{score}</span>
               </div>
             ))}
           </div>
@@ -202,9 +202,9 @@ const Game: React.FC<GameProps> = ({ lobbyId, currentUser, scores, isHost }) => 
   }
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-      <div className="md:col-span-3">
-        <div className="aspect-square bg-black/20 rounded-lg p-4 relative">
+    <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 sm:gap-6">
+      <div className="lg:col-span-3">
+        <div className="aspect-square bg-black/20 rounded-lg p-2 sm:p-4 relative">
           {showSplash && currentGame && (
             <MinigameSplash
               game={currentGame}
@@ -213,8 +213,8 @@ const Game: React.FC<GameProps> = ({ lobbyId, currentUser, scores, isHost }) => 
           )}
           {!showSplash && renderGame()}
           {!currentGame && !showShop && !gameOver && (
-            <div className="absolute inset-0 flex items-center justify-center">
-              <p className="text-white text-xl">
+            <div className="absolute inset-0 flex items-center justify-center p-4 text-center">
+              <p className="text-white text-base sm:text-xl">
                 {isHost ? 'Start the next minigame when ready!' : 'Waiting for host to start next minigame...'}
               </p>
             </div>
@@ -223,34 +223,34 @@ const Game: React.FC<GameProps> = ({ lobbyId, currentUser, scores, isHost }) => 
       </div>
 
       <div className="space-y-4">
-        <div className="bg-black/20 rounded-lg p-4 border border-white/10">
-          <div className="flex justify-between items-center mb-4">
-            <h3 className="text-white font-semibold flex items-center gap-2">
-              <Trophy className="w-5 h-5 text-yellow-500" />
+        <div className="bg-black/20 rounded-lg p-3 sm:p-4 border border-white/10">
+          <div className="flex justify-between items-center mb-3 sm:mb-4">
+            <h3 className="text-white font-semibold text-sm sm:text-base flex items-center gap-1 sm:gap-2">
+              <Trophy className="w-4 h-4 sm:w-5 sm:h-5 text-yellow-500" />
               Scoreboard
             </h3>
             {!gameOver && (
               <button
                 onClick={() => setShowShop(true)}
-                className="flex items-center gap-2 px-3 py-1 bg-purple-600 rounded-md hover:bg-purple-700 transition-colors"
+                className="flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-1 bg-purple-600 rounded-md hover:bg-purple-700 transition-colors text-xs sm:text-sm"
               >
-                <ShoppingBag className="w-4 h-4" />
-                <span className="text-sm">Shop</span>
+                <ShoppingBag className="w-3 h-3 sm:w-4 sm:h-4" />
+                <span>Shop</span>
               </button>
             )}
           </div>
-          <div className="space-y-2">
+          <div className="space-y-1 sm:space-y-2">
             {sortedScores.map(([username, score]) => (
               <div
                 key={username}
-                className={`p-2 rounded-md ${
+                className={`p-1 sm:p-2 rounded-md ${
                   username === currentUser
                     ? 'bg-purple-500/20 text-purple-300'
                     : 'bg-white/5 text-gray-300'
                 } flex justify-between items-center`}
               >
-                <span>{username}</span>
-                <span className="font-mono">{score}</span>
+                <span className="text-xs sm:text-sm">{username}</span>
+                <span className="font-mono text-xs sm:text-sm">{score}</span>
               </div>
             ))}
           </div>

@@ -27,7 +27,7 @@ const QuizGame: React.FC<QuizGameProps> = ({
   lobbyId,
   currentUser,
   timeLeft,
-  users
+  users,
 }) => {
   const [question, setQuestion] = useState<QuizQuestion | null>(null);
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
@@ -44,7 +44,11 @@ const QuizGame: React.FC<QuizGameProps> = ({
       setResults(null);
     };
 
-    const handleAnswerUpdate = ({ answeredUsers }: { answeredUsers: string[] }) => {
+    const handleAnswerUpdate = ({
+      answeredUsers,
+    }: {
+      answeredUsers: string[];
+    }) => {
       setAnsweredUsers(answeredUsers);
     };
 
@@ -79,7 +83,8 @@ const QuizGame: React.FC<QuizGameProps> = ({
   };
 
   const getAnswerButtonClass = (index: number) => {
-    const baseClass = 'w-full p-3 sm:p-4 rounded-lg transition-colors text-sm sm:text-base';
+    const baseClass =
+      'w-full p-3 sm:p-4 rounded-lg transition-colors text-sm sm:text-base';
     if (!results) {
       return `${baseClass} ${
         selectedAnswer === index
@@ -108,13 +113,17 @@ const QuizGame: React.FC<QuizGameProps> = ({
   }
 
   return (
-    <div className="flex flex-col items-center justify-center h-full px-4 w-full max-w-lg mx-auto">
+    <div className="flex flex-col items-center justify-center h-full px-4 w-full max-w-lg mx-auto overflow-auto">
       {!results && (
-        <div className="text-3xl sm:text-4xl font-bold text-white mb-8">{timeLeft}s</div>
+        <div className="text-2xl sm:text-4xl font-bold text-white mb-4 sm:mb-8">
+          {timeLeft}s
+        </div>
       )}
 
-      <div className="w-full space-y-6">
-        <h2 className="text-xl sm:text-2xl text-white text-center mb-8">{question.text}</h2>
+      <div className="w-full space-y-4 sm:space-y-6">
+        <h2 className="text-lg sm:text-2xl font-semibold text-white text-center">
+          {question.text}
+        </h2>
 
         <div className="grid grid-cols-1 gap-4">
           {question.options.map((option, index) => (
@@ -125,17 +134,20 @@ const QuizGame: React.FC<QuizGameProps> = ({
               className={getAnswerButtonClass(index)}
             >
               {option}
-              {results && results.results.some(r => r.answer === index) && (
-                <span className="ml-2 text-sm">
-                  ({results.results.filter(r => r.answer === index).length} votes)
-                </span>
-              )}
+              {results &&
+                results.results.some((r) => r.answer === index) && (
+                  <span className="ml-2 text-sm">
+                    (
+                    {results.results.filter((r) => r.answer === index).length}{' '}
+                    votes)
+                  </span>
+                )}
             </button>
           ))}
         </div>
 
-        <div className="mt-8 text-center">
-          <p className="text-gray-300">
+        <div className="mt-4 text-center">
+          <p className="text-gray-300 text-sm">
             {answeredUsers.length} / {users.length} players have answered
           </p>
           {results && (
