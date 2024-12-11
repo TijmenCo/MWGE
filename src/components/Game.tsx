@@ -46,6 +46,20 @@ const Game: React.FC<GameProps> = ({ lobbyId, currentUser, scores, isHost }) => 
   const [votingQuestion, setVotingQuestion] = useState<{ id: string; text: string } | null>(null);
 
   useEffect(() => {
+
+    const handlePowerUpUsed = ({ username, powerUpId, inventory: newInventory }: { 
+      username: string; 
+      powerUpId: string; 
+      inventory: Record<string, number>;
+    }) => {
+      if (username === currentUser) {
+        setInventory(prev => ({
+          ...prev,
+          powerUps: newInventory
+        }));
+      }
+    };
+
     socket.on('minigame_splash_start', (game: MinigameConfig & { votingQuestion?: { id: string; text: string } }) => {
       setCurrentGame(game);
       if (game.votingQuestion) {
@@ -84,27 +98,42 @@ const Game: React.FC<GameProps> = ({ lobbyId, currentUser, scores, isHost }) => 
     });
 
     socket.on('scores_update', (newScores) => {
+      console.log("scores_update")
+      console.log(inventory);
+      console.log(newScores)
+      console.log(newScores[currentUser])
       setGameScores(newScores);
       setInventory((prev) => ({
         ...prev,
-        points: newScores[currentUser] || 0,
+        points: newScores[currentUser],
       }));
+
+      console.log("Updated inventory in Scores_Updates:", inventory);
     });
 
-    socket.on('power_up_purchased', ({ username, inventory: newInventory }) => {
+    socket.on('power_up_purchased', ({ username, powerUpId, newPoints, inventory: newInventory }) => {
+      console.log("Power-up purchased");
+      console.log({ username, powerUpId, newPoints, inventory: newInventory }); // Log all received data
+    
       if (username === currentUser) {
         setInventory((prev) => ({
           ...prev,
-          powerUps: newInventory,
+          powerUps: newInventory, // Update powerUps
+          points: newPoints,      // Update points
         }));
       }
+    
+      console.log("Updated inventory:", inventory);
     });
+    
 
     socket.on('lobby_update', (state) => {
       if (state.users) {
         setUsers(state.users);
       }
     });
+
+    socket.on('power_up_used', handlePowerUpUsed);
 
     socket.emit('request_lobby_state', { lobbyId });
 
@@ -117,6 +146,7 @@ const Game: React.FC<GameProps> = ({ lobbyId, currentUser, scores, isHost }) => 
       socket.off('scores_update');
       socket.off('power_up_purchased');
       socket.off('lobby_update');
+      socket.off('power_up_used', handlePowerUpUsed);
     };
   }, [currentUser, lobbyId]);
 
@@ -157,8 +187,6 @@ const Game: React.FC<GameProps> = ({ lobbyId, currentUser, scores, isHost }) => 
         return <MemoryMatch {...props} />;
       case 'reactiontime':
         return <ReactionTime {...props} />;
-      case 'patternmemory':
-        return <PatternMemory {...props} />;
       case 'wordscramble':
         return <WordScramble {...props} />;
       case 'votingquestion':

@@ -1,9 +1,9 @@
 // Game types categorization
 const QUESTION_GAMES = ['quiz', 'votingquestion'];
-const ACTION_GAMES = ['buttonmash', 'colorclick', 'quickmath', 'typespeed', 'memorymatch', 'reactiontime', 'patternmemory', 'wordscramble'];
+const ACTION_GAMES = ['buttonmash', 'colorclick', 'quickmath', 'typespeed', 'memorymatch', 'reactiontime', 'wordscramble'];
 
 // Sequence template: 2 question games followed by 1 action game
-const SEQUENCE_TEMPLATE = ['question', 'question', 'action'];
+const SEQUENCE_TEMPLATE = ['question', 'action'];
 
 export function generateGameSequence(totalRounds = 9) {
   const sequence = [];

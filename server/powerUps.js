@@ -1,7 +1,7 @@
 import { POWER_UPS } from './constants/powerUps.js';
 
 export function handlePowerUpPurchase(socket, io, lobbies) {
-  socket.on('purchase_power_up', ({ lobbyId, username, powerUpId }) => {
+  socket.on('purchase_power_up', ({ lobbyId, username, powerUpId, currentPoints }) => {
     const lobby = lobbies.get(lobbyId);
     if (!lobby) return;
 
@@ -16,6 +16,10 @@ export function handlePowerUpPurchase(socket, io, lobbies) {
       };
     }
 
+    if (lobby.playerInventories[username]) {
+      lobby.playerInventories[username].points = currentPoints;
+      }
+
     const inventory = lobby.playerInventories[username];
     const powerUp = POWER_UPS.find(p => p.id === powerUpId);
 
@@ -23,6 +27,8 @@ export function handlePowerUpPurchase(socket, io, lobbies) {
       console.error(`Power-up ${powerUpId} not found`);
       return;
     }
+
+    console.log(inventory.points)
 
     if (inventory.points >= powerUp.cost) {
       inventory.points -= powerUp.cost;

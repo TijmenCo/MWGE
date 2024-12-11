@@ -6,7 +6,6 @@ export type MinigameType =
   | 'typespeed'
   | 'memorymatch'
   | 'reactiontime'
-  | 'patternmemory'
   | 'wordscramble'
   | 'votingquestion'
   | 'quiz';

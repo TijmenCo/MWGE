@@ -27,6 +27,7 @@ const QuizGame: React.FC<QuizGameProps> = ({
   lobbyId,
   currentUser,
   timeLeft,
+  onScore,
   users,
 }) => {
   const [question, setQuestion] = useState<QuizQuestion | null>(null);
@@ -54,8 +55,13 @@ const QuizGame: React.FC<QuizGameProps> = ({
     };
 
     const handleQuizResults = (results: QuizResults) => {
+      if (results.correctUsers.find(user => user === currentUser.toString())) {
+      const newScore = 10;
+      onScore(newScore);
+      }
       setResults(results);
     };
+    
 
     socket.on('quiz_question', handleQuizQuestion);
     socket.on('quiz_answer_update', handleAnswerUpdate);

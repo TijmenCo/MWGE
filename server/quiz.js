@@ -78,16 +78,10 @@ function sendQuizResults(io, lobby, lobbyId) {
 
   Object.entries(lobby.quizState.answers).forEach(([username, userAnswer]) => {
     if (userAnswer === correctAnswer) {
-      if (!lobby.scores[username]) {
-        lobby.scores[username] = 0;
-      }
-      lobby.scores[username] += 10;
       correctUsers.push(username);
     }
     results.push({ username, answer: userAnswer });
   });
-
-  io.to(lobbyId).emit('scores_update', lobby.scores);
 
   io.to(lobbyId).emit('quiz_results', {
     results,

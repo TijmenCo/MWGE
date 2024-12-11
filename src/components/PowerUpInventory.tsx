@@ -69,23 +69,12 @@ const PowerUpInventory: React.FC<PowerUpInventoryProps> = ({
   const [localInventory, setLocalInventory] = useState<PlayerInventory>(inventory);
 
   React.useEffect(() => {
+    console.log("LOG FROM INVENTORY")
     setLocalInventory(inventory);
+    console.log(inventory)
   }, [inventory]);
 
   React.useEffect(() => {
-    const handlePowerUpUsed = ({ username, powerUpId, inventory: newInventory }: { 
-      username: string; 
-      powerUpId: string; 
-      inventory: Record<string, number>;
-    }) => {
-      if (username === currentUser) {
-        setLocalInventory(prev => ({
-          ...prev,
-          powerUps: newInventory
-        }));
-      }
-    };
-
     const handleDrinkCommand = (data: {
       type: 'sip' | 'shot' | 'all' | 'waterfall';
       fromUser: string;
@@ -107,12 +96,9 @@ const PowerUpInventory: React.FC<PowerUpInventoryProps> = ({
         setShowDrinkCommandModal(true);
       }
     };
-
-    socket.on('power_up_used', handlePowerUpUsed);
     socket.on('drink_command', handleDrinkCommand);
 
     return () => {
-      socket.off('power_up_used', handlePowerUpUsed);
       socket.off('drink_command', handleDrinkCommand);
     };
   }, [currentUser]);
@@ -152,7 +138,7 @@ const PowerUpInventory: React.FC<PowerUpInventoryProps> = ({
       <div className="bg-black/20 rounded-lg p-4 border border-white/10">
         <h3 className="text-white font-semibold mb-4">Your Power-Ups</h3>
         <div className="grid grid-cols-2 gap-2">
-          {Object.entries(localInventory.powerUps).map(([powerUpId, quantity]) => {
+          {Object.entries(inventory.powerUps).map(([powerUpId, quantity]) => {
             if (quantity === 0) return null;
             const powerUp = getPowerUpById(powerUpId);
             if (!powerUp) return null;
