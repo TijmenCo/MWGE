@@ -108,7 +108,9 @@ const QuizGame: React.FC<QuizGameProps> = ({
 
   return (
     <div className="flex flex-col items-center justify-center h-full">
+       {!results && (
       <div className="text-4xl font-bold text-white mb-8">{timeLeft}s</div>
+       )}
       
       <div className="w-full max-w-2xl space-y-6">
         <h2 className="text-2xl text-white text-center mb-8">{question.text}</h2>
@@ -135,9 +137,6 @@ const QuizGame: React.FC<QuizGameProps> = ({
           <p className="text-gray-300">
             {answeredUsers.length} / {users.length} players have answered
           </p>
-          <div className="mt-2 text-sm text-gray-400">
-            Players who answered: {answeredUsers.join(', ')}
-          </div>
           {results && (
             <div className="mt-4 text-green-400">
               {results.correctUsers.includes(currentUser)

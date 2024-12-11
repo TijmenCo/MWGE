@@ -89,7 +89,9 @@ const VotingQuestion: React.FC<VotingQuestionProps> = ({
 
   return (
     <div className="flex flex-col items-center justify-center h-full">
+      {!results && (
       <div className="text-4xl font-bold text-white mb-8">{timeLeft}s</div>
+       )}
       <div className="text-2xl text-white mb-8 text-center">{question.text}</div>
       <div className="grid grid-cols-2 gap-4 w-full max-w-2xl">
         {users.filter(u => u.username !== currentUser).map((user) => (
