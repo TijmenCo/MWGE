@@ -57,7 +57,7 @@ const VotingQuestion: React.FC<VotingQuestionProps> = ({
 
   if (results) {
     return (
-      <div className="flex flex-col items-center justify-center h-full">
+      <div className="flex flex-col items-center justify-center h-full px-4 w-full max-w-lg mx-auto">
         <div className="bg-black/40 p-6 rounded-lg max-w-md w-full">
           <h2 className="text-2xl font-bold text-white mb-4">Voting Results</h2>
           <div className="space-y-2 mb-6">
@@ -76,7 +76,7 @@ const VotingQuestion: React.FC<VotingQuestionProps> = ({
           {isHost && (
             <button
               onClick={handleProceedToShop}
-              className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-md hover:from-purple-700 hover:to-pink-700 transition-colors"
+              className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-md hover:from-purple-700 hover:to-pink-700 transition-colors text-lg"
             >
               <FastForward className="w-5 h-5" />
               <span>Continue to Shop</span>
@@ -88,12 +88,12 @@ const VotingQuestion: React.FC<VotingQuestionProps> = ({
   }
 
   return (
-    <div className="flex flex-col items-center justify-center h-full">
+    <div className="flex flex-col items-center justify-center h-full px-4 w-full max-w-lg mx-auto">
       {!results && (
-      <div className="text-4xl font-bold text-white mb-8">{timeLeft}s</div>
+      <div className="text-3xl sm:text-4xl font-bold text-white mb-8">{timeLeft}s</div>
        )}
-      <div className="text-2xl text-white mb-8 text-center">{question.text}</div>
-      <div className="grid grid-cols-2 gap-4 w-full max-w-2xl">
+      <div className="text-xl sm:text-2xl text-white mb-8 text-center">{question.text}</div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full">
         {users.filter(u => u.username !== currentUser).map((user) => (
           <button
             key={user.username}

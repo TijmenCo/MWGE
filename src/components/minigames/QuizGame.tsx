@@ -79,8 +79,9 @@ const QuizGame: React.FC<QuizGameProps> = ({
   };
 
   const getAnswerButtonClass = (index: number) => {
+    const baseClass = 'w-full p-3 sm:p-4 rounded-lg transition-colors text-sm sm:text-base';
     if (!results) {
-      return `w-full p-4 rounded-lg transition-colors ${
+      return `${baseClass} ${
         selectedAnswer === index
           ? 'bg-purple-600 text-white'
           : 'bg-white/5 hover:bg-white/10 text-white'
@@ -88,14 +89,14 @@ const QuizGame: React.FC<QuizGameProps> = ({
     }
 
     if (index === results.correctAnswer) {
-      return 'w-full p-4 rounded-lg bg-green-600 text-white';
+      return `${baseClass} bg-green-600 text-white`;
     }
 
     if (selectedAnswer === index && selectedAnswer !== results.correctAnswer) {
-      return 'w-full p-4 rounded-lg bg-red-600 text-white';
+      return `${baseClass} bg-red-600 text-white`;
     }
 
-    return 'w-full p-4 rounded-lg bg-white/5 text-white';
+    return `${baseClass} bg-white/5 text-white`;
   };
 
   if (!question) {
@@ -107,14 +108,14 @@ const QuizGame: React.FC<QuizGameProps> = ({
   }
 
   return (
-    <div className="flex flex-col items-center justify-center h-full">
-       {!results && (
-      <div className="text-4xl font-bold text-white mb-8">{timeLeft}s</div>
-       )}
-      
-      <div className="w-full max-w-2xl space-y-6">
-        <h2 className="text-2xl text-white text-center mb-8">{question.text}</h2>
-        
+    <div className="flex flex-col items-center justify-center h-full px-4 w-full max-w-lg mx-auto">
+      {!results && (
+        <div className="text-3xl sm:text-4xl font-bold text-white mb-8">{timeLeft}s</div>
+      )}
+
+      <div className="w-full space-y-6">
+        <h2 className="text-xl sm:text-2xl text-white text-center mb-8">{question.text}</h2>
+
         <div className="grid grid-cols-1 gap-4">
           {question.options.map((option, index) => (
             <button
@@ -144,12 +145,12 @@ const QuizGame: React.FC<QuizGameProps> = ({
                 : 'Better luck next time!'}
 
               <button
-              onClick={handleProceedToShop}
-              className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-md hover:from-purple-700 hover:to-pink-700 transition-colors"
-            >
-              <FastForward className="w-5 h-5" />
-              <span>Continue to Shop</span>
-            </button>
+                onClick={handleProceedToShop}
+                className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-md hover:from-purple-700 hover:to-pink-700 transition-colors text-lg mt-4"
+              >
+                <FastForward className="w-5 h-5" />
+                <span>Continue to Shop</span>
+              </button>
             </div>
           )}
         </div>

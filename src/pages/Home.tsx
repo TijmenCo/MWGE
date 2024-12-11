@@ -117,18 +117,18 @@ const Home = () => {
   };
 
   return (
-    <div className="max-w-md mx-auto mt-20 p-6 relative">
+    <div className="max-w-md mx-auto mt-10 sm:mt-20 p-4 sm:p-6 relative">
          {/* Settings Button */}
     <button
       onClick={() => setShowSettings(!showSettings)}
-      className="fixed top-4 right-4 p-2 text-white/80 hover:text-white transition-colors z-50"
+      className="fixed top-4 right-4 p-3 text-white/80 hover:text-white transition-colors z-50"
     >
-      <Settings className="w-6 h-6" />
+      <Settings className="w-6 h-6 sm:w-5 sm:h-5" />
     </button>
 
     {/* Settings Modal */}
     {showSettings && (
-      <div className="fixed top-16 right-4 w-64 bg-black/80 backdrop-blur-md rounded-lg p-4 shadow-xl border border-white/20 z-50">
+      <div className="fixed top-16 right-4 w-[calc(100%-2rem)] sm:w-64 bg-black/80 backdrop-blur-md rounded-lg p-4 shadow-xl border border-white/20 z-50">
         <div className="flex justify-between items-center mb-4">
           <h3 className="text-white font-semibold">Settings</h3>
           <button
@@ -152,10 +152,10 @@ const Home = () => {
       </div>
     )}
 
-      <div className="bg-white/10 backdrop-blur-md rounded-lg p-8 shadow-xl border border-white/20">
+      <div className="bg-white/10 backdrop-blur-md rounded-lg p-4 sm:p-8 shadow-xl border border-white/20">
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-white mb-2">Welcome to Doozy!</h1>
-          <p className="text-gray-300">Create or join a lobby to play with friends</p>
+          <h1 className="text-2xl sm:text-3xl font-bold text-white mb-2">Welcome to Doozy!</h1>
+          <p className="text-sm sm:text-base text-gray-300">Create or join a lobby to play with friends</p>
         </div>
 
         <div className="space-y-4">
@@ -190,7 +190,7 @@ const Home = () => {
 
           <button
             onClick={createLobby}
-            className="w-full flex items-center justify-center px-4 py-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-md hover:from-purple-700 hover:to-pink-700 transition-all duration-200 space-x-2"
+            className="w-full flex items-center justify-center px-3 sm:px-4 py-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-md hover:from-purple-700 hover:to-pink-700 transition-all duration-200 space-x-2 text-sm sm:text-base"
           >
             <Play className="w-5 h-5" />
             <span>Create New Lobby</span>
@@ -210,7 +210,7 @@ const Home = () => {
               const lobbyId = prompt('Enter lobby ID:');
               if (lobbyId) joinLobby(lobbyId);
             }}
-            className="w-full flex items-center justify-center px-4 py-2 bg-white/5 border border-white/10 text-white rounded-md hover:bg-white/10 transition-all duration-200 space-x-2"
+            className="w-full flex items-center justify-center px-3 sm:px-4 py-2 bg-white/5 border border-white/10 text-white rounded-md hover:bg-white/10 transition-all duration-200 space-x-2 text-sm sm:text-base"
           >
             <Users className="w-5 h-5" />
             <span>Join Existing Lobby</span>
@@ -219,14 +219,14 @@ const Home = () => {
           {!isAuthenticated ? (
             <button
               onClick={loginToSpotify}
-              className="w-full flex items-center justify-center px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-all duration-200"
+              className="w-full flex items-center justify-center px-3 sm:px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-all duration-200 text-sm sm:text-base"
             >
               <span>Login to Spotify</span>
             </button>
           ) : (
             <button
               onClick={fetchPlaylist}
-              className="w-full flex items-center justify-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-all duration-200"
+              className="w-full flex items-center justify-center px-3 sm:px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-all duration-200 text-sm sm:text-base"
             >
               <span>Debug</span>
             </button>
@@ -235,7 +235,7 @@ const Home = () => {
         </div>
 
         {playlist && (
-          <div className="mt-8 bg-gray-800 rounded-lg p-4">
+          <div className="mt-6 sm:mt-8 bg-gray-800 rounded-lg p-3 sm:p-4">
             <h2 className="text-lg font-bold text-white mb-4">Playlist Tracks</h2>
             <ul className="space-y-2">
               {playlist.map((track) => (
@@ -248,7 +248,7 @@ const Home = () => {
         )}
 
         {accessToken && randomTrackUri && (
-          <div className="mt-8">
+          <div className="mt-6 sm:mt-8">
             <SpotifyPlayer
               token={accessToken}
               uris={[randomTrackUri]}
