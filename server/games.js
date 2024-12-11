@@ -221,13 +221,20 @@ export function updateMinigameScore(io, lobby, lobbyId, username, score, gameTyp
 
 export function handleVote(io, lobby, lobbyId, username, votedFor) {
   if (!lobby.minigameState?.votingState) return;
-  
+
   lobby.minigameState.votingState.votes[username] = votedFor;
-  
+
+  // Emit vote update to all users
   io.to(lobbyId).emit('vote_update', {
-    votedUsers: Object.keys(lobby.minigameState.votingState.votes)
+    votedUsers: Object.keys(lobby.minigameState.votingState.votes),
   });
+
+  // Check if all users have voted
+  if (Object.keys(lobby.minigameState.votingState.votes).length === lobby.users.length) {
+    handleVotingEnd(io, lobby, lobbyId); // End voting when all users have voted
+  }
 }
+
 
 export function proceedToShop(io, lobby, lobbyId) {
   if (!lobby.minigameState?.isActive) return;

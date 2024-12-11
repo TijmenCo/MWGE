@@ -29,17 +29,18 @@ const TypeSpeed: React.FC<TypeSpeedProps> = ({ lobbyId, currentUser, onScore, ti
     generateNewWord();
   }, []);
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => { 
     const input = e.target.value;
     setUserInput(input);
 
-    if (input === currentWord) {
+    // Normalize both input and currentWord to lowercase for case-insensitive comparison
+    if (input.toLowerCase() === currentWord.toLowerCase()) {
       const newScore = 1;
-      setScore(score +  newScore);
+      setScore(score + newScore);
       onScore(newScore);
       generateNewWord();
     }
-  };
+};
 
   return (
     <div className="flex flex-col items-center justify-center h-full">

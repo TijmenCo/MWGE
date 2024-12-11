@@ -25,19 +25,27 @@ const VotingQuestion: React.FC<VotingQuestionProps> = ({
   const isHost = users.find(u => u.username === currentUser)?.isHost ?? false;
 
   useEffect(() => {
-    socket.on('vote_update', ({ votedUsers }) => {
+    const handleVoteUpdate = ({ votedUsers }: { votedUsers: string[] }) => {
       setVotedUsers(votedUsers);
-    });
 
-    socket.on('voting_results', ({ results }) => {
+      // End voting when all users have voted
+      if (votedUsers.length === users.length) {
+        socket.emit('voting_complete', { lobbyId });
+      }
+    };
+
+    const handleVotingResults = ({ results }: { results: { username: string; votes: number }[] }) => {
       setResults(results);
-    });
+    };
+
+    socket.on('vote_update', handleVoteUpdate);
+    socket.on('voting_results', handleVotingResults);
 
     return () => {
-      socket.off('vote_update');
-      socket.off('voting_results');
+      socket.off('vote_update', handleVoteUpdate);
+      socket.off('voting_results', handleVotingResults);
     };
-  }, []);
+  }, [lobbyId, users.length]);
 
   const handleVote = (votedFor: string) => {
     if (hasVoted || votedFor === currentUser) return;
@@ -122,4 +130,3 @@ const VotingQuestion: React.FC<VotingQuestionProps> = ({
 };
 
 export default VotingQuestion;
-
