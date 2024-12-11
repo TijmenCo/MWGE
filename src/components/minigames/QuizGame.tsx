@@ -7,7 +7,7 @@ interface QuizGameProps {
   currentUser: string;
   onScore: (score: number) => void;
   timeLeft: number;
-  users: { username: string }[];
+  users: { username: string; isHost?: boolean }[];
 }
 
 interface QuizQuestion {
@@ -34,6 +34,7 @@ const QuizGame: React.FC<QuizGameProps> = ({
   const [hasAnswered, setHasAnswered] = useState(false);
   const [answeredUsers, setAnsweredUsers] = useState<string[]>([]);
   const [results, setResults] = useState<QuizResults | null>(null);
+  const isHost = users.find(u => u.username === currentUser)?.isHost ?? false;
 
   useEffect(() => {
     const handleQuizQuestion = (newQuestion: QuizQuestion) => {
@@ -155,7 +156,7 @@ const QuizGame: React.FC<QuizGameProps> = ({
               {results.correctUsers.includes(currentUser)
                 ? 'You got it right! +10 points'
                 : 'Better luck next time!'}
-
+              {isHost && (
               <button
                 onClick={handleProceedToShop}
                 className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-md hover:from-purple-700 hover:to-pink-700 transition-colors text-lg mt-4"
@@ -163,6 +164,7 @@ const QuizGame: React.FC<QuizGameProps> = ({
                 <FastForward className="w-5 h-5" />
                 <span>Continue to Shop</span>
               </button>
+              )}
             </div>
           )}
         </div>
