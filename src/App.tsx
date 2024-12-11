@@ -2,8 +2,19 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Home from './pages/Home';
 import Lobby from './pages/Lobby';
 import { Users } from 'lucide-react';
+import { useState, useEffect } from 'react';
 
 function App() {
+  const [splashAngle, setSplashAngle] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setSplashAngle((prevAngle) => (prevAngle + 1) % 360);
+    }, 30);
+
+    return () => clearInterval(interval);
+  }, []);
+
   return (
     <BrowserRouter>
       <div className="min-h-screen bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-900">
@@ -13,7 +24,18 @@ function App() {
               <div className="flex items-center">
                 <Users className="w-8 h-8 text-white" />
                 <span className="ml-2 text-xl font-bold text-white">Doozy (beta)</span>
-                <span className="text-gray-300 text-sm">v0.6</span>
+                <span className="text-gray-300 text-sm ml-2">v0.6</span>
+                <div className="relative ml-4">
+                  <span 
+                    className="absolute -top-4 left-0 text-yellow-300 font-bold text-sm transform origin-left"
+                    style={{
+                      animation: 'splash 2s ease-in-out infinite',
+                      transform: `rotate(${Math.sin(splashAngle * Math.PI / 180) * 5}deg) scale(${0.9 + Math.sin(splashAngle * Math.PI / 90) * 0.1})`,
+                    }}
+                  >
+                    Now with minigames!
+                  </span>
+                </div>
               </div>
             </div>
           </div>

@@ -91,7 +91,7 @@ const Lobby = () => {
       socket.off('lobby_update');
       socket.off('game_countdown');
     };
-  }, [lobbyId, currentUser]);
+  }, [lobbyId, currentUser, gameOver]);
 
   // If the user hasn't joined and there's no current user, show the join form
   if (!hasJoined && !currentUser) {
