@@ -24,10 +24,8 @@ const ShopModal: React.FC<ShopModalProps> = ({
   if (!isOpen) return null;
 
   const handlePurchase = (powerUp: PowerUp) => {
-    console.log("handle purchase")
     console.log(inventory.points)
     if (canAffordPowerUp(inventory.points, powerUp)) {
-      console.log("makingm purchase")
       socket.emit('purchase_power_up', {
         lobbyId,
         username: currentUser,
