@@ -16,6 +16,9 @@ import ReactionTime from './minigames/ReactionTime';
 import WordScramble from './minigames/WordScramble';
 import VotingQuestion from './minigames/VotingQuestion';
 import QuizGame from './minigames/QuizGame';
+import SequenceRepeat from './minigames/SequenceRepeat';
+import FallingCatch from './minigames/FallingCatch';
+import TargetShoot from './minigames/TargetShoot';
 
 interface GameProps {
   lobbyId: string;
@@ -173,7 +176,7 @@ const Game: React.FC<GameProps> = ({ lobbyId, currentUser, scores, isHost }) => 
       case 'whackamole':
         return <WhackAMole {...props} />;
       case 'quiz':
-       return <QuizGame {...props} />;
+        return <QuizGame {...props} />;
       case 'buttonmash':
         return <ButtonMash {...props} />;
       case 'colorclick':
@@ -190,6 +193,12 @@ const Game: React.FC<GameProps> = ({ lobbyId, currentUser, scores, isHost }) => 
         return <WordScramble {...props} />;
       case 'votingquestion':
         return votingQuestion ? <VotingQuestion {...props} question={votingQuestion} /> : null;
+      case 'sequencerepeat':
+        return <SequenceRepeat {...props} />;
+      case 'fallingcatch':
+        return <FallingCatch {...props} />;
+      case 'targetshoot':
+        return <TargetShoot {...props} />;
       default:
         return null;
     }

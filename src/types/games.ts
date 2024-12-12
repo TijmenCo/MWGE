@@ -8,7 +8,10 @@ export type MinigameType =
   | 'reactiontime'
   | 'wordscramble'
   | 'votingquestion'
-  | 'quiz';
+  | 'quiz'
+  | 'sequencerepeat'
+  | 'fallingcatch'
+  | 'targetshoot';
 
 export interface MinigameConfig {
   type: MinigameType;

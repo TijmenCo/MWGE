@@ -29,19 +29,20 @@ const ReactionTime: React.FC<ReactionTimeProps> = ({ lobbyId, currentUser, onSco
     if (state === 'ready' && startTime) {
       const reactionTime = Date.now() - startTime;
       const points = Math.max(0, Math.floor(1000 - reactionTime));
-      const newScore = points;
-      setScore(score + points);
+      const newScore = Math.ceil(points / 100); // Divide by 100 and round up
+      setScore(score + newScore);
       onScore(newScore);
     } else if (state === 'waiting') {
       // Clicked too early
       setScore(Math.max(0, score - 100));
-      onScore(score)
+      onScore(score);
     }
-
+  
     setAttempts(attempts + 1);
     setState('waiting');
     setStartTime(null);
   };
+  
 
   return (
     <div className="flex flex-col items-center justify-center h-full">
