@@ -114,6 +114,8 @@ io.on('connection', (socket) => {
   socket.on('return_to_lobby', ({ lobbyId }) => {
     const lobby = lobbies.get(lobbyId);
     if (lobby) {
+      stopMinigameSequence(lobby);
+
       // Store final scores before resetting
       const finalScores = { ...lobby.scores };
   
@@ -123,23 +125,24 @@ io.on('connection', (socket) => {
         lobby.timer = null;
       }
   
-      // First emit game over with final scores
+     // First emit game over with final scores
       io.to(lobbyId).emit('game_over', { finalScores });
   
       // Wait a bit before resetting the lobby state
       setTimeout(() => {
         // Reset all game-related state
-        lobby.gameState = 'waiting';
-        lobby.gameMode = null;
-        lobby.currentSong = null;
-        lobby.scores = {};
-        lobby.guesses = {};
-        lobby.playlist = [];
-        lobby.currentRound = 0;
-        lobby.currentSongIndex = 0;
-        lobby.remainingGuesses = {};
-        lobby.minigameState = null;
-        lobby.correctGuessOrder = { title: [], artist: [], addedBy: [] };
+      lobby.gameState = 'waiting';
+      lobby.gameMode = null;
+      lobby.currentSong = null;
+      lobby.scores = {};
+      lobby.guesses = {};
+      lobby.playlist = [];
+      lobby.currentRound = 0;
+      lobby.currentSongIndex = 0;
+      lobby.remainingGuesses = {};
+      lobby.minigameState = null;
+      lobby.correctGuessOrder = { title: [], artist: [], addedBy: [] };
+      lobby.quizState = null;
   
         // Reset user scores
         lobby.users.forEach(user => {
@@ -228,7 +231,9 @@ io.on('connection', (socket) => {
 
   socket.on('select_game_mode', ({ lobbyId, mode, playlist, config, musicProvider, gameVariant }) => {
     const lobby = lobbies.get(lobbyId);
+    console.log(lobby)
     if (lobby) {
+      stopMinigameSequence(lobby);
       lobby.gameMode = mode;
       lobby.musicProvider = musicProvider;
       lobby.gameVariant = gameVariant;
