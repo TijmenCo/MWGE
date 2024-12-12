@@ -3,7 +3,7 @@ import { VOTING_QUESTIONS } from './constants/votingQuestions.js';
 import { startQuizQuestion } from './quiz.js';
 import { generateGameSequence } from './constants/gameSequence.js';
 
-export function startMinigameSequence(io, lobby, lobbyId) {
+export function startMinigameSequence(io, lobby, lobbyId, numberOfRounds) {
   if (!lobby.minigameState) {
     lobby.minigameState = {
       currentGameIndex: 0,
@@ -12,7 +12,7 @@ export function startMinigameSequence(io, lobby, lobbyId) {
       showingSplash: false,
       completedGames: 0,
       inShop: false,
-      gameSequence: generateGameSequence(),
+      gameSequence: generateGameSequence(numberOfRounds),
       votingState: {
         currentQuestion: null,
         votes: {},
@@ -26,7 +26,7 @@ export function startMinigameSequence(io, lobby, lobbyId) {
   lobby.minigameState.isActive = true;
   lobby.minigameState.completedGames = 0;
   lobby.minigameState.inShop = false;
-  lobby.minigameState.gameSequence = generateGameSequence();
+  lobby.minigameState.gameSequence = generateGameSequence(numberOfRounds);
 
   startNextMinigame(io, lobby, lobbyId);
 }

@@ -45,6 +45,7 @@ const Lobby = () => {
   const { currentUser } = useStore();
   const [playlistUrl, setPlaylistUrl] = useState('');
   const [gameOver, setGameOver] = useState(false);
+  const [playListLoaded, setPlaylistLoaded] = useState(false);
   const [playlistError, setPlaylistError] = useState<string | null>(null);
   const [isLoadingPlaylist, setIsLoadingPlaylist] = useState(false);
   const [musicProvider, setMusicProvider] = useState<'youtube' | 'spotify'>('spotify');
@@ -52,7 +53,10 @@ const Lobby = () => {
   const [roundConfig, setRoundConfig] = useState({
     totalRounds: 5,
     roundTime: 20,
-    maxGuesses: 3 // Added maxGuesses config
+    maxGuesses: 3 
+  });
+  const [minigameRoundConfig, setMinigameRoundConfig] = useState({
+    totalRounds: 5
   });
   const [spotifyToken, setSpotifyToken] = useState<string>('');
   const [hasJoined, setHasJoined] = useState(false);
@@ -150,8 +154,10 @@ const Lobby = () => {
           playlist = allTracks.flat();
         } else if (musicProvider === 'youtube') {
           playlist = await fetchPlaylistVideos(playlistUrl);
+          setPlaylistLoaded(true);
         } else {
           playlist = await fetchSpotifyPlaylist(playlistUrl);
+          setPlaylistLoaded(true);
         }
 
         socket.emit('select_game_mode', {
@@ -168,6 +174,7 @@ const Lobby = () => {
         });
       } catch (error) {
         setPlaylistError('Failed to load songs. Please check the URLs and try again.');
+        setPlaylistLoaded(false);
         return;
       } finally {
         setIsLoadingPlaylist(false);
@@ -244,7 +251,8 @@ const Lobby = () => {
           gameVariant,
           config: {
             totalRounds: roundConfig.totalRounds,
-            roundTime: roundConfig.roundTime
+            roundTime: roundConfig.roundTime,
+            maxGuesses: roundConfig.maxGuesses
           }
         });
       } catch (error) {
@@ -254,13 +262,19 @@ const Lobby = () => {
         setIsLoadingPlaylist(false);
       }
     } else {
-      socket.emit('select_game_mode', { lobbyId, mode, musicProvider, gameVariant });
+      socket.emit('select_game_mode', { 
+        lobbyId, 
+        mode, 
+        musicProvider, 
+        gameVariant,
+        config: mode === 'minigames' ? { totalRounds: minigameRoundConfig.totalRounds } : undefined
+      });
     }
   };
 
   const startGame = () => {
     setGameOver(false);
-    socket.emit('start_game', { lobbyId });
+    socket.emit('start_game', { lobbyId }, minigameRoundConfig.totalRounds);
   };
 
   const isHost = lobbyState.users.find(u => u.username === currentUser)?.isHost ?? false;
@@ -323,7 +337,7 @@ const Lobby = () => {
                 {canStartGame && (
                   <button
                     onClick={startGame}
-                    disabled={isLoadingPlaylist}
+                    disabled={isLoadingPlaylist || !lobbyState.gameMode || (lobbyState.gameMode === "songguess" && !playListLoaded)}
                     className="flex items-center space-x-1 px-2 py-1 sm:px-3 sm:py-2 text-xs sm:text-sm bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-md hover:from-green-600 hover:to-emerald-700 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     <Play className="w-3 h-3 sm:w-4 sm:h-4" />
@@ -500,6 +514,25 @@ const Lobby = () => {
           </div>
         )}
 
+        {isHost && lobbyState.gameMode === 'minigames' && lobbyState.gameState === 'waiting' && (
+          <div>
+            <label className="block text-sm font-medium text-gray-200 mb-2">
+              Number of Minigame Rounds
+            </label>
+            <input
+              type="number"
+              min="1"
+              max="100"
+              value={minigameRoundConfig.totalRounds}
+              onChange={(e) => setMinigameRoundConfig(prev => ({
+                ...prev,
+                totalRounds: Math.max(1, Math.min(100, parseInt(e.target.value) || 1))
+              }))}
+              className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-md text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500"
+            />
+          </div>
+        )}
+
         {countdown && (
           <div className="fixed inset-0 flex items-center justify-center bg-black/50 backdrop-blur-sm z-50">
             <div className="text-7xl font-bold text-white animate-pulse">
@@ -533,6 +566,7 @@ const Lobby = () => {
               currentUser={currentUser} 
               scores={lobbyState.scores}
               isHost={isHost} 
+              totalRounds={lobbyState.gameMode === 'minigames' ? minigameRoundConfig.totalRounds : undefined}
             />
           )
         ) : (

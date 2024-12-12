@@ -5,10 +5,12 @@ const ACTION_GAMES = ['buttonmash', 'colorclick', 'quickmath', 'typespeed', 'mem
 // Sequence template: 2 question games followed by 1 action game
 const SEQUENCE_TEMPLATE = ['question', 'action'];
 
-export function generateGameSequence(totalRounds = 9) {
+export function generateGameSequence(totalRounds) {
   const sequence = [];
   let questionGameIndex = 0;
   let actionGameIndex = 0;
+
+  console.log(totalRounds);
 
   for (let i = 0; i < totalRounds; i++) {
     const sequenceType = SEQUENCE_TEMPLATE[i % SEQUENCE_TEMPLATE.length];

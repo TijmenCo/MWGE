@@ -25,6 +25,7 @@ interface GameProps {
   currentUser: string;
   scores: Record<string, number>;
   isHost: boolean;
+  totalRounds: number | undefined;
 }
 
 interface User {
