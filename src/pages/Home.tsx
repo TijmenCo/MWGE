@@ -184,13 +184,14 @@ const Home = () => {
             placeholder="https://open.spotify.com/user/your-profile-id"
           />
           <p className="mt-1 text-sm text-gray-400">
-            If you want to easily/automatically play songs, enter your Spotify profile URL.
+            Optional: If you're playing Song Guess, enter your Spotify profile URL.
           </p>
         </div>
-
+          
           <button
             onClick={createLobby}
             className="w-full flex items-center justify-center px-3 sm:px-4 py-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-md hover:from-purple-700 hover:to-pink-700 transition-all duration-200 space-x-2 text-sm sm:text-base"
+            disabled={!username}
           >
             <Play className="w-5 h-5" />
             <span>Create New Lobby</span>
