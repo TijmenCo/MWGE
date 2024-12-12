@@ -33,14 +33,14 @@ export const POWER_UPS = [
     uses: 1
   },
   {
-    id: 'waterfall',
-    name: 'Waterfall',
-    description: 'Start a waterfall! Everyone drinks until the person before them stops',
-    cost: 80,
+    id: 'Chug',
+    name: 'chug your drink!',
+    description: 'Make someone chug their drink!',
+    cost: 70,
     type: 'drink',
-    effect: 'waterfall',
-    icon: '🌊',
-    target: 'all',
+    effect: 'make_drink',
+    icon: '🍺🍺🍺',
+    target: 'single',
     uses: 1
   }
 ];
