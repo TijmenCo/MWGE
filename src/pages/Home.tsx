@@ -196,15 +196,6 @@ const Home = () => {
             <span>Create New Lobby</span>
           </button>
 
-          <div className="relative">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-white/10"></div>
-            </div>
-            <div className="relative flex justify-center text-sm">
-              <span className="px-2 bg-transparent text-gray-300">or</span>
-            </div>
-          </div>
-
           <button
             onClick={() => {
               const lobbyId = prompt('Enter lobby ID:');
@@ -215,6 +206,15 @@ const Home = () => {
             <Users className="w-5 h-5" />
             <span>Join Existing Lobby</span>
           </button>
+
+          <div className="relative">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-white/10"></div>
+            </div>
+            <div className="relative flex justify-center text-sm">
+              <span className="px-2 bg-transparent text-gray-300">or if you're hosting and want to play Song Guess</span>
+            </div>
+          </div>
 
           {!isAuthenticated ? (
             <button
