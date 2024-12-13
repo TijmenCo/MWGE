@@ -368,22 +368,31 @@ io.on('connection', (socket) => {
       }
     } else if (lobby.gameVariant === 'whoAdded') {
       if (!lobby.guesses[username].addedBy && addedBy) {
+        // Ensure `addedBy` has the expected properties
+        const addedByUsername = addedBy.username?.toLowerCase();
+        const addedByDisplayName = addedBy.displayName?.toLowerCase();
+    
         // Find the user who added the song
-        const adder = lobby.users.find(u => {
-          // Check both username and Spotify display name
+        const isAdderCorrect = lobby.users.some(u => {
           const usernameLower = u.username.toLowerCase();
           const spotifyDisplayNameLower = u.spotifyDisplayName?.toLowerCase();
-          const addedByDisplayNameLower = addedBy.displayName?.toLowerCase();
-          
-          return usernameLower === normalizedGuess || 
-                 (spotifyDisplayNameLower && spotifyDisplayNameLower === normalizedGuess) ||
-                 (addedByDisplayNameLower && addedByDisplayNameLower === normalizedGuess);
+    
+          // Log for debugging
+          console.log("Checking user:", {
+            usernameLower,
+            spotifyDisplayNameLower,
+            normalizedGuess,
+            addedByUsername,
+            addedByDisplayName,
+          });
+    
+          return addedByDisplayName && addedByDisplayName === normalizedGuess;
         });
-
-        if (adder) {
+    
+        if (isAdderCorrect) {
           isCorrect = true;
           lobby.guesses[username].addedBy = true;
-
+    
           const addedByGuessOrder = lobby.correctGuessOrder.addedBy.length;
           if (addedByGuessOrder < Math.min(3, totalPlayers)) {
             points = 3 - addedByGuessOrder;
@@ -392,7 +401,7 @@ io.on('connection', (socket) => {
         }
       }
     }
-
+    
     if (isCorrect) {
       lobby.scores[username] = (lobby.scores[username] || 0) + points;
     }

@@ -19,6 +19,10 @@ export interface SpotifyArtist {
   
   export interface SpotifyPlaylist {
     id: string;
+    snapshot_id: string;
+    owner: {
+      id: string;
+    };
     tracks: {
       total: number;
     };

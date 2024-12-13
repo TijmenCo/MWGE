@@ -149,6 +149,8 @@ const Lobby = () => {
             })
           );
 
+          setPlaylistLoaded(true);
+
           console.log(allTracks);
 
           playlist = allTracks.flat();
@@ -384,6 +386,7 @@ const Lobby = () => {
                   Source Type
                 </label>
                 <div className="flex gap-2">
+                {isHost && lobbyState.gameMode === 'songguess' && gameVariant === 'classic' && (
                   <button
                     onClick={() => setSourceType('playlist')}
                     className={`flex-1 px-2 py-1 sm:px-4 sm:py-2 text-xs sm:text-sm rounded-md transition-all duration-200 ${
@@ -394,6 +397,7 @@ const Lobby = () => {
                   >
                     From Playlist
                   </button>
+                )}
                   <button
                     onClick={() => setSourceType('profiles')}
                     className={`flex-1 px-2 py-1 sm:px-4 sm:py-2 text-xs sm:text-sm rounded-md transition-all duration-200 ${
