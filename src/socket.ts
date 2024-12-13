@@ -8,6 +8,7 @@ const socket = io({
   // Increase reconnection attempts
   reconnection: true,
   reconnectionAttempts: Infinity,
+  reconnectionDelay: 1000,
   reconnectionDelayMax: 5000,
 
   // Timeout settings
