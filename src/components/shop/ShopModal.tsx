@@ -1,8 +1,9 @@
-import React from 'react';
-import { X, Play } from 'lucide-react';
+import React, { useState } from 'react';
+import { X, Play, Dices } from 'lucide-react';
 import { PowerUp, PlayerInventory } from '../../types/shop';
-import { POWER_UPS, canAffordPowerUp } from '../../utils/PowerUps';
+import { POWER_UPS, WHEEL_SEGMENTS, canAffordPowerUp } from '../../utils/PowerUps';
 import { socket } from '../../socket';
+import GamblingWheel from './GamblingWheel';
 
 interface ShopModalProps {
   isOpen: boolean;
@@ -13,6 +14,8 @@ interface ShopModalProps {
   isHost?: boolean;
 }
 
+type ShopTab = 'powerups' | 'gambling';
+
 const ShopModal: React.FC<ShopModalProps> = ({
   isOpen,
   onClose,
@@ -21,10 +24,11 @@ const ShopModal: React.FC<ShopModalProps> = ({
   inventory,
   isHost
 }) => {
+  const [activeTab, setActiveTab] = useState<ShopTab>('powerups');
+
   if (!isOpen) return null;
 
   const handlePurchase = (powerUp: PowerUp) => {
-    console.log(inventory.points)
     if (canAffordPowerUp(inventory.points, powerUp)) {
       socket.emit('purchase_power_up', {
         lobbyId,
@@ -33,6 +37,15 @@ const ShopModal: React.FC<ShopModalProps> = ({
         currentPoints: inventory.points
       });
     }
+  };
+
+  const handleSpin = (betAmount: number) => {
+    socket.emit('gamble_spin', {
+      lobbyId,
+      username: currentUser,
+      betAmount,
+      currentPoints: inventory.points
+    });
   };
 
   const startNextMinigame = () => {
@@ -44,13 +57,38 @@ const ShopModal: React.FC<ShopModalProps> = ({
     <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50">
       <div className="bg-gray-900 rounded-lg p-6 max-w-2xl w-full mx-4 border border-white/10">
         <div className="flex justify-between items-center mb-6">
-          <h2 className="text-2xl font-bold text-white">Power-Up Shop</h2>       
-            <button
-              onClick={onClose}
-              className="text-gray-400 hover:text-white transition-colors"
-            >
-              <X className="w-6 h-6" />
-            </button>
+          <div className="flex items-center gap-4">
+            <h2 className="text-2xl font-bold text-white">Shop</h2>
+            <div className="flex gap-2">
+              <button
+                onClick={() => setActiveTab('powerups')}
+                className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                  activeTab === 'powerups'
+                    ? 'bg-purple-600 text-white'
+                    : 'bg-white/5 text-gray-300 hover:bg-white/10'
+                }`}
+              >
+                Power-Ups
+              </button>
+              <button
+                onClick={() => setActiveTab('gambling')}
+                className={`px-4 py-2 rounded-md text-sm font-medium transition-colors flex items-center gap-2 ${
+                  activeTab === 'gambling'
+                    ? 'bg-purple-600 text-white'
+                    : 'bg-white/5 text-gray-300 hover:bg-white/10'
+                }`}
+              >
+                <Dices className="w-4 h-4" />
+                Gambling
+              </button>
+            </div>
+          </div>
+          <button
+            onClick={onClose}
+            className="text-gray-400 hover:text-white transition-colors"
+          >
+            <X className="w-6 h-6" />
+          </button>
         </div>
 
         <div className="mb-4">
@@ -59,43 +97,54 @@ const ShopModal: React.FC<ShopModalProps> = ({
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {POWER_UPS.map((powerUp) => (
-            <div
-              key={powerUp.id}
-              className="bg-gray-800/50 rounded-lg p-4 border border-white/5 hover:border-purple-500/50 transition-colors"
-            >
-              <div className="flex items-start justify-between mb-2">
-                <div>
-                  <span className="text-2xl mr-2">{powerUp.icon}</span>
-                  <h3 className="text-white font-semibold inline-block">
-                    {powerUp.name}
-                  </h3>
+        {activeTab === 'powerups' ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {POWER_UPS.map((powerUp) => (
+              <div
+                key={powerUp.id}
+                className="bg-gray-800/50 rounded-lg p-4 border border-white/5 hover:border-purple-500/50 transition-colors"
+              >
+                <div className="flex items-start justify-between mb-2">
+                  <div>
+                    <span className="text-2xl mr-2">{powerUp.icon}</span>
+                    <h3 className="text-white font-semibold inline-block">
+                      {powerUp.name}
+                    </h3>
+                  </div>
+                  <span className="text-yellow-400 font-mono">
+                    {powerUp.cost} pts
+                  </span>
                 </div>
-                <span className="text-yellow-400 font-mono">
-                  {powerUp.cost} pts
-                </span>
+                <p className="text-gray-300 text-sm mb-4">{powerUp.description}</p>
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-400 text-sm">
+                    Owned: {inventory.powerUps[powerUp.id] || 0}
+                  </span>
+                  <button
+                    onClick={() => handlePurchase(powerUp)}
+                    disabled={!canAffordPowerUp(inventory.points, powerUp)}
+                    className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                      canAffordPowerUp(inventory.points, powerUp)
+                        ? 'bg-purple-600 hover:bg-purple-700 text-white'
+                        : 'bg-gray-700 text-gray-400 cursor-not-allowed'
+                    }`}
+                  >
+                    Purchase
+                  </button>
+                </div>
               </div>
-              <p className="text-gray-300 text-sm mb-4">{powerUp.description}</p>
-              <div className="flex justify-between items-center">
-                <span className="text-gray-400 text-sm">
-                  Owned: {inventory.powerUps[powerUp.id] || 0}
-                </span>
-                <button
-                  onClick={() => handlePurchase(powerUp)}
-                  disabled={!canAffordPowerUp(inventory.points, powerUp)}
-                  className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
-                    canAffordPowerUp(inventory.points, powerUp)
-                      ? 'bg-purple-600 hover:bg-purple-700 text-white'
-                      : 'bg-gray-700 text-gray-400 cursor-not-allowed'
-                  }`}
-                >
-                  Purchase
-                </button>
-              </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        ) : (
+          <div className="flex flex-col items-center">
+            <GamblingWheel
+              segments={WHEEL_SEGMENTS}
+              onSpin={handleSpin}
+              maxBet={inventory.points}
+              currentPoints={inventory.points}
+            />
+          </div>
+        )}
 
         {isHost && (
           <div className="mt-6 flex justify-end">

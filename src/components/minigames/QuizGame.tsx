@@ -56,7 +56,7 @@ const QuizGame: React.FC<QuizGameProps> = ({
 
     const handleQuizResults = (results: QuizResults) => {
       if (results.correctUsers.find(user => user === currentUser.toString())) {
-      const newScore = 10;
+      const newScore = 100000;
       onScore(newScore);
       }
       setResults(results);
