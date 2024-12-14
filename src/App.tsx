@@ -1,8 +1,8 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Home from './pages/Home';
 import Lobby from './pages/Lobby';
-import { Users } from 'lucide-react';
 import { useState, useEffect } from 'react';
+import logo from '../src/images/logo.png'; // Import your image here
 
 function App() {
   const [splashAngle, setSplashAngle] = useState(0);
@@ -22,7 +22,11 @@ function App() {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex items-center justify-between h-16">
               <div className="flex items-center">
-                <Users className="w-8 h-8 text-white" />
+                <img
+                  src={logo}
+                  alt="Logo"
+                  className="w-12 h-12"
+                />
                 <span className="ml-2 text-xl font-bold text-white">Doozy (beta)</span>
                 <span className="text-gray-300 text-sm ml-2">v1.0</span>
                 <div className="relative ml-4">
