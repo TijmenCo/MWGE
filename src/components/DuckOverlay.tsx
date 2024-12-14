@@ -2,34 +2,40 @@ import React, { useEffect, useRef } from 'react';
 
 interface DuckProps {
   username: string;
+  color: string;
   position: { x: number; y: number };
 }
 
-const Duck: React.FC<DuckProps> = ({ username, position }) => {
-  return (
-    <div
-      className="absolute"
-      style={{
-        left: `${position.x}%`,
-        top: `${position.y}%`,
-        transition: 'left 2s ease-in-out, top 2s ease-in-out',
-        zIndex: 10,
-      }}
-    >
-      <div className="relative">
-        <div className="w-8 h-8 bg-yellow-400 rounded-full flex items-center justify-center animate-walk">
-          🦆
+const Duck: React.FC<DuckProps> = ({ username, position, color }) => {
+    return (
+      <div
+        className="absolute"
+        style={{
+          left: `${position.x}%`,
+          top: `${position.y}%`,
+          transition: 'left 2s ease-in-out, top 2s ease-in-out',
+          zIndex: 10,
+        }}
+      >
+        <div className="relative">
+          <div
+            className="w-8 h-8 rounded-full flex items-center justify-center animate-walk"
+            style={{ backgroundColor: color }}
+          >
+            🦆
+          </div>
+          <span className="absolute -top-5 left-1/2 transform -translate-x-1/2 text-xs text-white bg-black/50 px-1 rounded">
+            {username}
+          </span>
         </div>
-        <span className="absolute -top-5 left-1/2 transform -translate-x-1/2 text-xs text-white bg-black/50 px-1 rounded">
-          {username}
-        </span>
       </div>
-    </div>
-  );
-};
-
+    );
+  };
+  
 interface DuckOverlayProps {
-  users: { username: string }[];
+  users: {
+      color: string; username: string 
+}[];
 }
 
 const DuckOverlay: React.FC<DuckOverlayProps> = React.memo(({ users }) => {
@@ -85,6 +91,7 @@ const DuckOverlay: React.FC<DuckOverlayProps> = React.memo(({ users }) => {
         <Duck
           key={user.username}
           username={user.username}
+          color={user.color}
           position={duckPositions[user.username] || { x: 0, y: 0 }}
         />
       ))}
