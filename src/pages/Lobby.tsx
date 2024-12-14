@@ -10,6 +10,7 @@ import DrawingCanvas from '../components/DrawingCanvas';
 import JoinLobbyForm from '../components/JoinLobbyForm';
 import { fetchPlaylistVideos } from '../utils/youtube';
 import { fetchSpotifyPlaylist, fetchUserTopTracks } from '../utils/spotify';
+import DuckOverlay from '../components/DuckOverlay';
 
 interface User {
   username: string;
@@ -283,8 +284,8 @@ const Lobby = () => {
   const canStartGame = lobbyState.users.length >= 1 && isHost && lobbyState.gameState === 'waiting';
 
   return (
-    <div className="max-w-6xl mx-auto p-2 sm:p-4 md:p-6">
-      <div className="bg-white/10 backdrop-blur-md rounded-lg p-4 md:p-6 shadow-xl border border-white/20">
+    <div className="max-w-6xl mx-auto p-2 sm:p-4 md:p-6 relative min-h-screen">
+      <div className="bg-white/10 backdrop-blur-md rounded-lg p-4 md:p-6 shadow-xl border border-white/20 relative min-h-[calc(100vh-2rem)]">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 sm:mb-6 gap-2 sm:gap-4">
           <div className="flex items-center space-x-2 mb-2 sm:mb-0">
             <h2 className="text-xl sm:text-2xl font-bold text-white">Lobby</h2>
@@ -609,6 +610,9 @@ const Lobby = () => {
             </div>
           </div>
         )}
+         {lobbyState.gameState === 'waiting' && (
+        <DuckOverlay users={lobbyState.users} />
+         )}
       </div>
     </div>
   );
