@@ -139,4 +139,108 @@ export const VOTING_QUESTIONS = [
     id: 'should-do-an-awkward-dance',
     text: 'Who should do the most awkward dance they can think of?'
   },
+  {
+    id: 'should-walk-on-their-hands',
+    text: 'Who should attempt to walk on their hands or do a handstand?'
+  },
+  {
+    id: 'should-pretend-to-be-an-animal',
+    text: 'Who should pretend to be their favorite animal for the next round?'
+  },
+  {
+    id: 'should-speak-backwards',
+    text: 'Who should try to speak every sentence backwards until the next round?'
+  },
+  {
+    id: 'should-draw-on-their-face',
+    text: 'Who should draw something funny on their face using a marker?'
+  },
+  {
+    id: 'should-hop-on-one-foot',
+    text: 'Who should hop on one foot until the next round ends?'
+  },
+  {
+    id: 'should-balance-object-on-head',
+    text: 'Who should try to balance a random object on their head for a minute?'
+  },
+  {
+    id: 'should-dance-to-silent-music',
+    text: 'Who should perform a dance as if they’re hearing music no one else can hear?'
+  },
+  {
+    id: 'should-tell-a-bad-joke',
+    text: 'Who should tell the worst joke they can think of right now?'
+  },
+  {
+    id: 'should-sing-random-song',
+    text: 'Who should sing a random song as if they’re on a talent show?'
+  },
+  {
+    id: 'should-do-cartwheel',
+    text: 'Who should attempt to do a cartwheel or their best version of one?'
+  },
+  {
+    id: 'should-create-awkward-pose',
+    text: 'Who should strike and hold the most awkward pose they can think of?'
+  },
+  {
+    id: 'should-act-like-a-celebrity',
+    text: 'Who should act like their favorite celebrity for the next 2 minutes?'
+  },
+  {
+    id: 'should-wrap-themselves-in-toilet-paper',
+    text: 'Who should wrap themselves up in toilet paper like a mummy?'
+  },
+  {
+    id: 'should-lip-sync',
+    text: 'Who should perform an over-the-top lip-sync of a song?'
+  },
+  {
+    id: 'should-make-up-story',
+    text: 'Who should make up the most ridiculous story they can think of?'
+  },
+  {
+    id: 'should-pretend-to-be-drunken-pirate',
+    text: 'Who should act like a drunken pirate for the next round?'
+  },
+  {
+    id: 'should-play-air-guitar',
+    text: 'Who should shred an air guitar solo like they’re in a rock band?'
+  },
+  {
+    id: 'should-make-animal-noises',
+    text: 'Who should only communicate using animal noises until the next round?'
+  },
+  {
+    id: 'should-run-in-slow-motion',
+    text: 'Who should run in slow motion like they’re in a movie chase scene?'
+  },
+  {
+    id: 'should-model-runway-walk',
+    text: 'Who should do their best runway model walk around the room?'
+  },
+  {
+    id: 'should-do-funny-impression',
+    text: 'Who should do a funny impression of another player?'
+  },
+  {
+    id: 'should-stack-cups',
+    text: 'Who should attempt to stack a pyramid of cups as fast as they can?'
+  },
+  {
+    id: 'should-create-rap',
+    text: 'Who should freestyle a rap about someone in the room?'
+  },
+  {
+    id: 'should-walk-blindfolded',
+    text: 'Who should walk across the room blindfolded without bumping into anything?'
+  },
+  {
+    id: 'should-whisper-everything',
+    text: 'Who should whisper everything they say until the next round?'
+  },
+  {
+    id: 'should-eat-something-weird',
+    text: 'Who should eat a strange combination of snacks from the kitchen?'
+  },
 ];

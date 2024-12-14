@@ -658,5 +658,461 @@ export const QUIZ_QUESTIONS = [
     ],
     correctAnswer: 0,
     category: 'fun'
+  },
+  {
+    id: 'fun-2',
+    text: 'What is illegal to do in Texas while standing up?',
+    options: [
+      'Drink beer',
+      'Play cards',
+      'Swear',
+      'Shoot a gun'
+    ],
+    correctAnswer: 0,
+    category: 'fun'
+  },
+  {
+    id: 'trivia-10',
+    text: 'What is the capital of Canada?',
+    options: [
+      'Toronto',
+      'Ottawa',
+      'Vancouver',
+      'Montreal'
+    ],
+    correctAnswer: 1,
+    category: 'trivia'
+  },
+  {
+    id: 'fun-11',
+    text: 'What is the largest planet in our Solar System?',
+    options: [
+      'Earth',
+      'Mars',
+      'Jupiter',
+      'Saturn'
+    ],
+    correctAnswer: 2,
+    category: 'fun'
+  },
+  {
+    id: 'games-3',
+    text: 'What is the main character’s profession in the game series "Assassin’s Creed"?',
+    options: [
+      'Knight',
+      'Assassin',
+      'Pirate',
+      'Detective'
+    ],
+    correctAnswer: 1,
+    category: 'games'
+  },
+  {
+    id: 'music-4',
+    text: 'Which band released the album "The Dark Side of the Moon"?',
+    options: [
+      'Led Zeppelin',
+      'Pink Floyd',
+      'The Beatles',
+      'The Rolling Stones'
+    ],
+    correctAnswer: 1,
+    category: 'music'
+  },
+  {
+    id: 'movies-3',
+    text: 'Who directed the movie "Pulp Fiction"?',
+    options: [
+      'Christopher Nolan',
+      'Steven Spielberg',
+      'Quentin Tarantino',
+      'James Cameron'
+    ],
+    correctAnswer: 2,
+    category: 'movies'
+  },
+  {
+    id: 'trivia-11',
+    text: 'What is the smallest unit of life?',
+    options: [
+      'Atom',
+      'Molecule',
+      'Cell',
+      'Organ'
+    ],
+    correctAnswer: 2,
+    category: 'trivia'
+  },
+  {
+    id: 'fun-12',
+    text: 'What is the term for a baby goat?',
+    options: [
+      'Cub',
+      'Fawn',
+      'Kid',
+      'Calf'
+    ],
+    correctAnswer: 2,
+    category: 'fun'
+  },
+  {
+    id: 'drinks-5',
+    text: 'Which coffee drink is made with espresso and steamed milk foam?',
+    options: [
+      'Latte',
+      'Cappuccino',
+      'Americano',
+      'Espresso'
+    ],
+    correctAnswer: 1,
+    category: 'drinks'
+  },
+  {
+    id: 'trivia-12',
+    text: 'What is the capital of France?',
+    options: [
+      'Berlin',
+      'Madrid',
+      'Paris',
+      'Rome'
+    ],
+    correctAnswer: 2,
+    category: 'geography'
+  },
+  {
+    id: 'trivia-13',
+    text: 'Who wrote "Romeo and Juliet"?',
+    options: [
+      'Charles Dickens',
+      'William Shakespeare',
+      'Mark Twain',
+      'Jane Austen'
+    ],
+    correctAnswer: 1,
+    category: 'literature'
+  },
+  {
+    id: 'trivia-14',
+    text: 'What planet is known as the Red Planet?',
+    options: [
+      'Earth',
+      'Mars',
+      'Venus',
+      'Jupiter'
+    ],
+    correctAnswer: 1,
+    category: 'science'
+  },
+  {
+    id: 'trivia-15',
+    text: 'How many continents are there?',
+    options: [
+      '5',
+      '6',
+      '7',
+      '8'
+    ],
+    correctAnswer: 2,
+    category: 'geography'
+  },
+  {
+    id: 'trivia-16',
+    text: 'What is the largest mammal?',
+    options: [
+      'Elephant',
+      'Blue Whale',
+      'Giraffe',
+      'Hippopotamus'
+    ],
+    correctAnswer: 1,
+    category: 'science'
+  },
+  {
+    id: 'trivia-17',
+    text: 'Who painted the Mona Lisa?',
+    options: [
+      'Michelangelo',
+      'Leonardo da Vinci',
+      'Raphael',
+      'Donatello'
+    ],
+    correctAnswer: 1,
+    category: 'art'
+  },
+  {
+    id: 'trivia-18',
+    text: 'What is the chemical symbol for water?',
+    options: [
+      'CO2',
+      'H2O',
+      'O2',
+      'NaCl'
+    ],
+    correctAnswer: 1,
+    category: 'science'
+  },
+  {
+    id: 'trivia-19',
+    text: 'What is the largest ocean on Earth?',
+    options: [
+      'Atlantic Ocean',
+      'Indian Ocean',
+      'Arctic Ocean',
+      'Pacific Ocean'
+    ],
+    correctAnswer: 3,
+    category: 'geography'
+  },
+  {
+    id: 'trivia-20',
+    text: 'Who discovered gravity?',
+    options: [
+      'Isaac Newton',
+      'Albert Einstein',
+      'Galileo Galilei',
+      'Nikola Tesla'
+    ],
+    correctAnswer: 0,
+    category: 'science'
+  },
+  {
+    id: 'trivia-21',
+    text: 'Which country is famous for the kangaroo?',
+    options: [
+      'India',
+      'South Africa',
+      'Australia',
+      'Brazil'
+    ],
+    correctAnswer: 2,
+    category: 'geography'
+  },
+  {
+    id: 'trivia-22',
+    text: 'What is the square root of 81?',
+    options: [
+      '7',
+      '8',
+      '9',
+      '10'
+    ],
+    correctAnswer: 2,
+    category: 'math'
+  },
+  {
+    id: 'trivia-23',
+    text: 'Which element is found in abundance in the Sun?',
+    options: [
+      'Oxygen',
+      'Hydrogen',
+      'Helium',
+      'Carbon'
+    ],
+    correctAnswer: 1,
+    category: 'science'
+  },
+  {
+    id: 'trivia-24',
+    text: 'What is the main language spoken in Brazil?',
+    options: [
+      'Spanish',
+      'Portuguese',
+      'French',
+      'English'
+    ],
+    correctAnswer: 1,
+    category: 'geography'
+  },
+  {
+    id: 'trivia-25',
+    text: 'What is the largest planet in the Solar System?',
+    options: [
+      'Mars',
+      'Earth',
+      'Saturn',
+      'Jupiter'
+    ],
+    correctAnswer: 3,
+    category: 'science'
+  },
+  {
+    id: 'trivia-26',
+    text: 'What is 5 x 6?',
+    options: [
+      '25',
+      '30',
+      '35',
+      '40'
+    ],
+    correctAnswer: 1,
+    category: 'math'
+  },
+  {
+    id: 'trivia-27',
+    text: 'Which country is known as the Land of the Rising Sun?',
+    options: [
+      'China',
+      'South Korea',
+      'Japan',
+      'Thailand'
+    ],
+    correctAnswer: 2,
+    category: 'geography'
+  },
+  {
+    id: 'trivia-28',
+    text: 'What is the freezing point of water?',
+    options: [
+      '0°C',
+      '32°C',
+      '50°C',
+      '100°C'
+    ],
+    correctAnswer: 0,
+    category: 'science'
+  },
+  {
+    id: 'trivia-29',
+    text: 'Who was the first president of the United States?',
+    options: [
+      'Abraham Lincoln',
+      'George Washington',
+      'Thomas Jefferson',
+      'John Adams'
+    ],
+    correctAnswer: 1,
+    category: 'history'
+  },
+  {
+    id: 'trivia-30',
+    text: 'Which is the smallest prime number?',
+    options: [
+      '0',
+      '1',
+      '2',
+      '3'
+    ],
+    correctAnswer: 2,
+    category: 'math'
+  },
+  {
+    id: 'trivia-31',
+    text: 'Who is known as the father of computers?',
+    options: [
+      'Charles Babbage',
+      'Alan Turing',
+      'Bill Gates',
+      'Steve Jobs'
+    ],
+    correctAnswer: 0,
+    category: 'technology'
+  },
+  {
+    id: 'trivia-32',
+    text: 'What is the main ingredient in guacamole?',
+    options: [
+      'Tomatoes',
+      'Avocado',
+      'Onion',
+      'Cucumber'
+    ],
+    correctAnswer: 1,
+    category: 'food'
+  },
+  {
+    id: 'trivia-33',
+    text: 'What is the hardest natural substance on Earth?',
+    options: [
+      'Gold',
+      'Diamond',
+      'Steel',
+      'Graphite'
+    ],
+    correctAnswer: 1,
+    category: 'science'
+  },
+  {
+    id: 'trivia-34',
+    text: 'What year did World War II end?',
+    options: [
+      '1943',
+      '1944',
+      '1945',
+      '1946'
+    ],
+    correctAnswer: 2,
+    category: 'history'
+  },
+  {
+    id: 'trivia-35',
+    text: 'Which organ is responsible for pumping blood?',
+    options: [
+      'Lungs',
+      'Kidneys',
+      'Liver',
+      'Heart'
+    ],
+    correctAnswer: 3,
+    category: 'science'
+  },
+  {
+    id: 'trivia-36',
+    text: 'What is the capital of Japan?',
+    options: [
+      'Kyoto',
+      'Osaka',
+      'Tokyo',
+      'Hiroshima'
+    ],
+    correctAnswer: 2,
+    category: 'geography'
+  },
+  {
+    id: 'trivia-37',
+    text: 'What gas do plants absorb during photosynthesis?',
+    options: [
+      'Oxygen',
+      'Nitrogen',
+      'Carbon Dioxide',
+      'Methane'
+    ],
+    correctAnswer: 2,
+    category: 'science'
+  },
+  {
+    id: 'trivia-38',
+    text: 'Who developed the theory of relativity?',
+    options: [
+      'Isaac Newton',
+      'Albert Einstein',
+      'Stephen Hawking',
+      'Marie Curie'
+    ],
+    correctAnswer: 1,
+    category: 'science'
+  },
+  {
+    id: 'trivia-39',
+    text: 'What is the national bird of the United States?',
+    options: [
+      'Bald Eagle',
+      'Flamingo',
+      'Penguin',
+      'Sparrow'
+    ],
+    correctAnswer: 0,
+    category: 'geography'
+  },
+  {
+    id: 'trivia-40',
+    text: 'Which metal is liquid at room temperature?',
+    options: [
+      'Gold',
+      'Mercury',
+      'Iron',
+      'Silver'
+    ],
+    correctAnswer: 1,
+    category: 'science'
   }
 ];
