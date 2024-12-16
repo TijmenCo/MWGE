@@ -41,6 +41,8 @@ const Game: React.FC<GameProps> = ({ lobbyId, currentUser, scores, isHost }) => 
   const [gameScores, setGameScores] = useState<Record<string, number>>(scores);
   const [showShop, setShowShop] = useState(false);
   const [gameOver, setGameOver] = useState(false);
+  const [currentRound, setCurrentRound] = useState(0);
+  const [totalRounds, setTotalRounds] = useState(0);
   const [inventory, setInventory] = useState<PlayerInventory>({
     powerUps: {},
     points: scores[currentUser] || 0,
@@ -80,6 +82,8 @@ const Game: React.FC<GameProps> = ({ lobbyId, currentUser, scores, isHost }) => 
       }
       setTimeLeft(game.duration);
       setShowShop(false);
+      setCurrentRound(game.currentGameIndex + 1); // Assuming `currentRound` is part of the `game` object
+      setTotalRounds(game.totalGames); // Set total games
     });
 
     socket.on('minigame_end', () => {
@@ -164,7 +168,7 @@ const Game: React.FC<GameProps> = ({ lobbyId, currentUser, scores, isHost }) => 
 
   const renderGame = () => {
     if (!currentGame) return null;
-
+  
     const props = {
       lobbyId,
       currentUser,
@@ -172,38 +176,52 @@ const Game: React.FC<GameProps> = ({ lobbyId, currentUser, scores, isHost }) => 
       timeLeft,
       users,
     };
-
-    switch (currentGame.type) {
-      case 'whackamole':
-        return <WhackAMole {...props} />;
-      case 'quiz':
-        return <QuizGame {...props} />;
-      case 'buttonmash':
-        return <ButtonMash {...props} />;
-      case 'colorclick':
-        return <ColorClick {...props} />;
-      case 'quickmath':
-        return <QuickMath {...props} />;
-      case 'typespeed':
-        return <TypeSpeed {...props} />;
-      case 'memorymatch':
-        return <MemoryMatch {...props} />;
-      case 'reactiontime':
-        return <ReactionTime {...props} />;
-      case 'wordscramble':
-        return <WordScramble {...props} />;
-      case 'votingquestion':
-        return votingQuestion ? <VotingQuestion {...props} question={votingQuestion} /> : null;
-      case 'sequencerepeat':
-        return <SequenceRepeat {...props} />;
-      case 'fallingcatch':
-        return <FallingCatch {...props} />;
-      case 'targetshoot':
-        return <TargetShoot {...props} />;
-      default:
-        return null;
-    }
+  
+    return (
+      <>
+        {/* Current round display */}
+        <div className="text-center mb-4">
+          <h3 className="text-white font-semibold">
+            Round {currentRound} of {totalRounds || 'Unknown'}
+          </h3>
+        </div>
+        {/* Render game based on type */}
+        {(() => {
+          switch (currentGame.type) {
+            case 'whackamole':
+              return <WhackAMole {...props} />;
+            case 'quiz':
+              return <QuizGame {...props} />;
+            case 'buttonmash':
+              return <ButtonMash {...props} />;
+            case 'colorclick':
+              return <ColorClick {...props} />;
+            case 'quickmath':
+              return <QuickMath {...props} />;
+            case 'typespeed':
+              return <TypeSpeed {...props} />;
+            case 'memorymatch':
+              return <MemoryMatch {...props} />;
+            case 'reactiontime':
+              return <ReactionTime {...props} />;
+            case 'wordscramble':
+              return <WordScramble {...props} />;
+            case 'votingquestion':
+              return votingQuestion ? <VotingQuestion {...props} question={votingQuestion} /> : null;
+            case 'sequencerepeat':
+              return <SequenceRepeat {...props} />;
+            case 'fallingcatch':
+              return <FallingCatch {...props} />;
+            case 'targetshoot':
+              return <TargetShoot {...props} />;
+            default:
+              return null;
+          }
+        })()}
+      </>
+    );
   };
+  
 
   const sortedScores = Object.entries(gameScores).sort(([, a], [, b]) => b - a);
 

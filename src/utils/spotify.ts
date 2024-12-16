@@ -168,7 +168,7 @@ export async function fetchUserTopTracks(userProfileUrl: string): Promise<Track[
     // Shuffle all tracks
     const shuffledTracks = allTracks.sort(() => Math.random() - 0.5);
 
-    return shuffledTracks.slice(0, Math.min(35, shuffledTracks.length));
+    return shuffledTracks.slice(0, Math.min(120, shuffledTracks.length));
   } catch (error) {
     console.error('Error fetching user tracks:', error);
     return [];

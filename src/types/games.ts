@@ -19,6 +19,8 @@ export interface MinigameConfig {
   description: string;
   duration: number;
   maxScore: number;
+  currentGameIndex: number;
+  totalGames: number;
   instruction: string;
   votingQuestion?: {
     id: string;
