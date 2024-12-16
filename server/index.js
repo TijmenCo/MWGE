@@ -26,14 +26,22 @@ app.use((req, res, next) => {
 // Serve static files from the dist directory after build
 app.use(express.static(join(__dirname, '../dist')));
 
+const HEARTBEAT_INTERVAL = 10000;
+const CLIENT_TIMEOUT = 35000;
+
+// Modify your socket.io initialization
 const io = new Server(httpServer, {
   cors: {
     origin: '*',
     methods: ['GET', 'POST'],
     credentials: true
   },
-  transports: ['websocket', 'polling']
+  transports: ['websocket', 'polling'],
+  pingTimeout: 30000,
+  pingInterval: 10000,
+  connectTimeout: 20000
 });
+
 
 const lobbies = new Map();
 const COLORS = [
@@ -50,6 +58,45 @@ const DEFAULT_PLAYLIST = [
 ];
 
 io.on('connection', (socket) => {
+  let lastHeartbeat = Date.now();
+  
+  socket.on('ping', () => {
+    lastHeartbeat = Date.now();
+    socket.emit('pong');
+  });
+
+  const heartbeatCheck = setInterval(() => {
+    const timeSinceLastHeartbeat = Date.now() - lastHeartbeat;
+    if (timeSinceLastHeartbeat > CLIENT_TIMEOUT) {
+      console.log(`Client ${socket.id} timed out`);
+      socket.disconnect(true);
+    }
+  }, HEARTBEAT_INTERVAL);
+
+  socket.on('disconnect', () => {
+    clearInterval(heartbeatCheck);
+    
+    // Find the user in the lobbies and notify others
+    for (const [lobbyId, lobby] of lobbies.entries()) {
+      const user = lobby.users.find(u => u.username === socket.username);
+      if (user) {
+        io.to(lobbyId).emit('user_disconnected', socket.username);
+        break;
+      }
+    }
+  });
+
+  socket.on('connect', () => {
+    // If the user was previously in a lobby, notify others of reconnection
+    for (const [lobbyId, lobby] of lobbies.entries()) {
+      const user = lobby.users.find(u => u.username === socket.username);
+      if (user) {
+        io.to(lobbyId).emit('user_reconnected', socket.username);
+        break;
+      }
+    }
+  });
+
   socket.on('request_lobby_state', ({ lobbyId }) => {
     const lobby = lobbies.get(lobbyId);
     if (lobby) {

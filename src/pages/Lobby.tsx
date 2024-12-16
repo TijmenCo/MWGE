@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { Copy, Users, Play, Music, Gamepad, Youtube, RotateCcw } from 'lucide-react';
-import { socket } from '../socket';
+import { isSocketConnected, socket } from '../socket';
 import useStore from '../store';
 import Game from '../components/Game';
 import SongGame from '../components/SongGame';
@@ -11,6 +11,8 @@ import JoinLobbyForm from '../components/JoinLobbyForm';
 import { fetchPlaylistVideos } from '../utils/youtube';
 import { fetchSpotifyPlaylist, fetchUserTopTracks } from '../utils/spotify';
 import DuckOverlay from '../components/DuckOverlay';
+import { useConnectionStatus } from '../components/useConnectionStatus';
+import PlayerList from '../components/PlayerList';
 
 interface User {
   username: string;
@@ -62,6 +64,37 @@ const Lobby = () => {
   const [spotifyToken, setSpotifyToken] = useState<string>('');
   const [hasJoined, setHasJoined] = useState(false);
   const [sourceType, setSourceType] = useState<'playlist' | 'profiles'>('playlist');
+  const { isConnected, disconnectedUsers } = useConnectionStatus();
+
+  React.useEffect(() => {
+    const handleConnectionChange = () => {
+      if (!isSocketConnected()) {
+        // Show reconnecting message to user
+        console.log('Connection lost, attempting to reconnect...');
+      }
+    };
+  
+    // Save lobby data when joining
+    if (lobbyId && currentUser) {
+      localStorage.setItem('currentLobbyId', lobbyId);
+      localStorage.setItem('currentUser', currentUser);
+      if (useStore.getState().spotifyProfile) {
+        localStorage.setItem('spotifyProfile', useStore.getState().spotifyProfile);
+      }
+    }
+  
+    socket.on('connect', handleConnectionChange);
+    socket.on('disconnect', handleConnectionChange);
+  
+    return () => {
+      socket.off('connect', handleConnectionChange);
+      socket.off('disconnect', handleConnectionChange);
+      // Clean up stored data when leaving lobby
+      localStorage.removeItem('currentLobbyId');
+      localStorage.removeItem('currentUser');
+      localStorage.removeItem('spotifyProfile');
+    };
+  }, [lobbyId, currentUser]);
 
   React.useEffect(() => {
     setGameOver(false);
@@ -581,35 +614,18 @@ const Lobby = () => {
               <ColorPicker />
             </div>
 
-            <div className="bg-black/20 rounded-lg p-4 border border-white/10">
-              <h3 className="text-white font-semibold mb-4">Players</h3>
-              <div className="space-y-2">
-                {lobbyState.users.map((user, index) => (
-                  <div
-                    key={index}
-                    className={`p-2 rounded-md ${user.username === currentUser
-                        ? 'bg-purple-500/20 text-purple-300'
-                        : 'bg-white/5 text-gray-300'
-                      } flex justify-between items-center`}
-                  >
-                    <div className="flex items-center space-x-2">
-                      <div
-                        className="w-3 h-3 rounded-full"
-                        style={{ backgroundColor: user.color }}
-                      />
-                      <span className="text-sm">{user.username}</span>
-                    </div>
-                    {user.isHost && (
-                      <span className="text-xs bg-yellow-500/20 text-yellow-300 px-2 py-1 rounded">
-                        Host
-                      </span>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
+            <PlayerList
+      users={lobbyState.users}
+      currentUser={currentUser}
+      disconnectedUsers={disconnectedUsers}
+    />
+          </div>    
         )}
+        {!isConnected && (
+  <div className="fixed bottom-4 right-4 bg-red-500/90 text-white px-4 py-2 rounded-lg shadow-lg animate-pulse z-50">
+    Connection lost. Attempting to reconnect...
+  </div>
+)}
          {lobbyState.gameState === 'waiting' && (
         <DuckOverlay users={lobbyState.users} />
          )}
