@@ -32,7 +32,10 @@ const io = new Server(httpServer, {
     methods: ['GET', 'POST'],
     credentials: true
   },
-  transports: ['websocket', 'polling']
+  transports: ['websocket', 'polling'],
+  pingTimeout: 50000,
+  pingInterval: 10000,
+  connectTimeout: 50000
 });
 
 const lobbies = new Map();

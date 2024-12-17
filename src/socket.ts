@@ -12,12 +12,12 @@ const socket = io({
   reconnectionDelayMax: 5000,
 
   // Timeout settings
-  timeout: 20000,
+  timeout: 80000,
 
   // Engine.io-specific settings (use `transportOptions`)
   transportOptions: {
     websocket: {
-      pingTimeout: 30000,
+      pingTimeout: 80000,
       pingInterval: 10000,
     },
   },
