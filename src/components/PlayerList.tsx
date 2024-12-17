@@ -29,7 +29,7 @@ const PlayerList: React.FC<PlayerListProps> = ({
               user.username === currentUser
                 ? 'bg-purple-500/20 text-purple-300'
                 : 'bg-white/5 text-gray-300'
-            } flex justify-between items-center relative`}
+            } flex items-center justify-between relative`}
           >
             <div className="flex items-center space-x-2">
               <div
@@ -37,12 +37,12 @@ const PlayerList: React.FC<PlayerListProps> = ({
                 style={{ backgroundColor: user.color }}
               />
               <span className="text-sm">{user.username}</span>
+              {user.isHost && (
+                <span className="text-xs bg-yellow-500/20 text-yellow-300 px-2 py-1 rounded">
+                  Host
+                </span>
+              )}
             </div>
-            {user.isHost && (
-              <span className="text-xs bg-yellow-500/20 text-yellow-300 px-2 py-1 rounded">
-                Host
-              </span>
-            )}
             <ConnectionStatus
               isConnected={!disconnectedUsers.has(user.username)}
               username={user.username}
