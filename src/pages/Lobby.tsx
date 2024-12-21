@@ -91,7 +91,6 @@ const Lobby = () => {
         setIsLoadingPlaylist(false);
         setPlaylistError(null);
         setCountdown(null);
-        setPlaylistLoaded(false);
       }
     };
 
