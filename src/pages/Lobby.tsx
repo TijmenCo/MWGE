@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { Copy, Users, Play, Music, Gamepad, Youtube, RotateCcw } from 'lucide-react';
+import { Copy, Users, Play, Music, Gamepad, Youtube, RotateCcw, Plus, Minus } from 'lucide-react';
 import { socket } from '../socket';
 import useStore from '../store';
 import Game from '../components/Game';
@@ -428,49 +428,109 @@ const Lobby = () => {
                 <label className="block text-sm font-medium text-gray-200 mb-2">
                   Number of Rounds
                 </label>
-                <input
-                  type="number"
-                  min="1"
-                  max="20"
-                  value={roundConfig.totalRounds}
-                  onChange={(e) => setRoundConfig(prev => ({
-                    ...prev,
-                    totalRounds: Math.max(1, Math.min(100, parseInt(e.target.value) || 1))
-                  }))}
-                  className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-md text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500"
-                />
+                <div className="flex items-center">
+                  <button
+                    onClick={() => setRoundConfig(prev => ({
+                      ...prev,
+                      totalRounds: Math.max(1, prev.totalRounds - 1)
+                    }))}
+                    className="p-2 bg-white/5 rounded-l-md hover:bg-white/10 transition-colors"
+                  >
+                    <Minus className="w-4 h-4 text-gray-300" />
+                  </button>
+                  <input
+                    type="number"
+                    min="1"
+                    max="20"
+                    value={roundConfig.totalRounds}
+                    onChange={(e) => setRoundConfig(prev => ({
+                      ...prev,
+                      totalRounds: Math.max(1, Math.min(100, parseInt(e.target.value) || 1))
+                    }))}
+                    className="w-full px-4 py-2 bg-white/5 border-x border-white/10 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 text-center"
+                  />
+                  <button
+                    onClick={() => setRoundConfig(prev => ({
+                      ...prev,
+                      totalRounds: Math.min(100, prev.totalRounds + 1)
+                    }))}
+                    className="p-2 bg-white/5 rounded-r-md hover:bg-white/10 transition-colors"
+                  >
+                    <Plus className="w-4 h-4 text-gray-300" />
+                  </button>
+                </div>
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-200 mb-2">
                   Round Duration (seconds)
                 </label>
-                <input
-                  type="number"
-                  min="1"
-                  max="60"
-                  value={roundConfig.roundTime}
-                  onChange={(e) => setRoundConfig(prev => ({
-                    ...prev,
-                    roundTime: Math.max(1, Math.min(120, parseInt(e.target.value) || 10))
-                  }))}
-                  className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-md text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500"
-                />
+                <div className="flex items-center">
+                  <button
+                    onClick={() => setRoundConfig(prev => ({
+                      ...prev,
+                      roundTime: Math.max(1, prev.roundTime - 1)
+                    }))}
+                    className="p-2 bg-white/5 rounded-l-md hover:bg-white/10 transition-colors"
+                  >
+                    <Minus className="w-4 h-4 text-gray-300" />
+                  </button>
+                  <input
+                    type="number"
+                    min="1"
+                    max="60"
+                    value={roundConfig.roundTime}
+                    onChange={(e) => setRoundConfig(prev => ({
+                      ...prev,
+                      roundTime: Math.max(1, Math.min(120, parseInt(e.target.value) || 10))
+                    }))}
+                    className="w-full px-4 py-2 bg-white/5 border-x border-white/10 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 text-center"
+                  />
+                  <button
+                    onClick={() => setRoundConfig(prev => ({
+                      ...prev,
+                      roundTime: Math.min(120, prev.roundTime + 1)
+                    }))}
+                    className="p-2 bg-white/5 rounded-r-md hover:bg-white/10 transition-colors"
+                  >
+                    <Plus className="w-4 h-4 text-gray-300" />
+                  </button>
+                </div>
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-200 mb-2">
                   Max Guesses per Round
                 </label>
-                <input
-                  type="number"
-                  min="1"
-                  max="99999"
-                  value={roundConfig.maxGuesses}
-                  onChange={(e) => setRoundConfig(prev => ({
-                    ...prev,
-                    maxGuesses: Math.max(1, Math.min(10, parseInt(e.target.value) || 1))
-                  }))}
-                  className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-md text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500"
-                />
+                <div className="flex items-center">
+                  <button
+                    onClick={() => setRoundConfig(prev => ({
+                      ...prev,
+                      maxGuesses: Math.max(1, prev.maxGuesses - 1)
+                    }))}
+                    className="p-2 bg-white/5 rounded-l-md hover:bg-white/10 transition-colors"
+                  >
+                    <Minus className="w-4 h-4 text-gray-300" />
+                  </button>
+                  <input
+                    type="number"
+                    min="1"
+                    max="99999"
+                    value={roundConfig.maxGuesses}
+                    onChange={(e) => setRoundConfig(prev => ({
+                      ...prev,
+                      maxGuesses: Math.max(1, Math.min(10, parseInt(e.target.value) || 1))
+                    }))}
+                    className="w-full px-4 py-2 bg-white/5 border-x border-white/10 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 text-center"
+                  />
+                  <button
+                    onClick={() => setRoundConfig(prev => ({
+                      ...prev,
+                      maxGuesses: Math.min(10, prev.maxGuesses + 1)
+                    }))}
+                    className="p-2 bg-white/5 rounded-r-md hover:bg-white/10 transition-colors"
+                  >
+                    <Plus className="w-4 h-4 text-gray-300" />
+                  </button>
+                </div>
               </div>
             </div>
 
@@ -537,17 +597,37 @@ const Lobby = () => {
             <label className="block text-sm font-medium text-gray-200 mb-2">
               Number of Minigame Rounds
             </label>
-            <input
-              type="number"
-              min="1"
-              max="100"
-              value={minigameRoundConfig.totalRounds}
-              onChange={(e) => setMinigameRoundConfig(prev => ({
-                ...prev,
-                totalRounds: Math.max(1, Math.min(100, parseInt(e.target.value) || 1))
-              }))}
-              className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-md text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500"
-            />
+            <div className="flex items-center">
+              <button
+                onClick={() => setMinigameRoundConfig(prev => ({
+                  ...prev,
+                  totalRounds: Math.max(1, prev.totalRounds - 1)
+                }))}
+                className="p-2 bg-white/5 rounded-l-md hover:bg-white/10 transition-colors"
+              >
+                <Minus className="w-4 h-4 text-gray-300" />
+              </button>
+              <input
+                type="number"
+                min="1"
+                max="100"
+                value={minigameRoundConfig.totalRounds}
+                onChange={(e) => setMinigameRoundConfig(prev => ({
+                  ...prev,
+                  totalRounds: Math.max(1, Math.min(100, parseInt(e.target.value) || 1))
+                }))}
+                className="w-full px-4 py-2 bg-white/5 border-x border-white/10 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 text-center"
+              />
+              <button
+                onClick={() => setMinigameRoundConfig(prev => ({
+                  ...prev,
+                  totalRounds: Math.min(100, prev.totalRounds + 1)
+                }))}
+                className="p-2 bg-white/5 rounded-r-md hover:bg-white/10 transition-colors"
+              >
+                <Plus className="w-4 h-4 text-gray-300" />
+              </button>
+            </div>
           </div>
         )}
 
@@ -632,3 +712,4 @@ const Lobby = () => {
 };
 
 export default Lobby;
+
