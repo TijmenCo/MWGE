@@ -71,7 +71,11 @@ const Lobby = () => {
     }
 
     const handleLobbyUpdate = (state: LobbyState) => {
-      setLobbyState(state);
+      setLobbyState(prevState => ({
+        ...prevState,
+        ...state,
+        gameMode: state.gameState === 'waiting' ? state.gameMode : prevState.gameMode
+      }));
       if (state.spotifyToken) {
         setSpotifyToken(state.spotifyToken);
       }
@@ -87,6 +91,7 @@ const Lobby = () => {
         setIsLoadingPlaylist(false);
         setPlaylistError(null);
         setCountdown(null);
+        setPlaylistLoaded(false);
       }
     };
 
@@ -110,9 +115,6 @@ const Lobby = () => {
       socket.off('game_countdown');
     };
   }, [lobbyId, currentUser, gameOver]);
-
-  
-
 
   // If the user hasn't joined and there's no current user, show the join form
   if (!hasJoined && !currentUser) {
@@ -225,17 +227,26 @@ const Lobby = () => {
     setIsLoadingPlaylist(false);
     setPlaylistError(null);
     setCountdown(null);
+    setPlaylistLoaded(false);
     // Reset game-specific states
     setLobbyState(prev => ({
       ...prev,
       gameState: 'waiting',
       gameMode: null,
       scores: {},
+      currentRound: 0,
+      totalRounds: 5,
+      roundTime: 20,
+      maxGuesses: 3,
     }));
   };
 
 
   const selectGameMode = async (mode: 'minigames' | 'songguess') => {
+    setLobbyState(prevState => ({
+      ...prevState,
+      gameMode: mode
+    }));
     if (mode === 'songguess' && playlistUrl) {
       setIsLoadingPlaylist(true);
       setPlaylistError(null);
@@ -371,7 +382,10 @@ const Lobby = () => {
                     Classic
                   </button>
                   <button
-                    onClick={() => setGameVariant('whoAdded')}
+                    onClick={() => {
+                      setGameVariant('whoAdded');
+                      setSourceType('profiles');
+                    }}
                     className={`flex-1 px-2 py-1 sm:px-4 sm:py-2 text-xs sm:text-sm rounded-md transition-all duration-200 ${
                       gameVariant === 'whoAdded'
                         ? 'bg-purple-600 text-white'
