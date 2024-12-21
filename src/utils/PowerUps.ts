@@ -13,17 +13,6 @@ export const POWER_UPS: PowerUp[] = [
     uses: 1
   },
   {
-    id: 'take-shot',
-    name: 'Take a Shot',
-    description: 'Make someone take a shot',
-    cost: 50,
-    type: 'drink',
-    effect: 'make_shot',
-    icon: '🥃',
-    target: 'single',
-    uses: 1
-  },
-  {
     id: 'everyone-drinks',
     name: 'Everyone Drinks',
     description: 'Everyone takes a sip!',
@@ -32,6 +21,17 @@ export const POWER_UPS: PowerUp[] = [
     effect: 'all_drink',
     icon: '🍻',
     target: 'all',
+    uses: 1
+  },
+  {
+    id: 'take-shot',
+    name: 'Take a Shot',
+    description: 'Make someone take a shot',
+    cost: 50,
+    type: 'drink',
+    effect: 'make_shot',
+    icon: '🥃',
+    target: 'single',
     uses: 1
   },
   {
