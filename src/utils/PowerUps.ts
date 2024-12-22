@@ -54,7 +54,7 @@ export const MINI_UPS: PowerUp[] = [
     description: 'Start a game of Bussen! The person who casted this game is the dealer, every question that the dealer gets right, he can give a sip to another player! Players take turns guessing card colors (red/black), high/low, inside/outside, and suit. Wrong guesses mean drinks!',
     cost: 100,
     type: 'drink',
-    effect: 'start_bussen',
+    effect: 'all_game',
     icon: '🚌',
     target: 'all',
     uses: 1
@@ -64,8 +64,8 @@ export const MINI_UPS: PowerUp[] = [
     name: 'Categories',
     description: 'The caster of this game gets to pick a category (e.g., "Car Brands"). Go around the circle - each player names something in that category. Whoever can\'t think of one drinks! Furthermore, all the brands that the caster gets right, he can give out to other players!',
     cost: 55,
-    type: 'drink',
-    effect: 'start_categories',
+    type: 'all_game',
+    effect: 'all_game',
     icon: '📝',
     target: 'all',
     uses: 1
@@ -75,8 +75,8 @@ export const MINI_UPS: PowerUp[] = [
     name: 'Never Have I Ever',
     description: 'Everyone holds up 3 fingers. Take turns saying things you\'ve never done. Those who have done it put a finger down. First to 0 drinks!',
     cost: 55,
-    type: 'drink',
-    effect: 'start_never',
+    type: 'all_game',
+    effect: 'all_game',
     icon: '🖐️',
     target: 'all',
     uses: 1

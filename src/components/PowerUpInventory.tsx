@@ -3,6 +3,7 @@ import { PowerUp, PlayerInventory } from '../types/shop';
 import { getPowerUpById } from '../utils/PowerUps';
 import { socket } from '../socket';
 import DrinkCommandModal from './DrinkCommandModal';
+import Game from './Game';
 
 interface PowerUpInventoryProps {
   inventory: PlayerInventory;
@@ -76,9 +77,10 @@ const PowerUpInventory: React.FC<PowerUpInventoryProps> = ({
 
   React.useEffect(() => {
     const handleDrinkCommand = (data: {
-      type: 'sip' | 'shot' | 'all' | 'waterfall';
+      type: 'sip' | 'shot' | 'all' | 'waterfall' | 'all_game';
       fromUser: string;
       toUser?: string;
+      gameDescription?: string;
     }) => {
       let message = '';
       if (data.type === 'sip' || data.type === 'shot') {
@@ -89,6 +91,8 @@ const PowerUpInventory: React.FC<PowerUpInventoryProps> = ({
         message = `${data.fromUser} says everyone needs to drink! 🍻`;
       } else if (data.type === 'waterfall') {
         message = `${data.fromUser} started a waterfall! Keep drinking until the person before you stops! 🌊`;
+      } else if (data.type === 'all_game') {
+        message = `${data.fromUser} started a Game! ${data.gameDescription}`;
       }
 
       if (message) {

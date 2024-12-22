@@ -3,7 +3,7 @@ export interface PowerUp {
   name: string;
   description: string;
   cost: number;
-  type: 'drink';
+  type: 'drink' | 'all_game';
   effect: string;
   icon: string;
   target: 'single' | 'all';

@@ -28,8 +28,6 @@ export function handlePowerUpPurchase(socket, io, lobbies) {
       return;
     }
 
-    console.log(inventory.points)
-
     if (inventory.points >= powerUp.cost) {
       inventory.points -= powerUp.cost;
       lobby.scores[username] = inventory.points;
@@ -57,6 +55,8 @@ export function handlePowerUpPurchase(socket, io, lobbies) {
     const powerUp = POWER_UPS.find(p => p.id === powerUpId);
     if (!powerUp) return;
 
+    console.log(powerUp)
+
     // Consume power-up
     inventory.powerUps[powerUpId]--;
 
@@ -78,6 +78,13 @@ export function handlePowerUpPurchase(socket, io, lobbies) {
           fromUser: username
         });
         break;
+        case 'all_game':
+          io.to(lobbyId).emit('drink_command', {
+            type: 'all_game',
+            fromUser: username,
+            gameDescription: powerUp.description
+          });
+          break;
       case 'waterfall':
         io.to(lobbyId).emit('drink_command', {
           type: 'waterfall',
