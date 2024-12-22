@@ -135,17 +135,19 @@ io.on('connection', (socket) => {
       setTimeout(() => {
         // Reset all game-related state
       lobby.gameState = 'waiting';
-      lobby.gameMode = null;
+      lobby.gameMode = 'minigames';
       lobby.currentSong = null;
       lobby.scores = {};
       lobby.guesses = {};
       lobby.playlist = [];
-      lobby.currentRound = 0;
-      lobby.currentSongIndex = 0;
+      lobby.currentRound = 1;
+      lobby.currentSongIndex = 1;
       lobby.remainingGuesses = {};
       lobby.minigameState = null;
       lobby.correctGuessOrder = { title: [], artist: [], addedBy: [] };
       lobby.quizState = null;
+      lobby.gameVariant = "classic";
+      lobby.timer = null;
   
         // Reset user scores
         lobby.users.forEach(user => {

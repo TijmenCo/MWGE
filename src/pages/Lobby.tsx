@@ -46,6 +46,7 @@ const Lobby = () => {
   const { currentUser } = useStore();
   const [playlistUrl, setPlaylistUrl] = useState('');
   const [gameOver, setGameOver] = useState(false);
+  const [resetState, setResetState] = useState(false);
   const [playListLoaded, setPlaylistLoaded] = useState(false);
   const [playlistError, setPlaylistError] = useState<string | null>(null);
   const [isLoadingPlaylist, setIsLoadingPlaylist] = useState(false);
@@ -65,10 +66,13 @@ const Lobby = () => {
 
   React.useEffect(() => {
     setGameOver(false);
+    setResetState(false);
     
     if (lobbyId) {
       socket.emit('request_lobby_state', { lobbyId });
     }
+
+    console.log()
 
     const handleLobbyUpdate = (state: LobbyState) => {
       setLobbyState(prevState => ({
@@ -83,6 +87,9 @@ const Lobby = () => {
       if (state.users.some(user => user.username === currentUser)) {
         setHasJoined(true);
       }
+
+      console.log("Updated gameState:", state.gameState);
+
       
       // Reset states when returning to lobby
       if (state.gameState === 'waiting') {
@@ -113,7 +120,7 @@ const Lobby = () => {
       socket.off('lobby_update', handleLobbyUpdate);
       socket.off('game_countdown');
     };
-  }, [lobbyId, currentUser, gameOver]);
+  }, [lobbyId, currentUser, gameOver, resetState]);
 
   // If the user hasn't joined and there's no current user, show the join form
   if (!hasJoined && !currentUser) {
@@ -232,8 +239,9 @@ const Lobby = () => {
       ...prev,
       gameState: 'waiting',
       gameMode: null,
+      minigameState: null,
       scores: {},
-      currentRound: 0,
+      currentRound: 1,
       totalRounds: 5,
       roundTime: 20,
       maxGuesses: 3,
@@ -287,7 +295,10 @@ const Lobby = () => {
 
   const startGame = () => {
     setGameOver(false);
+    console.log("LOBBYSTATE");
+    console.log(lobbyState);
     socket.emit('start_game', { lobbyId }, minigameRoundConfig.totalRounds);
+    setResetState(true)
   };
 
   const isHost = lobbyState.users.find(u => u.username === currentUser)?.isHost ?? false;
