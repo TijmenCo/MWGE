@@ -28,7 +28,7 @@ function App() {
                   className="w-12 h-12"
                 />
                 <span className="ml-2 text-xl font-bold text-white">Doozy (beta)</span>
-                <span className="text-gray-300 text-sm ml-2">v1.0</span>
+                <span className="text-gray-300 text-sm ml-2">v1.1</span>
                 <div className="relative ml-4">
                   <span 
                     className="absolute -top-4 left-0 text-yellow-300 font-bold text-sm transform origin-left"
