@@ -8,6 +8,7 @@ import fetch from 'node-fetch';
 import { startMinigameSequence, stopMinigameSequence, updateMinigameScore, startNextMinigame, handleVote, proceedToShop } from './games.js';
 import { handlePowerUpPurchase } from './powerUps.js';
 import { handleQuizAnswer, startQuizQuestion, handleQuizStateRequest} from './quiz.js'
+import { text } from 'stream/consumers';
 
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -328,9 +329,17 @@ io.on('connection', (socket) => {
     // Decrease remaining guesses
     lobby.remainingGuesses[username]--;
 
+    const normalizeText = (text) => {
+      return text
+        .toLowerCase()
+        .replace(/\(feat\..*?\)/g, '') // Remove "feat." segments
+        .replace(/[’']/g, "'")         // Normalize apostrophes
+        .trim();
+    };
+
     const { title, artist, addedBy } = lobby.currentSong;
     const normalizedGuess = guess.toLowerCase().trim();
-    const normalizedTitle = title.toLowerCase().replace(/\(feat\..*?\)/g, '').trim();
+    const normalizedTitle = normalizeText(text)
     const normalizedArtists = artist.toLowerCase().split(',').map(a => a.trim());
 
     const totalPlayers = lobby.users.length;
