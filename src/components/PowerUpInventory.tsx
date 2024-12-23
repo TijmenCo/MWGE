@@ -67,7 +67,7 @@ const PowerUpInventory: React.FC<PowerUpInventoryProps> = ({
   const [showDrinkModal, setShowDrinkModal] = useState(false);
   const [selectedPowerUp, setSelectedPowerUp] = useState<PowerUp | null>(null);
   const [showDrinkCommandModal, setShowDrinkCommandModal] = useState(false);
-  const [drinkCommandMessage, setDrinkCommandMessage] = useState('');
+  const [drinkCommandMessages, setDrinkCommandMessages] = useState<{ id: string; content: string }[]>([]);
   const [localInventory, setLocalInventory] = useState<PlayerInventory>(inventory);
 
   useEffect(() => {
@@ -76,7 +76,8 @@ const PowerUpInventory: React.FC<PowerUpInventoryProps> = ({
 
   useEffect(() => {
     const handleDrinkCommand = (data: {
-      type: 'sip' | 'shot' | 'all' | 'waterfall' | 'all_game';
+      id: string;
+      type: 'sip' | 'shot' | 'all' | 'waterfall' | 'all_game' | 'chug';
       fromUser: string;
       toUser?: string;
       gameDescription?: string;
@@ -92,13 +93,16 @@ const PowerUpInventory: React.FC<PowerUpInventoryProps> = ({
         message = `${data.fromUser} started a waterfall! Keep drinking until the person before you stops! 🌊`;
       } else if (data.type === 'all_game') {
         message = `${data.fromUser} started a Game! ${data.gameDescription}`;
+      } else if (data.type === 'chug') {
+        message = `${data.fromUser} says you need to chug! 🍻`;
       }
 
       if (message) {
-        setDrinkCommandMessage(message);
+        setDrinkCommandMessages(prev => [...prev, { id: data.id, content: message }]);
         setShowDrinkCommandModal(true);
       }
     };
+
     socket.on('drink_command', handleDrinkCommand);
 
     return () => {
@@ -134,6 +138,11 @@ const PowerUpInventory: React.FC<PowerUpInventoryProps> = ({
 
     setShowDrinkModal(false);
     setSelectedPowerUp(null);
+  };
+
+  const handleCloseDrinkCommandModal = () => {
+    setDrinkCommandMessages([]);
+    setShowDrinkCommandModal(false);
   };
 
   return (
@@ -187,12 +196,11 @@ const PowerUpInventory: React.FC<PowerUpInventoryProps> = ({
       </div>
       <DrinkCommandModal
         isOpen={showDrinkCommandModal}
-        onClose={() => setShowDrinkCommandModal(false)}
-        message={drinkCommandMessage}
+        onClose={handleCloseDrinkCommandModal}
+        messages={drinkCommandMessages}
       />
     </>
   );
 };
 
 export default PowerUpInventory;
-
