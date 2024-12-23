@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { socket } from '../socket';
 import useStore from '../store';
 import { getSpotifyUserProfile } from '../utils/spotify';
+import Cookies from 'js-cookie';
 
 interface JoinLobbyFormProps {
   lobbyId: string;
@@ -9,8 +10,8 @@ interface JoinLobbyFormProps {
 }
 
 const JoinLobbyForm: React.FC<JoinLobbyFormProps> = ({ lobbyId, onJoinSuccess }) => {
-  const [username, setUsername] = useState('');
-  const [spotifyProfileUrl, setSpotifyProfileUrl] = useState('');
+  const [username, setUsername] = useState(() => Cookies.get('doozy_username') || '');
+  const [spotifyProfileUrl, setSpotifyProfileUrl] = useState(() => Cookies.get('doozy_spotify_url') || '');
   const [spotifyDisplayName, setSpotifyDisplayName] = useState<string | null>(null);
   const [isLoadingProfile, setIsLoadingProfile] = useState(false);
   const [profileError, setProfileError] = useState<string | null>(null);
@@ -49,6 +50,12 @@ const JoinLobbyForm: React.FC<JoinLobbyFormProps> = ({ lobbyId, onJoinSuccess })
   const handleJoin = (e: React.FormEvent) => {
     e.preventDefault();
     if (!username.trim()) return;
+
+    // Save values to cookies (expires in 30 days)
+    Cookies.set('doozy_username', username, { expires: 30 });
+    if (spotifyProfileUrl) {
+      Cookies.set('doozy_spotify_url', spotifyProfileUrl, { expires: 30 });
+    }
 
     setCurrentUser(username);
     setStoreSpotifyDisplayName(spotifyDisplayName || username);
