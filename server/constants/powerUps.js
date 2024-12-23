@@ -48,7 +48,7 @@ export const POWER_UPS = [
     name: 'Bussen',
     description: 'Start a game of Bussen! The person who casted this game is the dealer, every question that the dealer gets right, he can give a sip to another player! Players take turns guessing card colors (red/black), high/low, inside/outside, and suit. Wrong guesses mean drinks!',
     cost: 100,
-    type: 'drink',
+    type: 'all_game',
     effect: 'all_game',
     icon: '🚌',
     target: 'all',

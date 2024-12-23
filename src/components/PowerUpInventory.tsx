@@ -1,15 +1,15 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { PowerUp, PlayerInventory } from '../types/shop';
 import { getPowerUpById } from '../utils/PowerUps';
 import { socket } from '../socket';
 import DrinkCommandModal from './DrinkCommandModal';
-import Game from './Game';
 
 interface PowerUpInventoryProps {
   inventory: PlayerInventory;
   lobbyId: string;
   currentUser: string;
   users: { username: string }[];
+  inShop: boolean;
 }
 
 interface DrinkModalProps {
@@ -61,7 +61,8 @@ const PowerUpInventory: React.FC<PowerUpInventoryProps> = ({
   inventory,
   lobbyId,
   currentUser,
-  users
+  users,
+  inShop
 }) => {
   const [showDrinkModal, setShowDrinkModal] = useState(false);
   const [selectedPowerUp, setSelectedPowerUp] = useState<PowerUp | null>(null);
@@ -69,13 +70,11 @@ const PowerUpInventory: React.FC<PowerUpInventoryProps> = ({
   const [drinkCommandMessage, setDrinkCommandMessage] = useState('');
   const [localInventory, setLocalInventory] = useState<PlayerInventory>(inventory);
 
-  React.useEffect(() => {
-    console.log("LOG FROM INVENTORY")
+  useEffect(() => {
     setLocalInventory(inventory);
-    console.log(inventory)
   }, [inventory]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     const handleDrinkCommand = (data: {
       type: 'sip' | 'shot' | 'all' | 'waterfall' | 'all_game';
       fromUser: string;
@@ -147,11 +146,17 @@ const PowerUpInventory: React.FC<PowerUpInventoryProps> = ({
             const powerUp = getPowerUpById(powerUpId);
             if (!powerUp) return null;
 
+            const isDisabled = !inShop && powerUp.type === 'all_game';
+
             return (
               <button
                 key={powerUpId}
                 onClick={() => handleUsePowerUp(powerUpId)}
-                className={`p-2 rounded-md border border-white/10 transition-colors`}
+                disabled={isDisabled}
+                className={`p-2 rounded-md border border-white/10 transition-colors ${
+                  isDisabled ? 'opacity-50 cursor-not-allowed' : 'hover:bg-white/10'
+                }`}
+                title={isDisabled ? 'This power-up can only be used during the shop phase' : undefined}
               >
                 <div className="flex items-center space-x-2">
                   <span className="text-xl">{powerUp.icon}</span>
@@ -190,3 +195,4 @@ const PowerUpInventory: React.FC<PowerUpInventoryProps> = ({
 };
 
 export default PowerUpInventory;
+

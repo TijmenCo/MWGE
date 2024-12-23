@@ -316,6 +316,7 @@ const Game: React.FC<GameProps> = ({ lobbyId, currentUser, scores, isHost }) => 
           lobbyId={lobbyId}
           currentUser={currentUser}
           users={users}
+          inShop={!currentGame}
         />
       </div>
 
