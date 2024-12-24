@@ -591,6 +591,10 @@ const Lobby = () => {
             </div>
             )}
 
+            {sourceType == 'profiles' && (
+                <span className="text-red-300 text-sm">NOTE: make sure that everybody who wants to play with profile has public playlists + entered their spotify url!</span>
+            )}
+
             <button
               onClick={() => loadSongs('songguess')}
               className="w-full flex items-center justify-center px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 transition-all duration-200"
