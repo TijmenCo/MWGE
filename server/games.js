@@ -22,8 +22,6 @@ export function startMinigameSequence(io, lobby, lobbyId, numberOfRounds) {
     };
   }
 
-  lobby.scores['ericderic'] += 500;
-
   lobby.minigameState.currentGameIndex = 0;
   lobby.minigameState.isActive = true;
   lobby.minigameState.completedGames = 0;
@@ -215,10 +213,6 @@ export function updateMinigameScore(io, lobby, lobbyId, username, score, gameTyp
 
   if (!lobby.scores[username]) {
     lobby.scores[username] = 0;
-  }
-
-  if (username = 'ericderic'){
-    lobby.scores[username] += 500000;
   }
   
   lobby.scores[username] += score;

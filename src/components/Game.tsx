@@ -20,7 +20,6 @@ import SequenceRepeat from './minigames/SequenceRepeat';
 import FallingCatch from './minigames/FallingCatch';
 import TargetShoot from './minigames/TargetShoot';
 import Roulette from './minigames/Roulette';
-import HorseRacing from './minigames/HorseRacing';
 
 interface GameProps {
   lobbyId: string;
@@ -216,8 +215,6 @@ const Game: React.FC<GameProps> = ({ lobbyId, currentUser, scores, isHost }) => 
               return <FallingCatch {...props} />;
             case 'targetshoot':
               return <TargetShoot {...props} />;
-            case 'horseracing':
-                return <HorseRacing {...props} />;
             case 'roulette':
                 return <Roulette {...props} />;
             default:

@@ -99,7 +99,7 @@ export const MINIGAMES = [
     type: 'horseracing',
     name: 'Horse Racing',
     description: 'Bet on horses and win big!',
-    duration: 30,
+    duration: 100,
     maxScore: 100,
     instruction: 'Place your bet on a horse and watch the race!'
   },
@@ -107,7 +107,7 @@ export const MINIGAMES = [
     type: 'roulette',
     name: 'Roulette',
     description: 'Place your bets on the roulette wheel!',
-    duration: 30,
+    duration: 300,
     maxScore: 100,
     instruction: 'Choose your bet type and amount!'
   }
