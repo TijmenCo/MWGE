@@ -358,7 +358,7 @@ const Lobby = () => {
                   <Music className="w-3 h-3 sm:w-4 sm:h-4" />
                   <span>Song Guess</span>
                 </button>
-                {!spotifyToken && (
+                {!spotifyToken && lobbyState.gameState === 'waiting' &&  (
                   <h2>Log-In with Spotify to play Song guess</h2>
                 )}
                 {canStartGame && (

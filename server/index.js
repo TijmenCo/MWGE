@@ -11,6 +11,7 @@ import { handleQuizAnswer, startQuizQuestion, handleQuizStateRequest} from './qu
 import { text } from 'stream/consumers';
 import { handleHorseRaceBet } from './gambling/horseRacing.js';
 import { handleRouletteBet } from './gambling/roulette.js';
+import { createSafeLobbyState } from './utils/serialization.js';
 
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -71,9 +72,14 @@ io.on('connection', (socket) => {
   });
 
   socket.on('request_lobby_state', ({ lobbyId }) => {
-    const lobby = lobbies.get(lobbyId);
-    if (lobby) {
-      socket.emit('lobby_update', lobby);
+    try {
+      const lobby = lobbies.get(lobbyId);
+      if (lobby) {
+        const safeLobbyState = createSafeLobbyState(lobby);
+        socket.emit('lobby_update', safeLobbyState);
+      }
+    } catch (error) {
+      console.error('Error sending lobby state:', error);
     }
   });
 
@@ -223,34 +229,45 @@ io.on('connection', (socket) => {
   });
 
   socket.on('join_lobby', ({ lobbyId, username, spotifyProfileUrl }, callback) => {
-    const lobby = lobbies.get(lobbyId);
-    if (lobby) {
-      const userColor = COLORS[lobby.users.length % COLORS.length];
-      socket.username = username;
-      socket.spotifyProfileUrl = spotifyProfileUrl;
-      socket.lobbyId = lobbyId;
-      
-      // Extract Spotify display name from URL if available
-      const spotifyDisplayName = spotifyProfileUrl 
-        ? spotifyProfileUrl.split('/').pop() 
-        : username;
-      
-      lobby.users.push({
-        username,
-        spotifyProfileUrl,
-        spotifyDisplayName, // Add Spotify display name
-        isHost: false,
-        score: 0,
-        color: userColor
-      });
-      socket.join(lobbyId);
-      socket.emit('color_assigned', { color: userColor });
-      callback(true);
-      io.to(lobbyId).emit('lobby_update', lobby);
-    } else {
+    try {
+      const lobby = lobbies.get(lobbyId);
+      if (lobby) {
+        const userColor = COLORS[lobby.users.length % COLORS.length];
+        socket.username = username;
+        socket.spotifyProfileUrl = spotifyProfileUrl;
+        socket.lobbyId = lobbyId;
+        
+        // Extract Spotify display name from URL if available
+        const spotifyDisplayName = spotifyProfileUrl 
+          ? spotifyProfileUrl.split('/').pop() 
+          : username;
+        
+        lobby.users.push({
+          username,
+          spotifyProfileUrl,
+          spotifyDisplayName,
+          isHost: false,
+          score: 0,
+          color: userColor
+        });
+  
+        socket.join(lobbyId);
+        socket.emit('color_assigned', { color: userColor });
+        
+        // Create safe copy of lobby state for broadcasting
+        const safeLobbyState = createSafeLobbyState(lobby);
+        io.to(lobbyId).emit('lobby_update', safeLobbyState);
+        
+        callback(true);
+      } else {
+        callback(false);
+      }
+    } catch (error) {
+      console.error('Error during lobby join:', error);
       callback(false);
     }
   });
+  
 
   socket.on('select_game_mode', ({ lobbyId, mode, playlist, config, musicProvider, gameVariant }) => {
     const lobby = lobbies.get(lobbyId);
@@ -473,22 +490,50 @@ io.on('connection', (socket) => {
   });
 
   socket.on('disconnecting', () => {
-    for (const room of socket.rooms) {
-      if (lobbies.has(room)) {
+    try {
+      const rooms = Array.from(socket.rooms);
+      for (const room of rooms) {
         const lobby = lobbies.get(room);
-        lobby.users = lobby.users.filter(u => u.username !== socket.username);
-        if (lobby.users.length === 0) {
-          if (lobby.timer) {
-            clearInterval(lobby.timer);
+        if (lobby) {
+          // Create a safe copy of users without circular references
+          lobby.users = lobby.users.filter(u => u.username !== socket.username);
+          
+          if (lobby.users.length === 0) {
+            // Clean up timers and intervals
+            if (lobby.timer) {
+              clearInterval(lobby.timer);
+            }
+            // Clean up any game-specific states
+            if (lobby.minigameState) {
+              lobby.minigameState = null;
+            }
+            lobbies.delete(room);
+          } else {
+            // Reassign host if needed
+            if (!lobby.users.some(u => u.isHost)) {
+              lobby.users[0].isHost = true;
+            }
+            
+            // Create a safe copy of the lobby state for broadcasting
+            const safeLobbyState = {
+              users: lobby.users,
+              gameState: lobby.gameState,
+              gameMode: lobby.gameMode,
+              scores: lobby.scores || {},
+              currentRound: lobby.currentRound,
+              totalRounds: lobby.totalRounds,
+              roundTime: lobby.roundTime,
+              maxGuesses: lobby.maxGuesses,
+              musicProvider: lobby.musicProvider,
+              gameVariant: lobby.gameVariant
+            };
+            
+            io.to(room).emit('lobby_update', safeLobbyState);
           }
-          lobbies.delete(room);
-        } else {
-          if (!lobby.users.some(u => u.isHost)) {
-            lobby.users[0].isHost = true;
-          }
-          io.to(room).emit('lobby_update', lobby);
         }
       }
+    } catch (error) {
+      console.error('Error during disconnection:', error);
     }
   });
 });
