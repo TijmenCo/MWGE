@@ -4,7 +4,7 @@ const ACTION_GAMES = ['buttonmash', 'colorclick', 'quickmath', 'typespeed', 'mem
 const GAMBLING_GAMES = ['roulette']
 
 // Sequence template: 2 question games followed by 1 action game
-const SEQUENCE_TEMPLATE = ['gambling', 'question', 'action'];
+const SEQUENCE_TEMPLATE = ['question', 'action', 'question', 'action', 'gambling'];
 
 export function generateGameSequence(totalRounds) {
   const sequence = [];

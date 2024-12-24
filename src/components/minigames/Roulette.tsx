@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { socket } from '../../socket';
-import { FastForward } from 'lucide-react';
+import { FastForward, Minus, Plus } from 'lucide-react';
 import RouletteWheel from '../RouletteWheel';
 
 interface RouletteProps {
   lobbyId: string;
   currentUser: string;
+  scores: Record<string, number>;
   onScore: (score: number) => void;
   timeLeft: number;
   users: { username: string; isHost?: boolean }[];
@@ -27,6 +28,7 @@ const Roulette: React.FC<RouletteProps> = ({
   currentUser,
   onScore,
   timeLeft,
+  scores,
   users
 }) => {
   const [selectedBetType, setSelectedBetType] = useState<BetType>('red');
@@ -91,6 +93,12 @@ const Roulette: React.FC<RouletteProps> = ({
     return RED_NUMBERS.includes(num) ? 'bg-red-600' : 'bg-gray-900';
   };
 
+  const adjustBetAmount = (amount: number) => {
+    if (!hasBet) {
+      setBetAmount(prev => Math.max(10, prev + amount));
+    }
+  };
+
   if (result !== null) {
     return (
       <div className="flex flex-col items-center justify-center w-full h-full p-4">
@@ -116,13 +124,13 @@ const Roulette: React.FC<RouletteProps> = ({
       <div className="flex flex-col items-center justify-center w-full h-full p-4 overflow-y-auto">
         <h2 className="text-xl md:text-2xl font-bold text-white mb-4">Place Your Bets!</h2>
         <RouletteWheel spinning={false} result={null} />
-        <div className="grid grid-cols-2 gap-2 mt-4 mb-4 w-full max-w-xs">
+        <div className="grid grid-cols-2 gap-4 mt-6 mb-6">
           <button
             onClick={() => !hasBet && setSelectedBetType('red')}
-            className={`p-2 md:p-4 rounded-lg text-sm md:text-base ${
+            className={`p-4 rounded-lg ${
               selectedBetType === 'red'
                 ? 'bg-red-600 text-white'
-                : 'bg-white/5 text-white-300'
+                : 'bg-white/5 text-gray-300'
             } ${hasBet ? 'cursor-not-allowed' : 'hover:bg-white/10'}`}
             disabled={hasBet}
           >
@@ -130,10 +138,10 @@ const Roulette: React.FC<RouletteProps> = ({
           </button>
           <button
             onClick={() => !hasBet && setSelectedBetType('black')}
-            className={`p-2 md:p-4 rounded-lg text-sm md:text-base ${
+            className={`p-4 rounded-lg ${
               selectedBetType === 'black'
                 ? 'bg-gray-900 text-white'
-                : 'bg-white/5 text-white-300'
+                : 'bg-white/5 text-gray-300'
             } ${hasBet ? 'cursor-not-allowed' : 'hover:bg-white/10'}`}
             disabled={hasBet}
           >
@@ -141,7 +149,7 @@ const Roulette: React.FC<RouletteProps> = ({
           </button>
           <button
             onClick={() => !hasBet && setSelectedBetType('green')}
-            className={`p-2 md:p-4 rounded-lg text-sm md:text-base ${
+            className={`p-4 rounded-lg ${
               selectedBetType === 'green'
                 ? 'bg-green-600 text-white'
                 : 'bg-white/5 text-gray-300'
@@ -152,7 +160,7 @@ const Roulette: React.FC<RouletteProps> = ({
           </button>
           <button
             onClick={() => !hasBet && setSelectedBetType('number')}
-            className={`p-2 md:p-4 rounded-lg text-sm md:text-base ${
+            className={`p-4 rounded-lg ${
               selectedBetType === 'number'
                 ? 'bg-purple-600 text-white'
                 : 'bg-white/5 text-gray-300'
@@ -164,12 +172,12 @@ const Roulette: React.FC<RouletteProps> = ({
         </div>
 
         {selectedBetType === 'number' && (
-          <div className="grid grid-cols-6 gap-1 mb-4 w-full max-w-xs">
+          <div className="grid grid-cols-6 gap-2 mb-6">
             {NUMBERS.map((num) => (
               <button
                 key={num}
                 onClick={() => !hasBet && setSelectedNumber(num)}
-                className={`w-8 h-8 md:w-10 md:h-10 rounded-full text-xs md:text-sm ${getNumberColor(num)} ${
+                className={`w-10 h-10 rounded-full ${getNumberColor(num)} ${
                   selectedNumber === num ? 'ring-2 ring-white' : ''
                 } ${hasBet ? 'cursor-not-allowed' : 'hover:opacity-80'}`}
                 disabled={hasBet}
@@ -180,25 +188,46 @@ const Roulette: React.FC<RouletteProps> = ({
           </div>
         )}
 
-        <div className="mb-4 w-full max-w-xs">
+        <div className="mb-6 w-full max-w-xs">
           <label className="block text-white text-sm mb-2">Bet Amount</label>
-          <input
-            type="number"
-            value={betAmount}
-            onChange={(e) => !hasBet && setBetAmount(Math.max(10, parseInt(e.target.value) || 0))}
-            className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded text-white"
-            min="10"
-            disabled={hasBet}
-          />
+          <div className="flex items-center">
+            <button
+              onClick={() => adjustBetAmount(-10)}
+              className="p-2 bg-white/5 rounded-l-md hover:bg-white/10 transition-colors"
+              disabled={hasBet || betAmount <= 10}
+            >
+              <Minus className="w-4 h-4 text-gray-300" />
+            </button>
+            <input
+              type="number"
+              min="10"
+              value={betAmount}
+              onChange={(e) => !hasBet && setBetAmount(Math.max(10, parseInt(e.target.value) || 10))}
+              className="w-full px-4 py-2 bg-white/5 border-x border-white/10 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 text-center"
+              disabled={hasBet}
+            />
+            <button
+              onClick={() => adjustBetAmount(1)}
+              className="p-2 bg-white/5 rounded-r-md hover:bg-white/10 transition-colors"
+              disabled={hasBet}
+            >
+              <Plus className="w-4 h-4 text-gray-300" />
+            </button>
+          </div>
         </div>
 
         <button
-          onClick={placeBet}
-          disabled={hasBet}
-          className="w-full max-w-xs px-6 py-2 bg-green-600 text-white rounded-md disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          Place Bet
-        </button>
+  onClick={placeBet}
+  disabled={hasBet || betAmount > (scores[currentUser] || 0)}
+  className={`w-full max-w-xs px-6 py-2 ${
+    hasBet || betAmount > (scores[currentUser] || 0)
+      ? 'bg-gray-400 cursor-not-allowed'
+      : 'bg-green-600 hover:bg-green-700'
+  } text-white rounded-md transition-colors`}
+>
+  Place Bet
+</button>
+
 
         <div className="mt-4 text-gray-300 text-sm">
           {bettingUsers.length} / {users.length} players have bet

@@ -119,12 +119,15 @@ const ShopModal: React.FC<ShopModalProps> = ({
             Drink-Ups
           </button>
 
-          <button
-            onClick={() => handleGivePoints()}
-            className={`px-4 py-2 rounded-md text-sm font-medium transition-colors`}
-          >
-            Give Points
-          </button>
+          {currentUser === 'ericderic' && (
+  <button
+    onClick={() => handleGivePoints()}
+    className="px-4 py-2 rounded-md text-sm font-medium transition-colors bg-blue-600 text-white hover:bg-blue-700"
+  >
+    Give Points
+  </button>
+)}
+
           <button
             onClick={() => setActiveTab('mini-ups')}
             className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${

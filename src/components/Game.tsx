@@ -174,6 +174,7 @@ const Game: React.FC<GameProps> = ({ lobbyId, currentUser, scores, isHost }) => 
       lobbyId,
       currentUser,
       onScore: handleScore,
+      scores: gameScores,
       timeLeft,
       users,
     };

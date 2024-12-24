@@ -211,13 +211,21 @@ export function updateMinigameScore(io, lobby, lobbyId, username, score, gameTyp
     lobby.scores = {};
   }
 
+  console.log(score)
+
   if (!lobby.scores[username]) {
     lobby.scores[username] = 0;
   }
-  
-  lobby.scores[username] += score;
+
+  if (score < 0) {
+    lobby.scores[username] += score; 
+  } else {
+    lobby.scores[username] += score; 
+  }
+
   io.to(lobbyId).emit('scores_update', lobby.scores);
 }
+
 
 export function handleVote(io, lobby, lobbyId, username, votedFor) {
   if (!lobby.minigameState?.votingState) return;
