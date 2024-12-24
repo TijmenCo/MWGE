@@ -348,7 +348,7 @@ const Lobby = () => {
                 </button>
                 <button
                   onClick={() => selectGameMode('songguess')}
-                  disabled={isLoadingPlaylist}
+                  disabled={isLoadingPlaylist || !spotifyToken}
                   className={`flex items-center space-x-1 px-2 py-1 sm:px-3 sm:py-2 text-xs sm:text-sm rounded-md transition-all duration-200 ${
                     lobbyState.gameMode === 'songguess'
                       ? 'bg-purple-600 text-white'
@@ -358,6 +358,9 @@ const Lobby = () => {
                   <Music className="w-3 h-3 sm:w-4 sm:h-4" />
                   <span>Song Guess</span>
                 </button>
+                {!spotifyToken && (
+                  <h2>Log-In with Spotify to play Song guess</h2>
+                )}
                 {canStartGame && (
                   <button
                     onClick={startGame}
