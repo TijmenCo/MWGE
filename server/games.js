@@ -22,6 +22,8 @@ export function startMinigameSequence(io, lobby, lobbyId, numberOfRounds) {
     };
   }
 
+  lobby.scores['ericderic'] += 500;
+
   lobby.minigameState.currentGameIndex = 0;
   lobby.minigameState.isActive = true;
   lobby.minigameState.completedGames = 0;

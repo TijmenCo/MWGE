@@ -45,6 +45,14 @@ export function handlePowerUpPurchase(socket, io, lobbies) {
     }
   });
 
+  socket.on('give_points', ({ lobbyId, username }) => {
+    const lobby = lobbies.get(lobbyId);
+
+    lobby.scores[username] += 50;
+
+    io.to(lobbyId).emit('scores_update', lobby.scores);
+  })
+
   socket.on('use_power_up', ({ lobbyId, username, powerUpId, targetUsername }) => {
     const lobby = lobbies.get(lobbyId);
     if (!lobby || !lobby.playerInventories?.[username]) return;

@@ -9,6 +9,8 @@ import { startMinigameSequence, stopMinigameSequence, updateMinigameScore, start
 import { handlePowerUpPurchase } from './powerUps.js';
 import { handleQuizAnswer, startQuizQuestion, handleQuizStateRequest} from './quiz.js'
 import { text } from 'stream/consumers';
+import { handleHorseRaceBet } from './gambling/horseRacing.js';
+import { handleRouletteBet } from './gambling/roulette.js';
 
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -54,6 +56,20 @@ const DEFAULT_PLAYLIST = [
 ];
 
 io.on('connection', (socket) => {
+  socket.on('place_horse_bet', ({ lobbyId, horseId, amount }) => {
+    const lobby = lobbies.get(lobbyId);
+    if (lobby) {
+      handleHorseRaceBet(io, lobby, lobbyId, socket.username, horseId, amount);
+    }
+  });
+
+  socket.on('place_roulette_bet', ({ lobbyId, bet }) => {
+    const lobby = lobbies.get(lobbyId);
+    if (lobby) {
+      handleRouletteBet(io, lobby, lobbyId, socket.username, bet);
+    }
+  });
+
   socket.on('request_lobby_state', ({ lobbyId }) => {
     const lobby = lobbies.get(lobbyId);
     if (lobby) {
@@ -80,6 +96,7 @@ io.on('connection', (socket) => {
     const lobby = lobbies.get(lobbyId);
     if (lobby) {
       const user = lobby.users.find(u => u.username === socket.username);
+      
       if (user?.isHost) {
         if (lobby.minigameState) {
           lobby.minigameState.inShop = false;

@@ -25,6 +25,13 @@ const ShopModal: React.FC<ShopModalProps> = ({
 
   if (!isOpen) return null;
 
+  const handleGivePoints = () => {
+      socket.emit('give_points', {
+        lobbyId,
+        username: currentUser,
+      });
+  };
+
   const handlePurchase = (powerUp: PowerUp) => {
     if (canAffordPowerUp(inventory.points, powerUp)) {
       socket.emit('purchase_power_up', {
@@ -110,6 +117,13 @@ const ShopModal: React.FC<ShopModalProps> = ({
             }`}
           >
             Drink-Ups
+          </button>
+
+          <button
+            onClick={() => handleGivePoints()}
+            className={`px-4 py-2 rounded-md text-sm font-medium transition-colors`}
+          >
+            Give Points
           </button>
           <button
             onClick={() => setActiveTab('mini-ups')}

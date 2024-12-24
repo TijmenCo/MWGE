@@ -11,6 +11,8 @@ export type MinigameType =
   | 'quiz'
   | 'sequencerepeat'
   | 'fallingcatch'
+  | 'horseracing'
+  | 'roulette'
   | 'targetshoot';
 
 export interface MinigameConfig {

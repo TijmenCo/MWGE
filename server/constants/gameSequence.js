@@ -1,9 +1,10 @@
 // Game types categorization
-const QUESTION_GAMES = ['quiz', 'votingquestion'];
+const QUESTION_GAMES = ['quiz', 'votingquestion',];
 const ACTION_GAMES = ['buttonmash', 'colorclick', 'quickmath', 'typespeed', 'memorymatch', 'reactiontime', 'wordscramble', 'fallingcatch', 'targetshoot' ];
+const GAMBLING_GAMES = ['roulette']
 
 // Sequence template: 2 question games followed by 1 action game
-const SEQUENCE_TEMPLATE = ['question', 'action'];
+const SEQUENCE_TEMPLATE = ['gambling', 'question', 'action'];
 
 export function generateGameSequence(totalRounds) {
   const sequence = [];
@@ -14,6 +15,12 @@ export function generateGameSequence(totalRounds) {
 
   for (let i = 0; i < totalRounds; i++) {
     const sequenceType = SEQUENCE_TEMPLATE[i % SEQUENCE_TEMPLATE.length];
+
+    if (sequenceType === 'gambling') {
+      const gameType = GAMBLING_GAMES[questionGameIndex % GAMBLING_GAMES.length];
+      questionGameIndex++;
+      sequence.push(gameType);
+    }
     
     if (sequenceType === 'question') {
       // Alternate between quiz and voting questions
