@@ -58,6 +58,8 @@ const Roulette: React.FC<RouletteProps> = ({
           else multiplier = 2;
           
           onScore(betAmount * multiplier);
+        } else {
+            onScore(-(betAmount))
         }
       }, 5000); // 5 seconds for the wheel to spin
     };
@@ -123,7 +125,6 @@ const Roulette: React.FC<RouletteProps> = ({
     return (
       <div className="flex flex-col items-center justify-center w-full h-full p-4 overflow-y-auto">
         <h2 className="text-xl md:text-2xl font-bold text-white mb-4">Place Your Bets!</h2>
-        <RouletteWheel spinning={false} result={null} />
         <div className="grid grid-cols-2 gap-4 mt-6 mb-6">
           <button
             onClick={() => !hasBet && setSelectedBetType('red')}

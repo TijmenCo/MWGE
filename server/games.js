@@ -12,7 +12,7 @@ export function startMinigameSequence(io, lobby, lobbyId, numberOfRounds) {
       showingSplash: false,
       completedGames: 0,
       inShop: false,
-      gameSequence: generateGameSequence(numberOfRounds),
+      gameSequence: [],
       votingState: {
         currentQuestion: null,
         votes: {},
@@ -22,11 +22,15 @@ export function startMinigameSequence(io, lobby, lobbyId, numberOfRounds) {
     };
   }
 
+  // Reset state and generate new sequence with exact number of rounds
   lobby.minigameState.currentGameIndex = 0;
   lobby.minigameState.isActive = true;
   lobby.minigameState.completedGames = 0;
   lobby.minigameState.inShop = false;
   lobby.minigameState.gameSequence = generateGameSequence(numberOfRounds);
+
+  console.log(`Starting minigame sequence with ${numberOfRounds} rounds`);
+  console.log('Generated sequence:', lobby.minigameState.gameSequence);
 
   startNextMinigame(io, lobby, lobbyId);
 }
