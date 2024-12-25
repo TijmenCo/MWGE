@@ -269,7 +269,7 @@ io.on('connection', (socket) => {
   });
   
 
-  socket.on('select_game_mode', ({ lobbyId, mode, playlist, config, musicProvider, gameVariant }) => {
+  socket.on('select_game_mode', ({ lobbyId, mode, playlist, config, musicProvider, gameVariant}) => {
     const lobby = lobbies.get(lobbyId);
     console.log(lobby)
     if (lobby) {
@@ -321,7 +321,7 @@ io.on('connection', (socket) => {
     }
   });
 
-  socket.on('start_game', ({ lobbyId }, numberOfRounds) => {
+  socket.on('start_game', ({ lobbyId }, numberOfRounds, sequence) => {
     const lobby = lobbies.get(lobbyId);
     if (lobby) {
       lobby.gameState = 'countdown';
@@ -339,7 +339,7 @@ io.on('connection', (socket) => {
         io.to(lobbyId).emit('lobby_update', lobby);
         
         if (lobby.gameMode === 'minigames') {
-          startMinigameSequence(io, lobby, lobbyId, numberOfRounds);
+          startMinigameSequence(io, lobby, lobbyId, numberOfRounds, sequence);
         } else if (lobby.gameMode === 'songguess') {
           startNextSong(lobbyId);
         }

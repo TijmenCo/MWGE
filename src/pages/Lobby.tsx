@@ -250,7 +250,7 @@ const Lobby = () => {
   };
 
 
-  const selectGameMode = async (mode: 'minigames' | 'songguess') => {
+  const selectGameMode = async (mode: 'minigames' | 'songguess', sequence: String) => {
     setLobbyState(prevState => ({
       ...prevState,
       gameMode: mode
@@ -284,7 +284,7 @@ const Lobby = () => {
         setIsLoadingPlaylist(false);
       }
     } else {
-      console.log(`gameSequence`, {selectedSequence})
+      console.log(`gameSequence`, {sequence})
 
       socket.emit('select_game_mode', { 
         lobbyId, 
@@ -293,7 +293,7 @@ const Lobby = () => {
         gameVariant,
         config: mode === 'minigames' ? { 
           totalRounds: minigameRoundConfig.totalRounds,
-          sequenceType: selectedSequence 
+          sequenceType: sequence
         } : undefined
       });
     }
@@ -303,7 +303,7 @@ const Lobby = () => {
     setGameOver(false);
     console.log("LOBBYSTATE");
     console.log(lobbyState);
-    socket.emit('start_game', { lobbyId }, minigameRoundConfig.totalRounds);
+    socket.emit('start_game', { lobbyId }, minigameRoundConfig.totalRounds, selectedSequence);
     setResetState(true)
   };
 
@@ -341,7 +341,7 @@ const Lobby = () => {
                   <span>Return</span>
                 </button>
                 <button
-                  onClick={() => selectGameMode('minigames')}
+                  onClick={() => selectGameMode('minigames', 'standard')}
                   disabled={isLoadingPlaylist}
                   className={`flex items-center space-x-1 px-2 py-1 sm:px-3 sm:py-2 text-xs sm:text-sm rounded-md transition-all duration-200 ${
                     lobbyState.gameMode === 'minigames'
@@ -353,7 +353,7 @@ const Lobby = () => {
                   <span>Mini Games</span>
                 </button>
                 <button
-                  onClick={() => selectGameMode('songguess')}
+                  onClick={() => selectGameMode('songguess', 'standard')}
                   disabled={isLoadingPlaylist || !spotifyToken}
                   className={`flex items-center space-x-1 px-2 py-1 sm:px-3 sm:py-2 text-xs sm:text-sm rounded-md transition-all duration-200 ${
                     lobbyState.gameMode === 'songguess'
@@ -626,7 +626,7 @@ const Lobby = () => {
         <button
            onClick={() => {
             setSelectedSequence('standard');
-            selectGameMode('minigames')
+            selectGameMode('minigames', 'standard')
           }}
           className={`p-4 rounded-lg transition-colors ${
             selectedSequence === 'standard'
@@ -640,7 +640,7 @@ const Lobby = () => {
         <button
           onClick={() => {
             setSelectedSequence('gamblingParadise')
-            selectGameMode('minigames')
+            selectGameMode('minigames', 'gamblingParadise')
           }}
           className={`p-4 rounded-lg transition-colors ${
             selectedSequence === 'gamblingParadise'
@@ -654,7 +654,7 @@ const Lobby = () => {
         <button
           onClick={() => {
             setSelectedSequence('brainTeaser')
-            selectGameMode('minigames')
+            selectGameMode('minigames', 'brainTeaser')
           }}
           className={`p-4 rounded-lg transition-colors ${
             selectedSequence === 'brainTeaser'
@@ -668,7 +668,7 @@ const Lobby = () => {
         <button
           onClick={() => {
             setSelectedSequence('actionPacked')
-            selectGameMode('minigames')
+            selectGameMode('minigames', 'actionPacked')
           }}
           className={`p-4 rounded-lg transition-colors ${
             selectedSequence === 'actionPacked'
@@ -682,7 +682,7 @@ const Lobby = () => {
         <button
           onClick={() => {
             setSelectedSequence('casinoNight')
-            selectGameMode('minigames')
+            selectGameMode('minigames', 'casinoNight')
           }}
           className={`p-4 rounded-lg transition-colors ${
             selectedSequence === 'casinoNight'
