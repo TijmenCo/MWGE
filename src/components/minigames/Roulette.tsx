@@ -98,7 +98,7 @@ const Roulette: React.FC<RouletteProps> = ({
 
   const adjustBetAmount = (amount: number) => {
     if (!hasBet) {
-      setBetAmount(prev => Math.max(10, prev + amount));
+      setBetAmount(prev => Math.max(0, prev + amount));
     }
   };
 
@@ -213,34 +213,60 @@ const Roulette: React.FC<RouletteProps> = ({
           {selectedBetType === 'number' && <p className="text-white">Selected: {selectedNumber}</p>}
 
           <div className="mb-6 w-full max-w-xs">
-            <label className="block text-white text-sm mb-2">Bet Amount</label>
-            <div className="flex items-center">
-              <button
-                onClick={() => adjustBetAmount(-10)}
-                className="p-2 bg-white/5 rounded-l-md hover:bg-white/10 transition-colors"
-                disabled={hasBet || betAmount <= 10}
-              >
-                <Minus className="w-4 h-4 text-gray-300" />
-              </button>
-              <input
-                type="number"
-                min="10"
-                value={betAmount}
-                onChange={(e) =>
-                  !hasBet && setBetAmount(Math.max(10, parseInt(e.target.value) || 10))
-                }
-                className="w-full px-4 py-2 bg-white/5 border-x border-white/10 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 text-center"
-                disabled={hasBet}
-              />
-              <button
-                onClick={() => adjustBetAmount(1)}
-                className="p-2 bg-white/5 rounded-r-md hover:bg-white/10 transition-colors"
-                disabled={hasBet}
-              >
-                <Plus className="w-4 h-4 text-gray-300" />
-              </button>
-            </div>
-          </div>
+  <label className="block text-white text-sm mb-2">Bet Amount</label>
+  <div className="flex flex-col">
+    <div className="grid grid-cols-5 mb-1">
+      <span className="text-xs text-gray-400 flex justify-center items-center">-10</span>
+      <span className="text-xs text-gray-400 flex justify-center items-center">-1</span>
+      <span className="text-xs text-gray-400 flex justify-center items-center">Amount</span>
+      <span className="text-xs text-gray-400 flex justify-center items-center">+1</span>
+      <span className="text-xs text-gray-400 flex justify-center items-center">+10</span>
+    </div>
+    <div className="grid grid-cols-5 items-center">
+      <button
+        onClick={() => adjustBetAmount(-10)}
+        className="p-2 bg-white/5 rounded-l-md hover:bg-white/10 transition-colors flex justify-center items-center"
+        disabled={hasBet || betAmount < 10} 
+      >
+        <Minus className="w-4 h-4 text-gray-300" />
+      </button>
+      <button
+        onClick={() => adjustBetAmount(-1)}
+        className="p-2 bg-white/5 border-l border-white/10 hover:bg-white/10 transition-colors flex justify-center items-center"
+        disabled={hasBet || betAmount < 1} 
+      >
+        <Minus className="w-4 h-4 text-gray-300" />
+      </button>
+      <label className="sr-only" htmlFor="betAmount">Bet Amount</label>
+      <input
+  id="betAmount"
+  type="number"
+  min="0"
+  value={betAmount}
+  onChange={(e) =>
+    !hasBet && setBetAmount(Math.max(0, parseInt(e.target.value) || 0))
+  }
+  className="w-full px-4 py-2 bg-white/5 border-x border-white/10 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 text-center"
+  disabled={hasBet}
+/>
+      <button
+        onClick={() => adjustBetAmount(1)}
+        className="p-2 bg-white/5 border-r border-white/10 hover:bg-white/10 transition-colors flex justify-center items-center"
+        disabled={hasBet}
+      >
+        <Plus className="w-4 h-4 text-gray-300" />
+      </button>
+      <button
+        onClick={() => adjustBetAmount(10)}
+        className="p-2 bg-white/5 rounded-r-md hover:bg-white/10 transition-colors flex justify-center items-center"
+        disabled={hasBet}
+      >
+        <Plus className="w-4 h-4 text-gray-300" />
+      </button>
+    </div>
+  </div>
+</div>
+
 
           <button
             onClick={placeBet}
