@@ -43,6 +43,7 @@ const Lobby = () => {
     gameMode: null,
   });
   const [countdown, setCountdown] = useState<number | null>(null);
+  const [selectedSequence, setSelectedSequence] = useState<'standard' | 'gamblingParadise' | 'brainTeaser' | 'actionPacked' | 'casinoNight'>('standard');
   const { currentUser } = useStore();
   const [playlistUrl, setPlaylistUrl] = useState('');
   const [gameOver, setGameOver] = useState(false);
@@ -283,12 +284,17 @@ const Lobby = () => {
         setIsLoadingPlaylist(false);
       }
     } else {
+      console.log(`gameSequence`, {selectedSequence})
+
       socket.emit('select_game_mode', { 
         lobbyId, 
         mode, 
         musicProvider, 
         gameVariant,
-        config: mode === 'minigames' ? { totalRounds: minigameRoundConfig.totalRounds } : undefined
+        config: mode === 'minigames' ? { 
+          totalRounds: minigameRoundConfig.totalRounds,
+          sequenceType: selectedSequence 
+        } : undefined
       });
     }
   };
@@ -610,44 +616,124 @@ const Lobby = () => {
           </div>
         )}
 
-        {isHost && lobbyState.gameMode === 'minigames' && lobbyState.gameState === 'waiting' && (
-          <div>
-            <label className="block text-sm font-medium text-gray-200 mb-2">
-              Number of Minigame Rounds
-            </label>
-            <div className="flex items-center">
-              <button
-                onClick={() => setMinigameRoundConfig(prev => ({
-                  ...prev,
-                  totalRounds: Math.max(1, prev.totalRounds - 1)
-                }))}
-                className="p-2 bg-white/5 rounded-l-md hover:bg-white/10 transition-colors"
-              >
-                <Minus className="w-4 h-4 text-gray-300" />
-              </button>
-              <input
-                type="number"
-                min="1"
-                max="100"
-                value={minigameRoundConfig.totalRounds}
-                onChange={(e) => setMinigameRoundConfig(prev => ({
-                  ...prev,
-                  totalRounds: Math.max(1, Math.min(100, parseInt(e.target.value) || 1))
-                }))}
-                className="w-full px-4 py-2 bg-white/5 border-x border-white/10 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 text-center"
-              />
-              <button
-                onClick={() => setMinigameRoundConfig(prev => ({
-                  ...prev,
-                  totalRounds: Math.min(100, prev.totalRounds + 1)
-                }))}
-                className="p-2 bg-white/5 rounded-r-md hover:bg-white/10 transition-colors"
-              >
-                <Plus className="w-4 h-4 text-gray-300" />
-              </button>
-            </div>
-          </div>
-        )}
+{isHost && lobbyState.gameMode === 'minigames' && lobbyState.gameState === 'waiting' && (
+  <div className="space-y-4">
+    <div>
+      <label className="block text-sm font-medium text-gray-200 mb-2">
+        Game Sequence Type
+      </label>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <button
+           onClick={() => {
+            setSelectedSequence('standard');
+            selectGameMode('minigames')
+          }}
+          className={`p-4 rounded-lg transition-colors ${
+            selectedSequence === 'standard'
+              ? 'bg-purple-600 text-white'
+              : 'bg-white/5 text-gray-300 hover:bg-white/10'
+          }`}
+        >
+          <h3 className="font-semibold mb-1">Standard Mix</h3>
+          <p className="text-sm opacity-80">A balanced mix of questions, action games, and gambling</p>
+        </button>
+        <button
+          onClick={() => {
+            setSelectedSequence('gamblingParadise')
+            selectGameMode('minigames')
+          }}
+          className={`p-4 rounded-lg transition-colors ${
+            selectedSequence === 'gamblingParadise'
+              ? 'bg-purple-600 text-white'
+              : 'bg-white/5 text-gray-300 hover:bg-white/10'
+          }`}
+        >
+          <h3 className="font-semibold mb-1">Gambling Paradise</h3>
+          <p className="text-sm opacity-80">For those feeling lucky! Alternates between action and gambling games</p>
+        </button>
+        <button
+          onClick={() => {
+            setSelectedSequence('brainTeaser')
+            selectGameMode('minigames')
+          }}
+          className={`p-4 rounded-lg transition-colors ${
+            selectedSequence === 'brainTeaser'
+              ? 'bg-purple-600 text-white'
+              : 'bg-white/5 text-gray-300 hover:bg-white/10'
+          }`}
+        >
+          <h3 className="font-semibold mb-1">Brain Teaser</h3>
+          <p className="text-sm opacity-80">Test your knowledge with quiz and voting questions</p>
+        </button>
+        <button
+          onClick={() => {
+            setSelectedSequence('actionPacked')
+            selectGameMode('minigames')
+          }}
+          className={`p-4 rounded-lg transition-colors ${
+            selectedSequence === 'actionPacked'
+              ? 'bg-purple-600 text-white'
+              : 'bg-white/5 text-gray-300 hover:bg-white/10'
+          }`}
+        >
+          <h3 className="font-semibold mb-1">Action Packed</h3>
+          <p className="text-sm opacity-80">Fast-paced action games to test your reflexes</p>
+        </button>
+        <button
+          onClick={() => {
+            setSelectedSequence('casinoNight')
+            selectGameMode('minigames')
+          }}
+          className={`p-4 rounded-lg transition-colors ${
+            selectedSequence === 'casinoNight'
+              ? 'bg-purple-600 text-white'
+              : 'bg-white/5 text-gray-300 hover:bg-white/10'
+          }`}
+        >
+          <h3 className="font-semibold mb-1">Casino Night</h3>
+          <p className="text-sm opacity-80">All gambling, all the time!</p>
+        </button>
+      </div>
+    </div>
+
+    <div>
+      <label className="block text-sm font-medium text-gray-200 mb-2">
+        Number of Minigame Rounds
+      </label>
+      <div className="flex items-center">
+        <button
+          onClick={() => setMinigameRoundConfig(prev => ({
+            ...prev,
+            totalRounds: Math.max(1, prev.totalRounds - 1)
+          }))}
+          className="p-2 bg-white/5 rounded-l-md hover:bg-white/10 transition-colors"
+        >
+          <Minus className="w-4 h-4 text-gray-300" />
+        </button>
+        <input
+          type="number"
+          min="1"
+          max="100"
+          value={minigameRoundConfig.totalRounds}
+          onChange={(e) => setMinigameRoundConfig(prev => ({
+            ...prev,
+            totalRounds: Math.max(1, Math.min(100, parseInt(e.target.value) || 1))
+          }))}
+          className="w-full px-4 py-2 bg-white/5 border-x border-white/10 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 text-center"
+        />
+        <button
+          onClick={() => setMinigameRoundConfig(prev => ({
+            ...prev,
+            totalRounds: Math.min(100, prev.totalRounds + 1)
+          }))}
+          className="p-2 bg-white/5 rounded-r-md hover:bg-white/10 transition-colors"
+        >
+          <Plus className="w-4 h-4 text-gray-300" />
+        </button>
+      </div>
+    </div>
+  </div>
+)}
 
         {countdown && (
           <div className="fixed inset-0 flex items-center justify-center bg-black/50 backdrop-blur-sm z-50">

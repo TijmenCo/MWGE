@@ -3,7 +3,8 @@ import { VOTING_QUESTIONS } from './constants/votingQuestions.js';
 import { startQuizQuestion } from './quiz.js';
 import { generateGameSequence } from './constants/gameSequence.js';
 
-export function startMinigameSequence(io, lobby, lobbyId, numberOfRounds) {
+// Update the startMinigameSequence function to accept sequenceType
+export function startMinigameSequence(io, lobby, lobbyId, numberOfRounds, sequenceType = 'standard') {
   if (!lobby.minigameState) {
     lobby.minigameState = {
       currentGameIndex: 0,
@@ -27,9 +28,9 @@ export function startMinigameSequence(io, lobby, lobbyId, numberOfRounds) {
   lobby.minigameState.isActive = true;
   lobby.minigameState.completedGames = 0;
   lobby.minigameState.inShop = false;
-  lobby.minigameState.gameSequence = generateGameSequence(numberOfRounds);
+  lobby.minigameState.gameSequence = generateGameSequence(numberOfRounds, sequenceType);
 
-  console.log(`Starting minigame sequence with ${numberOfRounds} rounds`);
+  console.log(`Starting minigame sequence with ${numberOfRounds} rounds using ${sequenceType} template`);
   console.log('Generated sequence:', lobby.minigameState.gameSequence);
 
   startNextMinigame(io, lobby, lobbyId);
