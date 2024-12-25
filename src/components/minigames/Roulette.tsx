@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { socket } from '../../socket';
 import { FastForward, Minus, Plus, X } from 'lucide-react';
 import RouletteWheel from '../RouletteWheel';
+import WinningMessage from '../WinningMessage';
 
 interface RouletteProps {
   lobbyId: string;
@@ -71,6 +72,7 @@ const Roulette: React.FC<RouletteProps> = ({
   const [result, setResult] = useState<number | null>(null);
   const [isNumberModalOpen, setNumberModalOpen] = useState(false);
   const [isAdvancedBetsOpen, setAdvancedBetsOpen] = useState(false);
+  const [winAmount, setWinAmount] = useState<number | null>(null);
   
   const isHost = users.find(u => u.username === currentUser)?.isHost ?? false;
 
@@ -86,7 +88,9 @@ const Roulette: React.FC<RouletteProps> = ({
         setResult(number);
         if (winners.includes(currentUser)) {
           const multiplier = getBetMultiplier(selectedBetType);
-          onScore(betAmount * multiplier);
+          const winningAmount = betAmount * multiplier;
+          setWinAmount(winningAmount);
+          onScore(winningAmount);
         } else {
           onScore(-betAmount);
         }
@@ -247,6 +251,7 @@ const Roulette: React.FC<RouletteProps> = ({
   if (result !== null) {
     return (
       <div className="flex flex-col items-center justify-center w-full h-full p-4">
+        {winAmount !== null && <WinningMessage amount={winAmount} />}
         <RouletteWheel spinning={false} result={result} />
         <h2 className="text-xl md:text-2xl font-bold text-white mt-4 mb-4">
           Result: {result} {RED_NUMBERS.includes(result) ? '🔴' : result === 0 ? '💚' : '⚫'}
@@ -296,7 +301,7 @@ const Roulette: React.FC<RouletteProps> = ({
               onClick={() => !hasBet && setAdvancedBetsOpen(true)}
               className={`p-4 rounded-lg ${
                 ['first12', 'second12', 'third12', 'even', 'odd', '1to18', '19to36'].includes(selectedBetType)
-                  ? 'bg-green-600 text-white'
+                  ? 'bg-purple-600 text-white'
                   : 'bg-white/5 text-gray-300'
               } ${hasBet ? 'cursor-not-allowed' : 'hover:bg-white/10'}`}
               disabled={hasBet}
