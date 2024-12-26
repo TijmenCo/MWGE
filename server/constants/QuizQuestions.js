@@ -1114,5 +1114,437 @@ export const QUIZ_QUESTIONS = [
     ],
     correctAnswer: 1,
     category: 'science'
+  },
+  {
+    id: 'trivia-44',
+    text: 'What is the capital of Italy?',
+    options: [
+      'Milan',
+      'Venice',
+      'Rome',
+      'Naples'
+    ],
+    correctAnswer: 2,
+    category: 'geography'
+  },
+  {
+    id: 'science-3',
+    text: 'What is the powerhouse of the cell?',
+    options: [
+      'Nucleus',
+      'Mitochondria',
+      'Ribosome',
+      'Golgi apparatus'
+    ],
+    correctAnswer: 1,
+    category: 'science'
+  },
+  {
+    id: 'movies-10',
+    text: 'Which movie won the first Academy Award for Best Picture?',
+    options: [
+      'Wings',
+      'The Jazz Singer',
+      'Gone with the Wind',
+      'The Broadway Melody'
+    ],
+    correctAnswer: 0,
+    category: 'movies'
+  },
+  {
+    id: 'fun-15',
+    text: 'What is the national dish of Japan?',
+    options: [
+      'Sushi',
+      'Ramen',
+      'Tempura',
+      'Soba'
+    ],
+    correctAnswer: 0,
+    category: 'fun'
+  },
+  {
+    id: 'music-11',
+    text: 'Which famous band was originally named "The Quarrymen"?',
+    options: [
+      'The Beatles',
+      'The Rolling Stones',
+      'Led Zeppelin',
+      'The Beach Boys'
+    ],
+    correctAnswer: 0,
+    category: 'music'
+  },
+  {
+    id: 'trivia-45',
+    text: 'What is the world’s longest river?',
+    options: [
+      'Amazon River',
+      'Nile River',
+      'Yangtze River',
+      'Mississippi River'
+    ],
+    correctAnswer: 1,
+    category: 'geography'
+  },
+  {
+    id: 'science-4',
+    text: 'What gas do humans exhale?',
+    options: [
+      'Oxygen',
+      'Carbon Dioxide',
+      'Nitrogen',
+      'Methane'
+    ],
+    correctAnswer: 1,
+    category: 'science'
+  },
+  {
+    id: 'games-10',
+    text: 'Which game series features the slogan "Gotta catch ‘em all"?',
+    options: [
+      'Digimon',
+      'Pokémon',
+      'Yu-Gi-Oh!',
+      'Monster Rancher'
+    ],
+    correctAnswer: 1,
+    category: 'games'
+  },
+  {
+    id: 'math-2',
+    text: 'What is the value of pi to two decimal places?',
+    options: [
+      '3.12',
+      '3.13',
+      '3.14',
+      '3.15'
+    ],
+    correctAnswer: 2,
+    category: 'math'
+  },
+  {
+    id: 'history-2',
+    text: 'Who was the first female Prime Minister of the UK?',
+    options: [
+      'Theresa May',
+      'Margaret Thatcher',
+      'Queen Elizabeth II',
+      'Angela Merkel'
+    ],
+    correctAnswer: 1,
+    category: 'history'
+  },
+  {
+    id: 'fun-16',
+    text: 'Which fruit is known as the "King of Fruits"?',
+    options: [
+      'Apple',
+      'Mango',
+      'Banana',
+      'Pineapple'
+    ],
+    correctAnswer: 1,
+    category: 'fun'
+  },
+  {
+    id: 'movies-11',
+    text: 'What is the name of the fictional African country in "Black Panther"?',
+    options: [
+      'Wakanda',
+      'Zamunda',
+      'Genovia',
+      'Latveria'
+    ],
+    correctAnswer: 0,
+    category: 'movies'
+  },
+  {
+    id: 'trivia-46',
+    text: 'What is the smallest planet in the Solar System?',
+    options: [
+      'Mars',
+      'Mercury',
+      'Venus',
+      'Pluto'
+    ],
+    correctAnswer: 1,
+    category: 'science'
+  },
+  {
+    id: 'science-5',
+    text: 'What is the boiling point of water at sea level?',
+    options: [
+      '90°C',
+      '100°C',
+      '110°C',
+      '120°C'
+    ],
+    correctAnswer: 1,
+    category: 'science'
+  },
+  {
+    id: 'drinks-16',
+    text: 'Which drink is made with gin and vermouth?',
+    options: [
+      'Martini',
+      'Margarita',
+      'Mimosa',
+      'Mojito'
+    ],
+    correctAnswer: 0,
+    category: 'drinks'
+  },
+  {
+    id: 'music-12',
+    text: 'Which band released the song "Bohemian Rhapsody"?',
+    options: [
+      'Led Zeppelin',
+      'The Rolling Stones',
+      'Queen',
+      'The Beatles'
+    ],
+    correctAnswer: 2,
+    category: 'music'
+  },
+  {
+    id: 'games-11',
+    text: 'In "Minecraft," what are Creepers afraid of?',
+    options: [
+      'Players',
+      'Cats',
+      'Dogs',
+      'Wolves'
+    ],
+    correctAnswer: 1,
+    category: 'games'
+  },
+  {
+    id: 'trivia-47',
+    text: 'Which element has the chemical symbol "Fe"?',
+    options: [
+      'Fermium',
+      'Iron',
+      'Fluorine',
+      'Francium'
+    ],
+    correctAnswer: 1,
+    category: 'science'
+  },
+  {
+    id: 'fun-17',
+    text: 'What is the collective term for a group of crows?',
+    options: [
+      'Herd',
+      'Murder',
+      'Flock',
+      'Gaggle'
+    ],
+    correctAnswer: 1,
+    category: 'fun'
+  },
+  {
+    id: 'history-3',
+    text: 'Who was the first man to circumnavigate the Earth?',
+    options: [
+      'Christopher Columbus',
+      'Ferdinand Magellan',
+      'Marco Polo',
+      'James Cook'
+    ],
+    correctAnswer: 1,
+    category: 'history'
+  },
+  {
+    id: 'math-3',
+    text: 'What is 15% of 200?',
+    options: [
+      '20',
+      '25',
+      '30',
+      '35'
+    ],
+    correctAnswer: 2,
+    category: 'math'
+  },
+  {
+    id: 'trivia-41',
+    text: 'Which is the largest desert in the world?',
+    options: [
+      'Sahara Desert',
+      'Arctic Desert',
+      'Gobi Desert',
+      'Antarctic Desert'
+    ],
+    correctAnswer: 3,
+    category: 'geography'
+  },
+  {
+    id: 'trivia-42',
+    text: 'What is the smallest country in the world by area?',
+    options: [
+      'Monaco',
+      'Vatican City',
+      'San Marino',
+      'Liechtenstein'
+    ],
+    correctAnswer: 1,
+    category: 'geography'
+  },
+  {
+    id: 'fun-13',
+    text: 'Which animal is known as the "Ship of the Desert"?',
+    options: [
+      'Horse',
+      'Camel',
+      'Elephant',
+      'Donkey'
+    ],
+    correctAnswer: 1,
+    category: 'fun'
+  },
+  {
+    id: 'games-8',
+    text: 'What does "FPS" stand for in gaming?',
+    options: [
+      'Fast Player Strategy',
+      'First-Person Shooter',
+      'Frames Per Second',
+      'Fast Projectile Shooter'
+    ],
+    correctAnswer: 1,
+    category: 'games'
+  },
+  {
+    id: 'drinks-15',
+    text: 'Which country is the origin of the cocktail "Caipirinha"?',
+    options: [
+      'Mexico',
+      'Brazil',
+      'Argentina',
+      'Portugal'
+    ],
+    correctAnswer: 1,
+    category: 'drinks'
+  },
+  {
+    id: 'music-10',
+    text: 'Which artist is known as the "Queen of Soul"?',
+    options: [
+      'Aretha Franklin',
+      'Whitney Houston',
+      'Mariah Carey',
+      'Tina Turner'
+    ],
+    correctAnswer: 0,
+    category: 'music'
+  },
+  {
+    id: 'movies-9',
+    text: 'Who directed "The Godfather"?',
+    options: [
+      'Martin Scorsese',
+      'Steven Spielberg',
+      'Francis Ford Coppola',
+      'Quentin Tarantino'
+    ],
+    correctAnswer: 2,
+    category: 'movies'
+  },
+  {
+    id: 'science-1',
+    text: 'What planet is known as the "Morning Star"?',
+    options: [
+      'Mercury',
+      'Venus',
+      'Mars',
+      'Jupiter'
+    ],
+    correctAnswer: 1,
+    category: 'science'
+  },
+  {
+    id: 'fun-14',
+    text: 'Which cartoon character lives in a pineapple under the sea?',
+    options: [
+      'Mickey Mouse',
+      'SpongeBob SquarePants',
+      'Bugs Bunny',
+      'Patrick Star'
+    ],
+    correctAnswer: 1,
+    category: 'fun'
+  },
+  {
+    id: 'trivia-43',
+    text: 'How many planets are there in our solar system?',
+    options: [
+      '7',
+      '8',
+      '9',
+      '10'
+    ],
+    correctAnswer: 1,
+    category: 'science'
+  },
+  {
+    id: 'history-1',
+    text: 'Who was the first person to step on the moon?',
+    options: [
+      'Buzz Aldrin',
+      'Neil Armstrong',
+      'Yuri Gagarin',
+      'John Glenn'
+    ],
+    correctAnswer: 1,
+    category: 'history'
+  },
+  {
+    id: 'geography-1',
+    text: 'What is the largest continent?',
+    options: [
+      'Africa',
+      'Asia',
+      'Europe',
+      'South America'
+    ],
+    correctAnswer: 1,
+    category: 'geography'
+  },
+  {
+    id: 'science-2',
+    text: 'What is the chemical symbol for gold?',
+    options: [
+      'Ag',
+      'Au',
+      'Gd',
+      'Go'
+    ],
+    correctAnswer: 1,
+    category: 'science'
+  },
+  {
+    id: 'math-1',
+    text: 'What is 12 x 12?',
+    options: [
+      '144',
+      '154',
+      '164',
+      '174'
+    ],
+    correctAnswer: 0,
+    category: 'math'
+  },
+  {
+    id: 'games-9',
+    text: 'What is the name of the platforming plumber in video games?',
+    options: [
+      'Luigi',
+      'Mario',
+      'Wario',
+      'Toad'
+    ],
+    correctAnswer: 1,
+    category: 'games'
   }
 ];

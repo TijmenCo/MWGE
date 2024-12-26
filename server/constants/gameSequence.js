@@ -1,5 +1,6 @@
 // Game types categorization
-const QUESTION_GAMES = ['quiz', 'votingquestion'];
+const QUESTION_GAMES = ['quiz'];
+const VOTING_GAMES = ['votingquestion']
 const ACTION_GAMES = ['buttonmash', 'colorclick', 'quickmath', 'typespeed', 'memorymatch', 'reactiontime', 'wordscramble', 'fallingcatch', 'targetshoot'];
 const GAMBLING_GAMES = ['roulette'];
 
@@ -8,7 +9,7 @@ const SEQUENCE_TEMPLATES = {
   standard: {
     name: 'Standard Mix',
     description: 'A balanced mix of questions, action games, and gambling',
-    pattern: ['question', 'action', 'question', 'action', 'gambling']
+    pattern: ['question', 'action', 'voting', 'action', 'gambling']
   },
   gamblingParadise: {
     name: 'Gambling Paradise',
@@ -42,6 +43,7 @@ export function generateGameSequence(totalRounds, sequenceType) {
 
   const sequence = [];
   let questionGameIndex = 0;
+  let votingGameIndex = 0;
   let actionGameIndex = 0;
   let gamblingGameIndex = 0;
 
@@ -61,6 +63,10 @@ export function generateGameSequence(totalRounds, sequenceType) {
       case 'question':
         gameType = QUESTION_GAMES[questionGameIndex % QUESTION_GAMES.length];
         questionGameIndex++;
+        break;
+      case 'voting':
+        gameType = VOTING_GAMES[votingGameIndex % VOTING_GAMES.length];
+        votingGameIndex++;
         break;
       case 'action':
         // Randomly select an action game without immediate repetition
