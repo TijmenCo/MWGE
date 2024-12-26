@@ -10,7 +10,7 @@ export const MINIGAMES = [
   {
     type: 'quiz',
     name: 'Quick Quiz',
-    description: 'Test your knowledge with multiple choice questions!',
+    description: 'Test your knowledge with questions',
     duration: 20,
     maxScore: 10,
     instruction: 'Choose the correct answer!'

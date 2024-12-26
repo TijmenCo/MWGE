@@ -18,7 +18,7 @@ const SEQUENCE_TEMPLATES = {
   },
   brainTeaser: {
     name: 'Brain Teaser',
-    description: 'Test your knowledge with quiz and voting questions',
+    description: 'Test your knowledge with questions',
     pattern: ['question', 'question', 'question', 'question', 'question']
   },
   actionPacked: {

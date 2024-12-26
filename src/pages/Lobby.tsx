@@ -663,7 +663,7 @@ const Lobby = () => {
           }`}
         >
           <h3 className="font-semibold mb-1">Brain Teaser</h3>
-          <p className="text-sm opacity-80">Test your knowledge with quiz and voting questions</p>
+          <p className="text-sm opacity-80">Test your knowledge with 1uiz questions</p>
         </button>
         <button
           onClick={() => {
