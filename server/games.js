@@ -3,7 +3,6 @@ import { VOTING_QUESTIONS } from './constants/votingQuestions.js';
 import { startQuizQuestion } from './quiz.js';
 import { generateGameSequence } from './constants/gameSequence.js';
 
-// Update the startMinigameSequence function to accept sequenceType
 export function startMinigameSequence(io, lobby, lobbyId, numberOfRounds, sequenceType = 'standard') {
   if (!lobby.minigameState) {
     lobby.minigameState = {
@@ -33,6 +32,8 @@ export function startMinigameSequence(io, lobby, lobbyId, numberOfRounds, sequen
   console.log(`Starting minigame sequence with ${numberOfRounds} rounds using ${sequenceType} template`);
   console.log('Generated sequence:', lobby.minigameState.gameSequence);
 
+  updateInitialMinigameScore(io, lobby, lobbyId, sequenceType)
+   
   startNextMinigame(io, lobby, lobbyId);
 }
 
@@ -210,6 +211,33 @@ export function stopMinigameSequence(lobby) {
     lobby.minigameState.inShop = false;
   }
 }
+
+export function updateInitialMinigameScore(io, lobby, lobbyId, sequenceType) { 
+  if (!lobby.scores) {
+    lobby.scores = {};
+  }
+
+  console.log(`initialScores sequence`, {sequenceType})
+
+  // Ensure all users in the lobby have a default score
+  Object.keys(lobby.scores).forEach(user => {
+    console.log(`users`, {user})
+    if (!lobby.scores[user]) {
+      lobby.scores[user] = 0;
+    }
+  });
+
+  if (sequenceType === 'casinoNight') {
+    const bonusAmount = 50;
+    Object.keys(lobby.scores).forEach(user => {
+      lobby.scores[user] += bonusAmount; 
+    });
+  }
+
+  // Emit updated scores to the lobby
+  io.to(lobbyId).emit('scores_update', lobby.scores);
+}
+
 
 export function updateMinigameScore(io, lobby, lobbyId, username, score, gameType) {
   if (!lobby.scores) {
