@@ -73,14 +73,12 @@ const Lobby = () => {
       socket.emit('request_lobby_state', { lobbyId });
     }
 
-    console.log()
-
     const handleLobbyUpdate = (state: LobbyState) => {
       console.log(`handleLobbyUpdate`, state)
       setLobbyState(prevState => ({
         ...prevState,
         ...state,
-        gameMode: state.gameState === 'waiting' ? state.gameMode : prevState.gameMode
+        gameMode: state.gameMode
       }));
       if (state.spotifyToken) {
         setSpotifyToken(state.spotifyToken);
@@ -116,6 +114,7 @@ const Lobby = () => {
           return prev - 1;
         });
       }, 1000);
+      setResetState(true);
     });
 
     return () => {
