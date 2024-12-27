@@ -43,6 +43,7 @@ const SongGame: React.FC<SongGameProps> = ({
   const [remainingGuesses, setRemainingGuesses] = useState(maxGuesses);
   const [currentSong, setCurrentSong] = useState<Track | null>(null);
   const [timeLeft, setTimeLeft] = useState<number>(roundTime);
+  const [nSpotifyToken, setNSpotifyToken] = useState(spotifyToken)
   const [showVideo, setShowVideo] = useState(false);
   const [gameScores, setGameScores] = useState<Record<string, number>>(scores);
   const [guesses, setGuesses] = useState<GuessResult[]>([]);
@@ -92,6 +93,7 @@ const SongGame: React.FC<SongGameProps> = ({
   }, [maxGuesses, roundTime]);
 
   const handleLobbyUpdate = useCallback((state: any) => {
+    setNSpotifyToken(spotifyToken)
     if (state.currentRound) {
       setCurrentRoundDisplay(state.currentRound);
     }
@@ -215,7 +217,7 @@ const SongGame: React.FC<SongGameProps> = ({
                   <div className={`${showVideo ? 'visible' : 'invisible'} min-h-[300px]`}>
                     <SpotifyPlayer
                       key={`${playerKey}-${currentSong.id}`}
-                      token={spotifyToken}
+                      token={nSpotifyToken}
                       uris={[`spotify:track:${currentSong.id}`]}
                       play={isPlaying}
                       magnifySliderOnHover={true}
