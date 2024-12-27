@@ -80,7 +80,7 @@ const Lobby = () => {
       setLobbyState(prevState => ({
         ...prevState,
         ...state,
-        gameMode: state.gameMode
+        gameMode: state.gameState === 'waiting' ? state.gameMode : prevState.gameMode
       }));
       if (state.spotifyToken) {
         setSpotifyToken(state.spotifyToken);
@@ -745,34 +745,34 @@ const Lobby = () => {
           </div>
         )}
 
-{lobbyState.gameState === 'playing' && !gameOver ? (
-  lobbyState.gameMode === 'songguess' ? (
-    lobbyState.musicProvider === 'spotify' && !spotifyToken ? (
-      <div>Loading Spotify token...</div>
-    ) : (
-      <SongGame
-        lobbyId={lobbyId!}
-        currentUser={currentUser}
-        scores={lobbyState.scores}
-        isHost={isHost}
-        currentRound={lobbyState.currentRound}
-        totalRounds={lobbyState.totalRounds}
-        roundTime={lobbyState.roundTime}
-        maxGuesses={lobbyState.maxGuesses}
-        musicProvider={lobbyState.musicProvider || 'youtube'}
-        spotifyToken={spotifyToken}
-        gameVariant={lobbyState.gameVariant}
-      />
-    )
-  ) : (
-    <Game 
-      lobbyId={lobbyId!} 
-      currentUser={currentUser} 
-      scores={lobbyState.scores}
-      isHost={isHost} 
-      totalRounds={lobbyState.gameMode === 'minigames' ? minigameRoundConfig.totalRounds : undefined}
-    />
-  )
+        {lobbyState.gameState === 'playing' && !gameOver ? (
+          lobbyState.gameMode === 'songguess' ? (
+            lobbyState.musicProvider === 'spotify' && !spotifyToken ? (
+              <div>Loading Spotify token...</div>
+            ) : (
+              <SongGame
+                lobbyId={lobbyId!}
+                currentUser={currentUser}
+                scores={lobbyState.scores}
+                isHost={isHost}
+                currentRound={lobbyState.currentRound}
+                totalRounds={lobbyState.totalRounds}
+                roundTime={lobbyState.roundTime}
+                maxGuesses={lobbyState.maxGuesses}
+                musicProvider={lobbyState.musicProvider || 'youtube'}
+                spotifyToken={spotifyToken}
+                gameVariant={lobbyState.gameVariant}
+              />
+            )
+          ) : (
+            <Game 
+              lobbyId={lobbyId!} 
+              currentUser={currentUser} 
+              scores={lobbyState.scores}
+              isHost={isHost} 
+              totalRounds={lobbyState.gameMode === 'minigames' ? minigameRoundConfig.totalRounds : undefined}
+            />
+          )
         ) : (
           <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 sm:gap-6">
             <div className="lg:col-span-3 space-y-4 sm:space-y-6">
