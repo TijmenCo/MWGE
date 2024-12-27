@@ -385,6 +385,7 @@ const Lobby = () => {
 
         {isHost && lobbyState.gameMode === 'songguess' && lobbyState.gameState === 'waiting' && (
           <div className="mb-4 sm:mb-6 space-y-4">
+             <span className="text-red-300 text-sm">NOTE: Sometimes the Spotify Player doesn't start correctly, just start the next song and it should be fixed!</span>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-200 mb-2">
