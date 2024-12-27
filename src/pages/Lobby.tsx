@@ -76,6 +76,7 @@ const Lobby = () => {
     console.log()
 
     const handleLobbyUpdate = (state: LobbyState) => {
+      console.log(`handleLobbyUpdate`, state)
       setLobbyState(prevState => ({
         ...prevState,
         ...state,

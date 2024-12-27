@@ -364,7 +364,7 @@ io.on('connection', (socket) => {
     lobby.remainingGuesses[username]--;
 
     const normalizeText = (text) => {
-      return text
+      return String
         .toLowerCase()
         .replace(/\(feat\..*?\)/g, '') // Remove "feat." segments
         .replace(/[’']/g, "'")         // Normalize apostrophes
@@ -373,7 +373,7 @@ io.on('connection', (socket) => {
 
     const { title, artist, addedBy } = lobby.currentSong;
     const normalizedGuess = guess.toLowerCase().trim();
-    const normalizedTitle = normalizeText(text)
+    const normalizedTitle = title.toLowerCase().replace(/\(feat\..*?\)/g, '').trim();
     const normalizedArtists = artist.toLowerCase().split(',').map(a => a.trim());
 
     const totalPlayers = lobby.users.length;
