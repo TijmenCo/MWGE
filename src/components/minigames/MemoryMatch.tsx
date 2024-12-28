@@ -1,3 +1,5 @@
+'use client'
+
 import React, { useState, useEffect } from 'react';
 
 interface MemoryMatchProps {
@@ -62,14 +64,14 @@ const MemoryMatch: React.FC<MemoryMatchProps> = ({ lobbyId, currentUser, onScore
   };
 
   return (
-    <div className="flex flex-col items-center justify-center h-full">
-      <div className="text-4xl font-bold text-white mb-8">{timeLeft}s</div>
-      <div className="grid grid-cols-4 gap-4">
+    <div className="flex flex-col items-center justify-center min-h-screen p-4">
+      <div className="text-2xl sm:text-4xl font-bold text-white mb-4 sm:mb-8">{timeLeft}s</div>
+      <div className="grid grid-cols-3 sm:grid-cols-4 gap-2 sm:gap-4 w-full max-w-md">
         {cards.map((card, index) => (
           <button
             key={index}
             onClick={() => handleCardClick(index)}
-            className={`w-20 h-20 flex items-center justify-center text-3xl rounded-lg transition-all duration-300 transform ${
+            className={`aspect-square flex items-center justify-center text-xl sm:text-3xl rounded-lg transition-all duration-300 transform ${
               card.flipped || card.matched
                 ? 'bg-purple-500 rotate-0'
                 : 'bg-gray-700 rotate-180'
@@ -79,7 +81,7 @@ const MemoryMatch: React.FC<MemoryMatchProps> = ({ lobbyId, currentUser, onScore
           </button>
         ))}
       </div>
-      <div className="mt-8 text-xl text-white">Matches: {score}</div>
+      <div className="mt-4 sm:mt-8 text-lg sm:text-xl text-white">Matches: {score}</div>
     </div>
   );
 };
