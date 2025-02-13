@@ -11,17 +11,6 @@ export const POWER_UPS = [
     uses: 1
   },
   {
-    id: 'take-shot',
-    name: 'Take a Shot',
-    description: 'Make someone take a shot',
-    cost: 50,
-    type: 'drink',
-    effect: 'make_shot',
-    icon: '🥃',
-    target: 'single',
-    uses: 1
-  },
-  {
     id: 'everyone-drinks',
     name: 'Everyone Drinks',
     description: 'Everyone takes a sip!',
@@ -44,6 +33,17 @@ export const POWER_UPS = [
     uses: 1
   },
   {
+    id: 'take-shot',
+    name: 'Take a Shot',
+    description: 'Make someone take a shot',
+    cost: 70,
+    type: 'drink',
+    effect: 'make_shot',
+    icon: '🥃',
+    target: 'single',
+    uses: 1
+  },
+  {
     id: 'bussen',
     name: 'Bussen',
     description: 'Start a game of Bussen! The person who casted this game is the dealer, every question that the dealer gets right, he can give a sip to another player! Players take turns guessing card colors (red/black), high/low, inside/outside, and suit. Wrong guesses mean drinks!',
@@ -58,7 +58,7 @@ export const POWER_UPS = [
     id: 'categories',
     name: 'Categories',
     description: 'The caster of this game gets to pick a category (e.g., "Car Brands"). Go around the circle - each player names something in that category. Whoever can\'t think of one drinks! Furthermore, all the brands that the caster gets right, he can give out to other players!',
-    cost: 55,
+    cost: 50,
     type: 'all_game',
     effect: 'all_game',
     icon: '📝',
@@ -66,25 +66,25 @@ export const POWER_UPS = [
     uses: 1
   },
   {
-    id: 'never-have-i-ever',
-    name: 'Never Have I Ever',
-    description: 'Everyone holds up 3 fingers. Take turns saying things you\'ve never done. Those who have done it put a finger down. First to 0 drinks!',
-    cost: 55,
-    type: 'all_game',
-    effect: 'all_game',
-    icon: '🖐️',
-    target: 'all',
-    uses: 1
-  },
-  {
     id: 'waterfall',
     name: 'Waterfall',
-    description: 'Everyone starts drinking at the same time. No one can stop until the person before them stops!',
-    cost: 60,
+    description: 'Everyone starts drinking at the same time. No one can stop until the person before them stops! The caster of this game can decide at anytime to stop drinking',
+    cost: 50,
     type: 'drink',
     effect: 'start_waterfall',
     icon: '🌊',
     target: 'all',
     uses: 1
-  }
+  },
+  {
+    id: 'number_drinking',
+    name: 'Number Drinking',
+    description: 'The caster chooses a number (for example, 7). Whenever that number or its multiples come up, players must drink. Whenever the caster gets a number right, he can give out a sip!',
+    cost: 50,
+    type: 'all_game',
+    effect: 'number_drinking',
+    icon: '🔢',
+    target: 'all',
+    uses: 1
+  }  
 ];
