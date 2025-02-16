@@ -84,9 +84,10 @@ const PowerUpInventory: React.FC<PowerUpInventoryProps> = ({
     }) => {
       console.log(data.type);
       let message = '';
-      if (data.type === 'sip' || data.type === 'shot') {
+    
+      if (data.type === 'sip' || data.type === 'shot' || data.type === 'chug') {
         if (data.toUser === currentUser) {
-          message = `${data.fromUser} says you need to take a ${data.type}! 🍻`;
+          message = `${data.fromUser} says you need to ${data.type === 'chug' ? 'chug' : `take a ${data.type}`}! 🍻`;
         }
       } else if (data.type === 'all') {
         message = `${data.fromUser} says everyone needs to drink! 🍻`;
@@ -94,16 +95,14 @@ const PowerUpInventory: React.FC<PowerUpInventoryProps> = ({
         message = `${data.fromUser} started a waterfall! Keep drinking until the person before you stops! 🌊`;
       } else if (data.type === 'all_game') {
         message = `${data.fromUser} started a Game! ${data.gameDescription}`;
-      } else if (data.type === 'chug') {
-        message = `${data.fromUser} says you need to chug! 🍻`;
       }
-
+    
       if (message) {
         setDrinkCommandMessages(prev => [...prev, { id: data.id, content: message }]);
         setShowDrinkCommandModal(true);
       }
     };
-
+    
     socket.on('drink_command', handleDrinkCommand);
 
     return () => {

@@ -29,7 +29,7 @@ export const POWER_UPS: PowerUp[] = [
     description: 'Make someone chug their drink!',
     cost: 70,
     type: 'drink',
-    effect: 'make_drink',
+    effect: 'make_chug',
     icon: '🍺🍺🍺',
     target: 'single',
     uses: 1
