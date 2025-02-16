@@ -77,7 +77,7 @@ export const MINI_UPS: PowerUp[] = [
     description: 'Everyone starts drinking at the same time. No one can stop until the person before them stops! The caster of this game can decide at anytime to stop drinking',
     cost: 50,
     type: 'drink',
-    effect: 'start_waterfall',
+    effect: 'all_ga e',
     icon: '🌊',
     target: 'all',
     uses: 1
@@ -88,7 +88,7 @@ export const MINI_UPS: PowerUp[] = [
     description: 'The caster chooses a number (for example, 7). Whenever that number or its multiples come up, players must drink. Whenever the caster gets a number right, he can give out a sip!',
     cost: 50,
     type: 'all_game',
-    effect: 'number_drinking',
+    effect: 'all_game',
     icon: '🔢',
     target: 'all',
     uses: 1
