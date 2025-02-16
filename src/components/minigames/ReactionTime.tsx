@@ -34,7 +34,7 @@ const ReactionTime: React.FC<ReactionTimeProps> = ({ lobbyId, currentUser, onSco
       onScore(newScore);
     } else if (state === 'waiting') {
       // Clicked too early
-      setScore(Math.max(0, score - 100));
+      setScore(Math.max(0, score - 150));
       onScore(score);
     }
   

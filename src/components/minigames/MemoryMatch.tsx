@@ -47,7 +47,7 @@ const MemoryMatch: React.FC<MemoryMatchProps> = ({ lobbyId, currentUser, onScore
           matchedCards[secondIndex].matched = true;
           setCards(matchedCards);
           setFlippedIndexes([]);
-          const newScore = 3;
+          const newScore = 5;
           setScore(score + newScore);
           onScore(newScore);
         }, 500);

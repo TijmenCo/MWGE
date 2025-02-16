@@ -8,10 +8,14 @@ interface WordScrambleProps {
   timeLeft: number;
 }
 
-const WORDS = [
+const WORDS = [ 
   'REACT', 'GAME', 'CODE', 'PLAY', 'FUN',
   'JUMP', 'QUICK', 'ZOOM', 'HAPPY', 'SKILL',
-  'LEVEL', 'SCORE', 'WIN', 'FAST', 'SMART'
+  'LEVEL', 'SCORE', 'WIN', 'FAST', 'SMART',
+  'LUCK', 'SPIN', 'RACE', 'GUESS', 'TIMER',
+  'MOVE', 'SHARP', 'TAP', 'SWIPE', 'MATCH',
+  'LOGIC', 'STACK', 'QUIZ', 'RIVAL', 'GOAL',
+  'BLAST', 'FLIP', 'RUSH', 'TOKEN', 'QUEST'
 ];
 
 const WordScramble: React.FC<WordScrambleProps> = ({ lobbyId, currentUser, onScore, timeLeft }) => {
@@ -41,7 +45,7 @@ const WordScramble: React.FC<WordScrambleProps> = ({ lobbyId, currentUser, onSco
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (userInput.toUpperCase() === currentWord) {
-      const newScore = 1;
+      const newScore = 4;
       setScore(score + newScore);
       onScore(newScore);
       generateNewWord();

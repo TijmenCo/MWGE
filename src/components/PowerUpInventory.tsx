@@ -82,6 +82,7 @@ const PowerUpInventory: React.FC<PowerUpInventoryProps> = ({
       toUser?: string;
       gameDescription?: string;
     }) => {
+      console.log(data.type);
       let message = '';
       if (data.type === 'sip' || data.type === 'shot') {
         if (data.toUser === currentUser) {

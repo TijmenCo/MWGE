@@ -55,7 +55,7 @@ const SequenceRepeat: React.FC<SequenceRepeatProps> = ({ lobbyId, currentUser, o
     if (newPlayerSequence.length === sequence.length) {
       // Completed sequence correctly
       const newScore = currentLength;
-      setScore(score + newScore);
+      setScore(score + newScore + 2);
       onScore(newScore);
       setCurrentLength(currentLength + 1);
     }

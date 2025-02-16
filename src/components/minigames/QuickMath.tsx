@@ -46,7 +46,7 @@ const QuickMath: React.FC<QuickMathProps> = ({ lobbyId, currentUser, onScore, ti
     e.preventDefault();
     if (parseInt(userAnswer) === problem.answer) {
       const newScore = 1;
-      setScore(newScore + 1);
+      setScore(newScore + 2);
       onScore(newScore);
       generateProblem();
     }

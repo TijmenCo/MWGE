@@ -11,8 +11,13 @@ interface TypeSpeedProps {
 const WORDS = [
   'quick', 'brown', 'fox', 'jumps', 'lazy', 'dog',
   'hello', 'world', 'coding', 'game', 'speed', 'type',
-  'fast', 'slow', 'jump', 'run', 'play', 'win'
+  'fast', 'slow', 'jump', 'run', 'play', 'win',
+  'code', 'react', 'fun', 'click', 'score', 'skill',
+  'move', 'smart', 'timer', 'level', 'race', 'push',
+  'drag', 'drop', 'build', 'flash', 'break', 'stack',
+  'block', 'match', 'focus', 'loop', 'shift', 'slide'
 ];
+
 
 const TypeSpeed: React.FC<TypeSpeedProps> = ({ lobbyId, currentUser, onScore, timeLeft }) => {
   const [currentWord, setCurrentWord] = useState('');
