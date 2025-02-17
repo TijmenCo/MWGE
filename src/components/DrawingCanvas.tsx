@@ -44,32 +44,66 @@ const DrawingCanvas: React.FC<DrawingCanvasProps> = ({ lobbyId }) => {
   }, []);
 
   useEffect(() => {
-    socket.on('start_path', (data: { x: number; y: number; color: string; socketId: string }) => {
-      if (!ctxRef.current || !canvasRef.current) return;
+    const canvas = canvasRef.current;
+    const ctx = canvas?.getContext('2d');
+    if (!ctx || !canvas) return;
+
+    const handleDrawingState = (drawings: Array<{
+      type: 'start' | 'draw';
+      x: number;
+      y: number;
+      color: string;
+      socketId: string;
+    }>) => {
+      // Clear existing paths
+      ctxRef.current.clear();
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // Replay all drawing actions
+      drawings.forEach((drawing) => {
+        if (drawing.type === 'start') {
+          const path = new Path2D();
+          path.moveTo(drawing.x, drawing.y);
+          ctxRef.current.set(drawing.socketId, path);
+        } else if (drawing.type === 'draw') {
+          const path = ctxRef.current.get(drawing.socketId);
+          if (path) {
+            ctx.strokeStyle = drawing.color;
+            path.lineTo(drawing.x, drawing.y);
+            ctx.stroke(path);
+          }
+        }
+      });
+    };
+
+    const handleStartPath = (data: { x: number; y: number; color: string; socketId: string }) => {
       const path = new Path2D();
       path.moveTo(data.x, data.y);
+      ctxRef.current.set(data.socketId, path);
+    };
 
-      ctxRef.current.set(data.socketId, path); // Store path for this socketId
-    });
-
-    socket.on('draw', (data: { x: number; y: number; color: string; socketId: string }) => {
-      const canvas = canvasRef.current;
-      const ctx = canvas?.getContext('2d');
-      if (!ctx || !ctxRef.current) return;
-
+    const handleDraw = (data: { x: number; y: number; color: string; socketId: string }) => {
       const path = ctxRef.current.get(data.socketId);
       if (!path) return;
 
       ctx.strokeStyle = data.color;
       path.lineTo(data.x, data.y);
       ctx.stroke(path);
-    });
+    };
+
+    socket.on('drawing_state', handleDrawingState);
+    socket.on('start_path', handleStartPath);
+    socket.on('draw', handleDraw);
+
+    // Request initial drawing state when component mounts
+    socket.emit('request_lobby_state', { lobbyId });
 
     return () => {
-      socket.off('draw');
-      socket.off('start_path');
+      socket.off('drawing_state', handleDrawingState);
+      socket.off('start_path', handleStartPath);
+      socket.off('draw', handleDraw);
     };
-  }, []);
+  }, [lobbyId]);
 
   const getCanvasPoint = (e: React.MouseEvent<HTMLCanvasElement> | React.TouchEvent<HTMLCanvasElement>) => {
     const canvas = canvasRef.current;

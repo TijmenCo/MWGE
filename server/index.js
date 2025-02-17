@@ -56,6 +56,8 @@ const DEFAULT_PLAYLIST = [
   { videoId: 'hTWKbfoikeg', title: 'Smells Like Teen Spirit', artist: 'Nirvana' }
 ];
 
+const lobbyDrawings = new Map();
+
 io.on('connection', (socket) => {
   socket.on('place_horse_bet', ({ lobbyId, horseId, amount }) => {
     const lobby = lobbies.get(lobbyId);
@@ -77,6 +79,9 @@ io.on('connection', (socket) => {
       if (lobby) {
         const safeLobbyState = createSafeLobbyState(lobby);
         socket.emit('lobby_update', safeLobbyState);
+
+        const drawings = lobbyDrawings.get(lobbyId) || [];
+        socket.emit('drawing_state', drawings);
       }
     } catch (error) {
       console.error('Error sending lobby state:', error);
@@ -221,6 +226,8 @@ io.on('connection', (socket) => {
       musicProvider: 'youtube',
       minigameState: null
     });
+
+    lobbyDrawings.set(lobbyId, []);
     
     socket.join(lobbyId);
     socket.emit('color_assigned', { color: userColor });
@@ -303,10 +310,18 @@ io.on('connection', (socket) => {
   });
 
   socket.on('start_drawing', ({ x, y, color, lobbyId }) => {
+    const drawings = lobbyDrawings.get(lobbyId) || [];
+    const newPath = { type: 'start', x, y, color, socketId: socket.id };
+    drawings.push(newPath);
+    lobbyDrawings.set(lobbyId, drawings);
     io.to(lobbyId).emit('start_path', { x, y, color, socketId: socket.id });
   });
   
   socket.on('draw', ({ x, y, color, lobbyId }) => {
+    const drawings = lobbyDrawings.get(lobbyId) || [];
+    const newPath = { type: 'draw', x, y, color, socketId: socket.id };
+    drawings.push(newPath);
+    lobbyDrawings.set(lobbyId, drawings);
     io.to(lobbyId).emit('draw', { x, y, color, socketId: socket.id });
   });  
 
@@ -507,6 +522,7 @@ io.on('connection', (socket) => {
             if (lobby.minigameState) {
               lobby.minigameState = null;
             }
+            lobbyDrawings.delete(room);
             lobbies.delete(room);
           } else {
             // Reassign host if needed
