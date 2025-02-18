@@ -32,9 +32,16 @@ const DrinkModal: React.FC<DrinkModalProps> = ({
   return (
     <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50">
       <div className="bg-gray-900 rounded-lg p-6 max-w-md w-full mx-4 border border-white/10">
-        <h2 className="text-xl font-bold text-white mb-4">
-          Select who should {powerUp.effect === 'make_drink' ? 'take a sip' : 'take a shot'}
-        </h2>
+      <h2 className="text-xl font-bold text-white mb-4">
+  Select who should{' '}
+  {powerUp.effect === 'make_drink' ? 'take a sip' :
+   powerUp.effect === 'make_shot' ? 'take a shot' :
+   powerUp.effect === 'make_chug' ? 'chug their drink' :
+   powerUp.effect === 'all_drink' ? 'drink with everyone' :
+   powerUp.effect === 'make_block' ? 'be blocked from sending commands' :
+   'participate'}
+</h2>
+
         <div className="space-y-2">
           {users.map((user) => (
             <button
@@ -77,7 +84,7 @@ const PowerUpInventory: React.FC<PowerUpInventoryProps> = ({
   useEffect(() => {
     const handleDrinkCommand = (data: {
       id: string;
-      type: 'sip' | 'shot' | 'all' | 'waterfall' | 'all_game' | 'chug';
+      type: 'sip' | 'shot' | 'all' | 'waterfall' | 'all_game' | 'chug' | 'block';
       fromUser: string;
       toUser?: string;
       gameDescription?: string;
@@ -85,9 +92,13 @@ const PowerUpInventory: React.FC<PowerUpInventoryProps> = ({
       console.log(data.type);
       let message = '';
     
-      if (data.type === 'sip' || data.type === 'shot' || data.type === 'chug') {
+      if (data.type === 'sip' || data.type === 'shot' || data.type === 'chug'  || data.type === 'block') {
         if (data.toUser === currentUser) {
+          if (data.type === 'block') {
+            message = `${data.fromUser} has blocked your last send command!`;
+          } else {
           message = `${data.fromUser} says you need to ${data.type === 'chug' ? 'chug' : `take a ${data.type}`}! 🍻`;
+          }
         }
       } else if (data.type === 'all') {
         message = `${data.fromUser} says everyone needs to drink! 🍻`;

@@ -24,6 +24,17 @@ export const POWER_UPS: PowerUp[] = [
     uses: 1
   },
   {
+    id: 'take-block',
+    name: 'Block',
+    description: 'Send to someone to nullify their last send *drink* command',
+    cost: 35,
+    type: 'drink',
+    effect: 'make_block',
+    icon: '🛡️', // Shield emoji
+    target: 'single',
+    uses: 1
+  },  
+  {
     id: 'Chug',
     name: 'chug your drink!',
     description: 'Make someone chug their drink!',

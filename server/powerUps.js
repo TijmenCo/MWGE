@@ -71,18 +71,20 @@ export function handlePowerUpPurchase(socket, io, lobbies) {
     // Apply power-up effect
     switch (powerUp.effect) {
       case 'make_drink':
-  case 'make_shot':
-  case 'make_chug':
-    if (targetUsername) {
-      io.to(lobbyId).emit('drink_command', {
-        type: powerUp.effect === 'make_drink' ? 'sip' : 
-              powerUp.effect === 'make_chug' ? 'chug' : 
-              'shot',
-        fromUser: username,
-        toUser: targetUsername
-      });
-    }
-    break;
+      case 'make_shot':
+      case 'make_chug':
+      case 'make_block':
+        if (targetUsername) {
+          io.to(lobbyId).emit('drink_command', {
+            type: powerUp.effect === 'make_drink' ? 'sip' : 
+                  powerUp.effect === 'make_chug' ? 'chug' : 
+                  powerUp.effect === 'make_block' ? 'block' : 
+                  'shot',
+            fromUser: username,
+            toUser: targetUsername
+          });
+        }
+        break;
       case 'all_drink':
         io.to(lobbyId).emit('drink_command', {
           type: 'all',

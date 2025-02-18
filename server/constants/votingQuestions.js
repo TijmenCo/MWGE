@@ -92,10 +92,6 @@ export const VOTING_QUESTIONS = [
     text: 'Who’s most likely to start a fight at a bar?'
   },
   {
-    id: 'most-likely-to-sleep-through-this',
-    text: 'Who’s most likely to sleep through the rest of the game?'
-  },
-  {
     id: 'needs-to-finish-their-drink',
     text: 'Who needs to finish their drink right now?'
   },
@@ -153,19 +149,15 @@ export const VOTING_QUESTIONS = [
   },
   {
     id: 'should-draw-on-their-face',
-    text: 'Who should draw something funny on their face using a marker?'
+    text: 'Who should should let some-one draw on their face using a marker?'
   },
   {
     id: 'should-hop-on-one-foot',
-    text: 'Who should hop on one foot until the next round ends?'
+    text: 'Who should stand on one foot until the next round ends?'
   },
   {
     id: 'should-balance-object-on-head',
     text: 'Who should try to balance a random object on their head for a minute?'
-  },
-  {
-    id: 'should-dance-to-silent-music',
-    text: 'Who should perform a dance as if they’re hearing music no one else can hear?'
   },
   {
     id: 'should-tell-a-bad-joke',
@@ -188,18 +180,6 @@ export const VOTING_QUESTIONS = [
     text: 'Who should act like their favorite celebrity for the next 2 minutes?'
   },
   {
-    id: 'should-wrap-themselves-in-toilet-paper',
-    text: 'Who should wrap themselves up in toilet paper like a mummy?'
-  },
-  {
-    id: 'should-lip-sync',
-    text: 'Who should perform an over-the-top lip-sync of a song?'
-  },
-  {
-    id: 'should-make-up-story',
-    text: 'Who should make up the most ridiculous story they can think of?'
-  },
-  {
     id: 'should-pretend-to-be-drunken-pirate',
     text: 'Who should act like a drunken pirate for the next round?'
   },
@@ -214,10 +194,6 @@ export const VOTING_QUESTIONS = [
   {
     id: 'should-run-in-slow-motion',
     text: 'Who should run in slow motion like they’re in a movie chase scene?'
-  },
-  {
-    id: 'should-model-runway-walk',
-    text: 'Who should do their best runway model walk around the room?'
   },
   {
     id: 'should-do-funny-impression',
@@ -243,4 +219,36 @@ export const VOTING_QUESTIONS = [
     id: 'should-eat-something-weird',
     text: 'Who should eat a strange combination of snacks from the kitchen?'
   },
+  {
+    id: 'should-reveal-phone-background',
+    text: 'Who should change their phone’s lock screen to some-body of the group?'
+  },
+  {
+    id: 'should-read-last-text',
+    text: 'Who should read their last text message out loud?'
+  },
+  {
+    id: 'most-likely-to-get-lost',
+    text: 'Who’s most likely to get lost on their way home tonight?'
+  },
+  {
+    id: 'should-compliment-everyone',
+    text: 'Who must give a genuine compliment to every player?'
+  },
+  {
+    id: 'should-swap-clothes',
+    text: 'Who should swap an item of clothing with another player?'
+  },
+  {
+    id: 'should-invent-new-dance',
+    text: 'Who should create a new dance move and show it off?'
+  },
+  {
+    id: 'should-tell-funniest-joke',
+    text: 'Who should tell their funniest joke (even if it’s bad)?'
+  },
+  {
+    id: 'should-laugh-without-smiling',
+    text: 'Who should try to laugh without smiling?'
+  }
 ];

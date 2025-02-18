@@ -107,7 +107,7 @@ export const MINIGAMES = [
     type: 'roulette',
     name: 'Roulette',
     description: 'Place your bets on the roulette wheel!',
-    duration: 300,
+    duration: 100,
     maxScore: 100,
     instruction: 'Choose your bet type and amount!'
   }
